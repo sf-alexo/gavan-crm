@@ -1,0 +1,1876 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лиды — мокап</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .c-sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .kanban-col { display: flex; flex-direction: column; min-width: 180px; }
+  .kanban-col .cnt { float: right; }
+  .kanban-col h4 { text-transform: none; line-height: 1.25; }
+  .kanban-cards { flex: 1; min-height: 80px; border-radius: 8px; }
+  .kanban-cards.drop-over { outline: 2px dashed var(--primary); outline-offset: 2px; background: #e6efff; }
+  .kanban-card { cursor: grab; }
+  .kanban-card:active { cursor: grabbing; }
+  .kanban-card.dragging { opacity: .5; }
+  .kanban-card .card-actions { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .kanban-card .card-actions .btn { cursor: pointer; }
+  .err { color: var(--danger); font-size: 12px; margin-top: 4px; display: none; }
+  .col-new h4 { color: #1e40af; }
+  .col-proc h4 { color: #92400e; }
+  .col-won h4 { color: #166534; }
+  .col-tech h4 { color: #0e7490; }
+  .col-visit h4 { color: #9a3412; }
+  .col-confirm h4 { color: #4338ca; }
+  .col-lost h4 { color: #991b1b; }
+
+  /* Каталог категорий */
+  .cat-overview {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;
+  }
+  @media (max-width: 720px) { .cat-overview { grid-template-columns: 1fr; } }
+  .cat-root {
+    border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px;
+    background: var(--panel); cursor: pointer; transition: border-color .15s, box-shadow .15s;
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .cat-root:hover { border-color: #94a3b8; }
+  .cat-root.on-home { border-color: #0d9488; box-shadow: 0 0 0 3px rgba(13,148,136,.12); }
+  .cat-root.on-biz { border-color: #1e56c8; box-shadow: 0 0 0 3px rgba(30,86,200,.12); }
+  .cat-ico {
+    width: 44px; height: 44px; border-radius: 10px; display: grid; place-items: center;
+    font-size: 22px; flex-shrink: 0;
+  }
+  .cat-ico.home { background: #ccfbf1; color: #0f766e; }
+  .cat-ico.biz { background: #dbeafe; color: #1e40af; }
+  .cat-root h3 { margin: 0 0 4px; font-size: 15px; }
+  .cat-root p { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.35; }
+  .cat-root .n { margin-left: auto; font-size: 22px; font-weight: 700; line-height: 1; align-self: center; }
+  .cat-root.on-home .n { color: #0f766e; }
+  .cat-root.on-biz .n { color: #1e40af; }
+
+  .badge.home { background: #ccfbf1; color: #0f766e; }
+  .badge.biz { background: #dbeafe; color: #1e40af; }
+  .badge.leaf { background: #f3f4f6; color: #374151; font-weight: 500; }
+
+  .qual-script { display: flex; flex-direction: column; gap: 14px; margin-top: 12px; }
+  .qual-block { border: 1px solid var(--border); border-radius: 10px; padding: 12px; background: #fafbfc; }
+  .qual-block h4 { margin: 0 0 10px; font-size: 13px; font-weight: 700; color: var(--text); }
+  .qual-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .qual-grid .full { grid-column: 1 / -1; }
+  .check-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .check-pill {
+    display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px;
+    border: 1px solid var(--border); border-radius: 999px; background: #fff;
+    font-size: 12px; color: var(--text); cursor: pointer; user-select: none;
+  }
+  .check-pill input { margin: 0; }
+  .check-pill:has(input:checked) { border-color: var(--primary); background: #eef4ff; color: #1e3a8a; }
+  .qual-mistakes {
+    margin-top: 14px; padding: 12px 14px; border-radius: 10px;
+    background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; font-size: 13px; line-height: 1.45;
+  }
+  .qual-mistakes b { display: block; margin-bottom: 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .02em; }
+  .qual-mistakes ul { margin: 0; padding-left: 18px; }
+  .qual-mistakes li { margin: 4px 0; }
+  .qual-metrics {
+    margin-top: 10px; padding: 12px 14px; border-radius: 10px;
+    background: #eff6ff; border: 1px solid #bfdbfe; color: #1e3a8a; font-size: 13px; line-height: 1.45;
+  }
+  .qual-metrics b { display: block; margin-bottom: 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .02em; }
+  .qual-metrics ul { margin: 0; padding-left: 18px; }
+  .qual-metrics li { margin: 4px 0; }
+  .qual-ro .kv { margin: 4px 0; font-size: 13px; }
+  .qual-ro .qual-block { background: #f8fafc; }
+  .calc {
+    margin-top: 8px; padding: 8px; border: 1px solid var(--border); border-radius: 8px;
+    background: #f8fafc; font-size: 12px;
+  }
+  .calc .calc-row {
+    display: grid; grid-template-columns: 1fr 72px; gap: 6px; align-items: center; margin-bottom: 5px;
+  }
+  .calc .calc-row span { color: var(--muted); }
+  .calc .calc-row input {
+    width: 100%; padding: 4px 6px; border: 1px solid var(--border); border-radius: 6px;
+    font-size: 12px; background: #fff; color: var(--text);
+  }
+  .calc .calc-total {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--border); font-weight: 700;
+  }
+  .calc.lg { padding: 12px; font-size: 13px; }
+  .calc.lg .calc-row { grid-template-columns: 1fr 110px; margin-bottom: 8px; }
+  .calc.lg .calc-row input { padding: 7px 8px; font-size: 13px; }
+  .calc.lg .calc-total { font-size: 16px; margin-top: 10px; padding-top: 10px; }
+  .sla-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:10px; }
+  .sla-row .sla-label { font-size:12px; color:var(--muted); }
+  .badge.sla-ok { background:#dcfce7; color:#166534; }
+  .badge.sla-warn { background:#fef3c7; color:#92400e; }
+  .badge.sla-bad { background:#fee2e2; color:#991b1b; }
+  .badge.sla-wait { background:#f3f4f6; color:#4b5563; }
+  .badge.teal { background:#cffafe; color:#0e7490; }
+  .badge.orange { background:#ffedd5; color:#9a3412; }
+  .badge.indigo { background:#e0e7ff; color:#3730a3; }
+  .photo-chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+  .photo-chip {
+    padding:6px 10px; border-radius:8px; background:#f1f5f9; border:1px solid var(--border);
+    font-size:12px; color:#334155;
+  }
+  .tech-check { margin:8px 0 0; padding-left:18px; font-size:13px; line-height:1.45; color:var(--text); }
+  .tech-check li { margin:4px 0; }
+  .tech-scope {
+    margin-top:12px; padding:12px 14px; border-radius:10px;
+    background:#f0fdfa; border:1px solid #99f6e4; color:#115e59; font-size:13px; line-height:1.45;
+  }
+  .tech-scope b { display:block; margin-bottom:6px; font-size:12px; text-transform:uppercase; letter-spacing:.02em; }
+  .tech-scope p { margin:0 0 6px; }
+  .tech-scope p:last-child { margin:0; }
+
+  .cat-path {
+    display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-top: 6px;
+  }
+  .cat-path .sep { color: var(--muted); font-size: 11px; }
+
+  /* Фильтр услуг */
+  .svc-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 14px; }
+  .svc-chip {
+    border: 1px solid var(--border); background: #fff; border-radius: 999px;
+    padding: 5px 10px; font-size: 12px; cursor: pointer; color: var(--text);
+  }
+  .svc-chip:hover { border-color: #94a3b8; }
+  .svc-chip.on { background: #0f172a; color: #fff; border-color: #0f172a; }
+  .svc-chip .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  .svc-chip .dot.home { background: #14b8a6; }
+  .svc-chip .dot.biz { background: #3b82f6; }
+
+  /* Модалки: крупнее, почти на весь экран */
+  #backdrop .modal { max-width: 1200px; width: 96vw; max-height: 94vh; }
+  #modalNew .modal { max-width: 960px; width: 96vw; max-height: 94vh; overflow: auto; }
+  #modalLost .modal { max-width: 560px; }
+  .pick-section { margin-bottom: 14px; }
+  .pick-section > .lbl {
+    font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase;
+    letter-spacing: .04em; margin-bottom: 8px;
+  }
+  .pick-roots { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .pick-root {
+    border: 2px solid var(--border); border-radius: 12px; padding: 14px;
+    cursor: pointer; background: #fff; text-align: left;
+  }
+  .pick-root:hover { border-color: #94a3b8; }
+  .pick-root.on.home { border-color: #0d9488; background: #f0fdfa; }
+  .pick-root.on.biz { border-color: #1e56c8; background: #eff6ff; }
+  .pick-root b { display: block; font-size: 15px; margin-bottom: 2px; }
+  .pick-root span { font-size: 12px; color: var(--muted); }
+
+  .pick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  @media (max-width: 560px) {
+    .pick-roots, .pick-grid { grid-template-columns: 1fr; }
+  }
+  .pick-card {
+    border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px;
+    cursor: pointer; background: #fff; font-size: 13px; line-height: 1.3;
+    display: flex; align-items: flex-start; gap: 8px;
+  }
+  .pick-card:hover { border-color: #94a3b8; background: #fafafa; }
+  .pick-card.on { border-color: var(--primary); background: #eff6ff; box-shadow: inset 0 0 0 1px var(--primary); }
+  .pick-card .mark {
+    width: 16px; height: 16px; border-radius: 50%; border: 2px solid #cbd5e1;
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .pick-card.on .mark { border-color: var(--primary); background: var(--primary);
+    box-shadow: inset 0 0 0 3px #fff; }
+
+  .pick-options { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pick-opt {
+    border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px;
+    font-size: 13px; cursor: pointer; background: #fff;
+  }
+  .pick-opt:hover { border-color: #94a3b8; }
+  .pick-opt.on { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+  .pick-summary {
+    border-radius: 10px; padding: 10px 12px; font-size: 13px;
+    background: #f8fafc; border: 1px dashed var(--border); margin-bottom: 12px;
+  }
+  .pick-summary.empty { color: var(--muted); }
+  .pick-summary b { font-weight: 600; }
+</style>
+</head>
+<body>
+<input class="navtoggle" id="navtoggle" type="checkbox">
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">Чистая Гавань <label class="side-close" for="navtoggle" title="Свернуть меню">«</label></div>
+    <nav>
+      <a href="map.html">← Схема процесса</a>
+      <a href="login.html">Вход</a>
+      <a href="dashboard.html">Дашборд</a>
+      <a href="clients.html">Клиенты</a>
+      <a href="objects.html">Объекты</a>
+      <a href="leads.html" class="active">Лиды</a>
+      <a href="deals.html">Договора</a>
+      <a href="orders.html">Заказы</a>
+      <a href="recurring.html">Постоянные</a>
+      <a href="employees.html">Сотрудники</a>
+      <a href="tasks.html">Задачи</a>
+      <a href="history.html">История</a>
+    </nav>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <label class="btn navhide" for="navtoggle" title="Скрыть/показать меню">☰</label>
+      <strong>Гавань — клининг CRM</strong>
+      <div class="topbar-right">
+        <details class="dd">
+          <summary><span class="icon-btn">🔔<span class="n-dot">3</span></span></summary>
+          <div class="dd-menu">
+            <div class="dd-title">Уведомления</div>
+            <a href="order-quality.html">ORD-SEED-003 сдан на проверку</a>
+            <a href="deals.html">Договор «Вектра» выигран · 96 000 ₽</a>
+            <a href="leads.html">Новый лид с сайта</a>
+          </div>
+        </details>
+        <details class="dd">
+          <summary>
+            <span class="avatar">ЕМ</span>
+            <span class="u-meta"><b>Елена Менеджерова</b><i>Менеджер</i></span>
+            <span style="color:var(--muted)">▾</span>
+          </summary>
+          <div class="dd-menu">
+            <a href="#">Профиль</a>
+            <a href="#">Сменить пароль</a>
+            <a href="login.html">Выйти</a>
+          </div>
+        </details>
+      </div>
+    </div>
+    <div class="content">
+
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap">
+        <div>
+          <h2 style="margin-bottom:2px">Лиды</h2>
+          <p style="color:var(--muted); margin:0 0 16px; font-size:14px">Новый → Квалификация → КП → Технолог → Замер → Подтверждение → договор</p>
+        </div>
+        <span class="btn primary" id="btnNew">+ Новый лид</span>
+      </div>
+
+      <div class="cat-overview">
+        <div class="cat-root" id="rootHome" data-root="home">
+          <div class="cat-ico home">⌂</div>
+          <div style="flex:1; min-width:0">
+            <h3>Для дома</h3>
+            <p>Химчистка, генеральная, окна, после ремонта, территории</p>
+          </div>
+          <div class="n" id="cntHome">0</div>
+        </div>
+        <div class="cat-root" id="rootBiz" data-root="biz">
+          <div class="cat-ico biz">▦</div>
+          <div style="flex:1; min-width:0">
+            <h3>Для бизнеса и гос. организаций</h3>
+            <p>Офисы по графику, послестрой, окна, премиум, территории</p>
+          </div>
+          <div class="n" id="cntBiz">0</div>
+        </div>
+      </div>
+
+      <div class="svc-chips" id="svcChips"></div>
+
+      <div class="toolbar">
+        <input class="input" id="q" style="max-width:340px" placeholder="Поиск по клиенту, лиду, телефону или объекту">
+        <select class="input" id="fSource" style="max-width:160px">
+          <option value="">Источник: все</option>
+          <option>Сайт</option><option>Телефон</option><option>WhatsApp</option><option>Telegram</option>
+          <option>Avito</option><option>Яндекс Бизнес</option><option>Рекомендация</option><option>Тендер</option><option>Другое</option>
+        </select>
+        <select class="input" id="fManager" style="max-width:170px">
+          <option value="">Менеджер: все</option><option>Алексей Смирнов</option><option>Мария Ким</option><option value="none">Не назначен</option>
+        </select>
+        <select class="input" id="fEmployee" style="max-width:160px">
+          <option value="">Сотрудник: все</option><option>Иван Петров</option><option>Олег Иванов</option><option>Сергей Петров</option><option value="none">Не назначен</option>
+        </select>
+        <span class="btn" id="btnReset">Сбросить</span>
+      </div>
+
+      <div class="kanban" id="board"></div>
+      <div id="empty" class="card empty" style="display:none">
+        <b>Лиды не найдены</b>
+        <p style="color:var(--muted)">Попробуйте изменить параметры поиска или фильтров.</p>
+        <span class="btn" id="btnReset2">Сбросить фильтры</span>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="backdrop" style="display:none">
+  <div class="modal" id="drawer" role="dialog" aria-modal="true"></div>
+</div>
+
+<div class="modal-backdrop" id="modalLost" style="display:none">
+  <div class="modal">
+    <h3>Не квалифицирован</h3>
+    <p style="color:var(--muted);font-size:13px;margin:0 0 12px">Вежливый отказ или передача партнёру</p>
+    <label class="field"><span>Причина *</span>
+      <select class="input" id="lostReason">
+        <option value="">— выберите —</option>
+        <option value="POLITE">Вежливый отказ</option>
+        <option value="PARTNER">Передача партнёру</option>
+        <option value="PRICE">Цена</option>
+        <option value="COMPETITOR">Клиент выбрал другую компанию</option>
+        <option value="REFUSED">Клиент отказался</option>
+        <option value="NO_CONTACT">Не удалось связаться</option>
+        <option value="OBJECT">Объект не подходит / вне зоны</option>
+        <option value="TIMING">Сроки</option>
+        <option value="OTHER">Другое</option>
+      </select>
+      <div class="err" id="eReason">Укажите причину</div>
+    </label>
+    <label class="field"><span>Комментарий</span><textarea class="input" id="lostComment" rows="2" placeholder="Что сказали клиенту / кому передали"></textarea></label>
+    <div class="actions">
+      <span class="btn" onclick="closeLost()">Отмена</span>
+      <span class="btn danger" id="btnLostSave">Сохранить</span>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modalNew" style="display:none">
+  <div class="modal">
+    <h3>Новый лид</h3>
+
+    <div class="pick-summary empty" id="nCatSummary">Категория не выбрана</div>
+    <div class="err" id="eCat">Выберите категорию услуги до конца</div>
+
+    <div class="pick-section">
+      <div class="lbl">1. Сегмент</div>
+      <div class="pick-roots">
+        <button type="button" class="pick-root" data-root="home" id="pickHome">
+          <b>⌂ Для дома</b>
+          <span>Частные клиенты, квартиры и дома</span>
+        </button>
+        <button type="button" class="pick-root" data-root="biz" id="pickBiz">
+          <b>▦ Для бизнеса и гос. организаций</b>
+          <span>Офисы, HoReCa, медучреждения, объекты</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="pick-section" id="secService" style="display:none">
+      <div class="lbl">2. Услуга</div>
+      <div class="pick-grid" id="pickServices"></div>
+    </div>
+
+    <div class="pick-section" id="secChild" style="display:none">
+      <div class="lbl" id="lblChild">3. Тип объекта</div>
+      <div class="pick-grid" id="pickChildren"></div>
+    </div>
+
+    <div class="pick-section" id="secOpt" style="display:none">
+      <div class="lbl" id="lblOpt">4. Параметр</div>
+      <div class="pick-options" id="pickOptions"></div>
+    </div>
+
+    <label class="field"><span>Источник *</span>
+      <select class="input" id="nSource"><option value="">— выберите —</option>
+        <option>Сайт</option><option>Телефон</option><option>WhatsApp</option><option>Telegram</option>
+        <option>Avito</option><option>Яндекс Бизнес</option><option>Рекомендация</option><option>Тендер</option><option>Другое</option>
+      </select>
+      <div class="err" id="eSource">Укажите источник лида</div>
+    </label>
+    <label class="field"><span>Клиент *</span>
+      <select class="input" id="nClient"><option value="">— выберите —</option></select>
+      <div class="err" id="eClient">Выберите клиента</div>
+    </label>
+    <label class="field"><span>Информация</span>
+      <textarea class="input" id="nInfo" rows="2" placeholder="Дополнительные детали (необязательно)"></textarea>
+    </label>
+    <label class="field"><span>Менеджер</span>
+      <select class="input" id="nManager"><option value="">— не назначен —</option><option>Алексей Смирнов</option><option>Мария Ким</option></select>
+    </label>
+    <label class="field"><span>Сотрудник</span>
+      <select class="input" id="nEmployee"><option value="">— не назначен —</option><option>Иван Петров</option><option>Олег Иванов</option><option>Сергей Петров</option></select>
+    </label>
+    <label class="field"><span>Объекты</span></label>
+    <div id="nObjects" style="border:1px solid var(--border); border-radius:8px; padding:8px 10px; max-height:130px; overflow:auto; font-size:13px"></div>
+    <div class="actions">
+      <span class="btn" onclick="closeNew()">Отмена</span>
+      <span class="btn primary" id="btnCreate">Создать лид</span>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+const STATUSES = {
+  RECEIVED:['Новый','blue'],
+  QUALIFICATION:['Квалификация','amber'],
+  QUALIFIED:['Расчёт стоимости и формирование КП','green'],
+  TECH_REVIEW:['Согласование с технологом/бригадиром','teal'],
+  SITE_VISIT:['Выезд на замер технолога/бригадира','orange'],
+  CONFIRMATION:['Согласование и подтверждение заказа','indigo'],
+  LOST:['Не квалифицирован','red'],
+};
+const COLS = [
+  ['RECEIVED','Новый','col-new'],
+  ['QUALIFICATION','Квалификация','col-proc'],
+  ['QUALIFIED','Расчёт стоимости и формирование КП','col-won'],
+  ['TECH_REVIEW','Согласование с технологом/бригадиром','col-tech'],
+  ['SITE_VISIT','Выезд на замер технолога/бригадира','col-visit'],
+  ['CONFIRMATION','Согласование и подтверждение заказа','col-confirm'],
+  ['LOST','Не квалифицирован','col-lost'],
+];
+const RACI = {
+  RECEIVED:'Цель: назначить ответственного, подтвердить источник, отсеять мусор',
+  QUALIFICATION:'Цель: понять, подходит ли клиент, и собрать данные для точной сметы.',
+  QUALIFIED:'Цель: дать клиенту понятную цену и условия, которые не приведут к убытку.',
+  TECH_REVIEW:'Цель: проверить смету и состав работ на реалистичность до отправки клиенту.',
+  SITE_VISIT:'Цель: увидеть объект на месте и дать точную смету там, где по телефону и фото оценить нельзя.',
+  CONFIRMATION:'Цель: получить твёрдое «да» и зафиксировать условия.',
+  LOST:'Вежливый отказ или передача партнёру',
+};
+const PAY_TYPES = { prepay:'Предоплата', postpay:'Постоплата' };
+const TECH_DECISIONS = {
+  ok:['Согласовано','green'],
+  adjusted:['Согласовано с корректировкой','amber'],
+  measure:['Нужен выезд на замер','blue'],
+};
+const SITE_OUTCOMES = {
+  take:['Берём','green'],
+  refuse:['Не берём','red'],
+};
+const TECHS = ['Игорь Технолог','Татьяна Мастерова','Ольга Бригадир','Никита Старший'];
+const REASONS = { POLITE:'Вежливый отказ', PARTNER:'Передача партнёру', PRICE:'Цена', COMPETITOR:'Клиент выбрал другую компанию', REFUSED:'Клиент отказался', NO_CONTACT:'Не удалось связаться', OBJECT:'Объект не подходит / вне зоны', TIMING:'Сроки', OTHER:'Другое' };
+const MANAGERS = ['Алексей Смирнов','Мария Ким'];
+const EMPLOYEES = ['Иван Петров','Олег Иванов','Сергей Петров'];
+const CLEAN_TYPES = ['поддерживающая','генеральная','после ремонта','специализированная'];
+const OBJ_TYPES = ['квартира','дом','офис'];
+const DIRT_LEVELS = ['слабое','среднее','сильное'];
+const EXTRA_OPTS = ['окна','химчистка','духовка','холодильник','балкон'];
+const LEAD_SOURCES = ['Сайт','Телефон','WhatsApp','Telegram','Avito','Яндекс Бизнес','Рекомендация','Тендер','Другое'];
+const pill = (name, value, checked, label=value) =>
+  `<label class="check-pill"><input type="checkbox" name="${name}" value="${esc(value)}" ${checked?'checked':''}> ${esc(label)}</label>`;
+const radioPill = (name, value, checked, label=value) =>
+  `<label class="check-pill"><input type="radio" name="${name}" value="${esc(value)}" ${checked?'checked':''}> ${esc(label)}</label>`;
+const zoneLabel = z => ({ok:'В зоне',edge:'Край зоны',out:'Вне зоны'}[z]||'—');
+const RATE_M2 = { 'поддерживающая':80, 'генеральная':150, 'после ремонта':220, 'специализированная':180 };
+const EXTRA_PRICE = { 'окна':3000, 'химчистка':5000, 'духовка':1500, 'холодильник':1500, 'балкон':2000 };
+const DIRT_MUL = { 'слабое':1, 'среднее':1.15, 'сильное':1.35 };
+const money = n => (Math.round(Number(n)||0)).toLocaleString('ru-RU')+' ₽';
+const defaultQuote = (a) => {
+  const q=a.qualify||{};
+  const area=Math.max(0, parseFloat(String(q.area).replace(',','.'))||0);
+  const rate=RATE_M2[q.cleanType]||150;
+  const mul=DIRT_MUL[q.dirt]||1;
+  const extras=(q.extras||[]).reduce((s,x)=>s+(EXTRA_PRICE[x]||0),0);
+  const travel = q.zone==='edge'?2500:q.zone==='out'?0:1500;
+  const supplies = Math.round(area*12);
+  const base = Math.round(area*rate*mul);
+  return {area, rate, mul, base, extras, travel, supplies, total: base+extras+travel+supplies};
+};
+const ensureQuote = a => {
+  if(!a.quote) a.quote=defaultQuote(a);
+  return a.quote;
+};
+const recomputeQuote = (qt) => {
+  qt.area=Math.max(0,+qt.area||0);
+  qt.rate=Math.max(0,+qt.rate||0);
+  qt.mul=Math.max(0,+qt.mul||1);
+  qt.extras=Math.max(0,+qt.extras||0);
+  qt.travel=Math.max(0,+qt.travel||0);
+  qt.supplies=Math.max(0,+qt.supplies||0);
+  qt.base=Math.round(qt.area*qt.rate*qt.mul);
+  qt.total=qt.base+qt.extras+qt.travel+qt.supplies;
+  return qt;
+};
+const calcDrawerHtml = (a) => {
+  const qt=ensureQuote(a);
+  return `<div class="calc lg" id="drawerCalc" data-calc="${a.id}">
+    <div class="calc-row"><span>Площадь, м²</span><input type="number" min="0" step="1" data-f="area" value="${qt.area}"></div>
+    <div class="calc-row"><span>Ставка за м², ₽</span><input type="number" min="0" step="10" data-f="rate" value="${qt.rate}"></div>
+    <div class="calc-row"><span>Коэффициент состояния</span><input type="number" min="0" step="0.05" data-f="mul" value="${qt.mul}"></div>
+    <div class="calc-row"><span>База (площадь × ставка × коэф.)</span><b data-base style="text-align:right">${money(qt.base)}</b></div>
+    <div class="calc-row"><span>Допуслуги, ₽</span><input type="number" min="0" step="100" data-f="extras" value="${qt.extras}"></div>
+    <div class="calc-row"><span>Дорога / выезд, ₽</span><input type="number" min="0" step="100" data-f="travel" value="${qt.travel}"></div>
+    <div class="calc-row"><span>Расходники, ₽</span><input type="number" min="0" step="50" data-f="supplies" value="${qt.supplies}"></div>
+    <div class="calc-total"><span>Итого в КП</span><b data-total>${money(qt.total)}</b></div>
+  </div>`;
+};
+const qualifyReadonly = (q, source) => {
+  if(!q) return `<div class="c-sub">Данные квалификации не заполнены</div>`;
+  const flags=[q.pets?'животные':null,q.kids?'дети':null].filter(Boolean).join(', ')||'—';
+  const extras=(q.extras&&q.extras.length)?q.extras.join(', '):'—';
+  return `<div class="qual-script qual-ro">
+    <div class="qual-block"><h4>1. Тип уборки</h4><div class="kv">${esc(q.cleanType||'—')}</div></div>
+    <div class="qual-block"><h4>2. Объект</h4>
+      <div class="kv"><b>Тип:</b> ${esc(q.objType||'—')}</div>
+      <div class="kv"><b>Площадь:</b> ${esc(q.area||'—')} м² · <b>Комнат:</b> ${esc(q.rooms||'—')} · <b>Санузлов:</b> ${esc(q.baths||'—')}</div>
+    </div>
+    <div class="qual-block"><h4>3. Состояние</h4>
+      <div class="kv"><b>Загрязнение:</b> ${esc(q.dirt||'—')}</div>
+      <div class="kv"><b>Животные / дети:</b> ${esc(flags)}</div>
+      <div class="kv"><b>Особые зоны:</b> ${esc(q.specialZones||'—')}</div>
+    </div>
+    <div class="qual-block"><h4>4. Допуслуги</h4><div class="kv">${esc(extras)}</div></div>
+    <div class="qual-block"><h4>5. Адрес, зона, дата/время</h4>
+      <div class="kv"><b>Адрес:</b> ${esc(q.address||'—')}</div>
+      <div class="kv"><b>Зона:</b> ${esc(zoneLabel(q.zone))}</div>
+      <div class="kv"><b>Дата / время:</b> ${esc(q.wishDate||'—')} · ${esc(q.wishTime||'—')}</div>
+    </div>
+    <div class="qual-block"><h4>6. Бюджетные ожидания</h4><div class="kv">${esc(q.budget||'—')}</div></div>
+    <div class="qual-block"><h4>7. Источник лида</h4><div class="kv">${esc(source||'—')}</div></div>
+  </div>`;
+};
+
+const SIZES_50 = ['до 50 м²','50–100 м²','от 100 м²'];
+const SIZES_100 = ['до 100 м²','100–200 м²','от 200 м²'];
+const WINDOW_OPTS = ['С одной стороны','С двух сторон','Промышленный альпинизм'];
+
+const CATALOG = {
+  home: {
+    id: 'home',
+    label: 'Для дома',
+    short: 'Дом',
+    tone: 'home',
+    services: [
+      { id: 'home-chem', label: 'Химчистка мебели и ковров' },
+      { id: 'home-general', label: 'Генеральная уборка', childLabel: 'Тип объекта', children: [
+        { id: 'apt', label: 'Квартиры', optLabel: 'Площадь', options: SIZES_50 },
+        { id: 'cottage', label: 'Коттеджи', optLabel: 'Площадь', options: SIZES_100 },
+        { id: 'house', label: 'Дома / апартаменты', optLabel: 'Площадь', options: SIZES_50 },
+      ]},
+      { id: 'home-windows', label: 'Мойка окон (витрин, фасадов)', childLabel: 'Способ', options: WINDOW_OPTS },
+      { id: 'home-after', label: 'Уборка после ремонта' },
+      { id: 'home-grounds', label: 'Уборка прилегающих территорий' },
+    ],
+  },
+  biz: {
+    id: 'biz',
+    label: 'Для бизнеса и гос. организаций',
+    short: 'Бизнес',
+    tone: 'biz',
+    services: [
+      { id: 'biz-office', label: 'Уборка офисов и предприятий (по графику)' },
+      { id: 'biz-post', label: 'Послестроительная уборка' },
+      { id: 'biz-windows', label: 'Мойка окон (витрин, фасадов)', childLabel: 'Способ', options: WINDOW_OPTS },
+      { id: 'biz-premium', label: 'Премиум клининг', childLabel: 'Сегмент объекта', children: [
+        { id: 'prem-office', label: 'Офисы и бизнес-центры' },
+        { id: 'prem-horeca', label: 'Рестораны и HoReCa' },
+        { id: 'prem-med', label: 'Медицинские учреждения' },
+        { id: 'prem-beauty', label: 'Салоны красоты и фитнес' },
+        { id: 'prem-res', label: 'Частные резиденции и коттеджи' },
+      ]},
+      { id: 'biz-grounds', label: 'Уборка прилегающих территорий' },
+    ],
+  },
+};
+
+function findService(rootId, serviceId) {
+  return CATALOG[rootId]?.services.find(s => s.id === serviceId);
+}
+function findChild(svc, childId) {
+  return svc?.children?.find(c => c.id === childId);
+}
+function catComplete(cat) {
+  if (!cat?.root || !cat?.service) return false;
+  const svc = findService(cat.root, cat.service);
+  if (!svc) return false;
+  if (svc.children) {
+    if (!cat.child) return false;
+    const ch = findChild(svc, cat.child);
+    if (ch?.options && !cat.option) return false;
+    return true;
+  }
+  if (svc.options && !cat.option) return false;
+  return true;
+}
+function catPath(cat) {
+  if (!cat?.root) return [];
+  const root = CATALOG[cat.root];
+  const parts = [{ text: root.label, tone: root.tone }];
+  const svc = findService(cat.root, cat.service);
+  if (!svc) return parts;
+  parts.push({ text: svc.label, tone: 'leaf' });
+  if (cat.child) {
+    const ch = findChild(svc, cat.child);
+    if (ch) parts.push({ text: ch.label, tone: 'leaf' });
+  }
+  if (cat.option) parts.push({ text: cat.option, tone: 'leaf' });
+  return parts;
+}
+function catTitle(cat) {
+  return catPath(cat).map(p => p.text).slice(1).join(' · ') || CATALOG[cat.root]?.label || 'Лид';
+}
+function catPathHtml(cat) {
+  const parts = catPath(cat);
+  if (!parts.length) return '<span class="c-sub">Категория не указана</span>';
+  return `<div class="cat-path">${parts.map((p,i)=>`
+    ${i?`<span class="sep">›</span>`:''}
+    <span class="badge ${p.tone}">${esc(p.text)}</span>
+  `).join('')}</div>`;
+}
+
+const CLIENTS = [
+ {id:'cl1',name:'Анна Петрова',phone:'+7 777 901-45-78'},
+ {id:'cl2',name:'ООО «Меридиан»',phone:'+7 727 300-11-22'},
+ {id:'cl3',name:'Дмитрий Соколов',phone:'+7 701 555-88-40'},
+ {id:'cl4',name:'ТОО «Новая Линия»',phone:'+7 702 456-12-90'},
+ {id:'cl5',name:'ООО «Вектор»',phone:'+7 701 123-45-67'},
+ {id:'cl6',name:'ТОО «Альфа Сервис»',phone:'+7 702 555-01-20'},
+ {id:'cl7',name:'БЦ «Орбита»',phone:'+7 717 200-33-14'},
+ {id:'cl8',name:'Елена Морозова',phone:'+7 705 222-77-31'},
+ {id:'cl9',name:'ООО «Стандарт»',phone:'+7 727 244-60-80'},
+ {id:'cl10',name:'ООО «Горизонт»',phone:'+7 701 900-45-12'},
+ {id:'cl11',name:'Сергей Волков',phone:'+7 777 130-20-55'},
+ {id:'cl12',name:'ООО «Промстрой»',phone:'+7 727 390-14-77'},
+ {id:'cl13',name:'Ирина Павлова',phone:'+7 701 640-98-21'},
+ {id:'cl14',name:'ООО «Север»',phone:'+7 717 250-66-09'},
+ {id:'cl15',name:'Наталья Ким',phone:'+7 707 411-22-33'},
+ {id:'cl16',name:'ТОО «Астана Ритейл»',phone:'+7 717 333-80-15'},
+ {id:'cl17',name:'Павел Орлов',phone:'+7 701 880-44-19'},
+];
+const OBJECTS = [
+ {id:'o1',name:'Квартира клиента',type:'Квартира',addr:'Алматы, ул. Розыбакиева, 120, кв. 45',area:'78 м²',status:'Активен'},
+ {id:'o2',name:'Офис «Меридиан»',type:'Офис',addr:'Алматы, пр. Достык, 210',area:'420 м²',status:'Активен'},
+ {id:'o3',name:'Частный дом',type:'Дом',addr:'пос. Боровое, уч. 18',area:'140 м²',status:'Активен'},
+ {id:'o4',name:'Складской комплекс',type:'Склад',addr:'Алматы, Северная кольцевая, 5',area:'2 100 м²',status:'Активен'},
+ {id:'o5',name:'Бизнес-центр «Вектор»',type:'БЦ',addr:'Алматы, пр. Абая, 88',area:'1 200 м²',status:'Активен'},
+ {id:'o6',name:'Склад «Вектор»',type:'Склад',addr:'Алматы, ул. Промышленная, 14',area:'4 800 м²',status:'Активен'},
+ {id:'o7',name:'Производственный корпус',type:'Производство',addr:'Алматы, Индустриальная зона, 3',area:'3 400 м²',status:'Активен'},
+ {id:'o8',name:'Склад',type:'Склад',addr:'Алматы, Индустриальная зона, 5',area:'900 м²',status:'Активен'},
+ {id:'o9',name:'Бизнес-центр «Орбита»',type:'БЦ',addr:'Алматы, ул. Тимирязева, 42',area:'2 600 м²',status:'Активен'},
+ {id:'o10',name:'Частный дом',type:'Дом',addr:'Алматы, мкр. Коктобе, 7',area:'210 м²',status:'Активен'},
+ {id:'o11',name:'Офис «Стандарт»',type:'Офис',addr:'Алматы, ул. Наурызбай батыра, 63',area:'380 м²',status:'Активен'},
+ {id:'o12',name:'Квартира',type:'Квартира',addr:'Алматы, ул. Жандосова, 12, кв. 9',area:'64 м²',status:'Активен'},
+ {id:'o13',name:'Производственный корпус',type:'Производство',addr:'Алматы, ул. Суюнбая, 220',area:'5 000 м²',status:'Активен'},
+ {id:'o14',name:'Частный дом',type:'Дом',addr:'Алматы, мкр. Мирас, 33',area:'160 м²',status:'Активен'},
+ {id:'o15',name:'Производственный комплекс',type:'Производство',addr:'Алматы, Индустриальная зона, 11',area:'7 200 м²',status:'Активен'},
+ {id:'o16',name:'Квартира',type:'Квартира',addr:'Алматы, пр. Райымбека, 300, кв. 21',area:'55 м²',status:'Активен'},
+ {id:'o17',name:'Склад',type:'Склад',addr:'Алматы, пос. Калкаман, 2',area:'1 400 м²',status:'Активен'},
+ {id:'o18',name:'Квартира',type:'Квартира',addr:'Алматы, мкр. Самал-2, 14, кв. 67',area:'92 м²',status:'Активен'},
+ {id:'o19',name:'Магазин «Астана Ритейл»',type:'Ритейл',addr:'Алматы, ул. Фурманова, 101',area:'240 м²',status:'Активен'},
+ {id:'o20',name:'Коттедж',type:'Дом',addr:'Алматы, пос. Каменка, 9',area:'185 м²',status:'Активен'},
+];
+const clientById=id=>CLIENTS.find(c=>c.id===id);
+const objById=id=>OBJECTS.find(o=>o.id===id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const badge=(t,cls)=>`<span class="badge ${cls||'gray'}">${esc(t)}</span>`;
+const now=()=>{const d=new Date();return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;};
+const H=(at,action,details='')=>({at,action,details});
+const fmtResponseMin = m => {
+  if(m==null||m==='') return null;
+  const n=Math.max(0, Math.round(+m));
+  if(n<60) return `${n} мин`;
+  const h=Math.floor(n/60), min=n%60;
+  return min?`${h} ч ${min} мин`:`${h} ч`;
+};
+const responseBadge = a => {
+  if(a.firstResponseMin==null) return badge('ожидает ответа','sla-wait');
+  const m=+a.firstResponseMin;
+  const cls=m<=15?'sla-ok':m<=60?'sla-warn':'sla-bad';
+  return badge(fmtResponseMin(m), cls);
+};
+const markFirstResponse = (a, minutes) => {
+  if(a.firstResponseMin!=null) return;
+  a.firstResponseMin = minutes ?? (8 + Math.floor(Math.random()*25));
+  pushHist(a,'Первый ответ',`Время до первого ответа: ${fmtResponseMin(a.firstResponseMin)}`);
+};
+
+const applications = [
+ {id:'#1049',title:'Генеральная уборка · Квартиры · 50–100 м²',source:'Сайт',clientId:'cl1',information:'Генеральная уборка квартиры после ремонта.',managerId:null,employeeId:null,objectIds:['o1'],status:'RECEIVED',createdAt:'06.10 13:02',firstResponseMin:null,
+  cat:{root:'home',service:'home-general',child:'apt',option:'50–100 м²'},
+  history:[H('06.10 13:02','Лид получен','Источник: сайт')]},
+ {id:'#1050',title:'Уборка офисов и предприятий (по графику)',source:'Телефон',clientId:'cl2',information:'Требуется регулярная уборка офисного помещения.',managerId:null,employeeId:null,objectIds:['o2'],status:'RECEIVED',createdAt:'06.10 11:20',firstResponseMin:null,
+  cat:{root:'biz',service:'biz-office'},
+  history:[H('06.10 11:20','Лид получен','Источник: телефон')]},
+ {id:'#1051',title:'Мойка окон · С двух сторон',source:'WhatsApp',clientId:'cl3',information:'Требуется мойка окон в частном доме.',managerId:null,employeeId:null,objectIds:['o3'],status:'RECEIVED',createdAt:'06.10 09:48',firstResponseMin:null,
+  cat:{root:'home',service:'home-windows',option:'С двух сторон'},
+  history:[H('06.10 09:48','Лид получен','Источник: WhatsApp')]},
+ {id:'#1052',title:'Премиум клининг · Офисы и бизнес-центры',source:'Рекомендация',clientId:'cl4',information:'Клиент интересуется премиум-обслуживанием склада и офиса.',managerId:null,employeeId:null,objectIds:['o4'],status:'RECEIVED',createdAt:'05.10 17:31',firstResponseMin:null,
+  cat:{root:'biz',service:'biz-premium',child:'prem-office'},
+  history:[H('05.10 17:31','Лид получен','Источник: рекомендация')]},
+ {id:'#1048',title:'Уборка офисов и предприятий (по графику)',source:'Сайт',clientId:'cl5',information:'Регулярная уборка офисного комплекса 3 раза в неделю.',managerId:'Алексей Смирнов',employeeId:'Иван Петров',objectIds:['o5','o6'],status:'QUALIFICATION',createdAt:'02.10 10:42',firstResponseMin:8,
+  cat:{root:'biz',service:'biz-office'},
+  qualify:{cleanType:'поддерживающая',objType:'офис',area:'1200',rooms:'',baths:'8',dirt:'среднее',pets:false,kids:false,specialZones:'переговорные, кухня',extras:['окна'],address:'пр. Абая, 88',zone:'ok',wishDate:'ежедневно',wishTime:'вечером',budget:'200–250 тыс'},
+  history:[H('02.10 10:42','Лид получен','Источник: сайт'),H('02.10 10:50','Назначен менеджер','Алексей Смирнов'),H('02.10 10:50','Первый ответ','Время до первого ответа: 8 мин'),H('02.10 11:20','Добавлен объект','Бизнес-центр «Вектор»'),H('02.10 12:10','Назначен сотрудник','Иван Петров'),H('02.10 14:30','Статус изменён','Новый → Квалификация')]},
+ {id:'#1047',title:'Послестроительная уборка',source:'Тендер',clientId:'cl6',information:'Комплексное обслуживание производственного помещения и склада.',managerId:'Мария Ким',employeeId:'Олег Иванов',objectIds:['o7','o8'],status:'QUALIFICATION',createdAt:'02.10 09:15',firstResponseMin:45,
+  cat:{root:'biz',service:'biz-post'},
+  qualify:{cleanType:'после ремонта',objType:'офис',area:'3400',rooms:'',baths:'4',dirt:'сильное',pets:false,kids:false,specialZones:'после стройки, пыль',extras:[],address:'Индустриальная зона, 3',zone:'ok',wishDate:'с 15.10',wishTime:'день',budget:'по смете'},
+  history:[H('02.10 09:15','Лид получен','Источник: тендер'),H('02.10 10:00','Назначен менеджер','Мария Ким'),H('02.10 10:00','Первый ответ','Время до первого ответа: 45 мин'),H('02.10 15:40','Статус изменён','Новый → Квалификация')]},
+ {id:'#1046',title:'Премиум клининг · Офисы и бизнес-центры',source:'Телефон',clientId:'cl7',information:'Требуется ежедневная уборка бизнес-центра.',managerId:'Алексей Смирнов',employeeId:'Сергей Петров',objectIds:['o9'],status:'QUALIFICATION',createdAt:'01.10 16:05',firstResponseMin:12,
+  cat:{root:'biz',service:'biz-premium',child:'prem-office'},
+  qualify:{cleanType:'поддерживающая',objType:'офис',area:'2600',rooms:'',baths:'12',dirt:'слабое',pets:false,kids:false,specialZones:'лобби, лифты',extras:['окна'],address:'ул. Тимирязева, 42',zone:'ok',wishDate:'ежедневно',wishTime:'ночь',budget:'~400 тыс'},
+  history:[H('01.10 16:05','Лид получен','Источник: телефон'),H('01.10 16:40','Назначен менеджер','Алексей Смирнов'),H('01.10 16:40','Первый ответ','Время до первого ответа: 12 мин'),H('02.10 09:10','Статус изменён','Новый → Квалификация')]},
+ {id:'#1045',title:'Генеральная уборка · Коттеджи · от 200 м²',source:'Avito',clientId:'cl8',information:'Генеральная уборка дома перед заселением.',managerId:'Мария Ким',employeeId:null,objectIds:['o10'],status:'QUALIFICATION',createdAt:'01.10 12:20',firstResponseMin:95,
+  cat:{root:'home',service:'home-general',child:'cottage',option:'от 200 м²'},
+  qualify:{cleanType:'генеральная',objType:'дом',area:'210',rooms:'5',baths:'3',dirt:'среднее',pets:false,kids:true,specialZones:'терраса',extras:['окна','балкон'],address:'мкр. Коктобе, 7',zone:'ok',wishDate:'до 10.10',wishTime:'утро',budget:'30–40 тыс'},
+  history:[H('01.10 12:20','Лид получен','Источник: Avito'),H('01.10 14:00','Назначен менеджер','Мария Ким'),H('01.10 14:00','Первый ответ','Время до первого ответа: 1 ч 35 мин'),H('02.10 10:30','Статус изменён','Новый → Квалификация')]},
+ {id:'#1044',title:'Уборка офисов и предприятий (по графику)',source:'Сайт',clientId:'cl9',information:'Регулярное обслуживание офисного помещения.',managerId:'Алексей Смирнов',employeeId:'Иван Петров',objectIds:['o11'],status:'QUALIFIED',createdAt:'29.09 15:12',firstResponseMin:14,
+  cat:{root:'biz',service:'biz-office'},
+  qualify:{cleanType:'поддерживающая',objType:'офис',area:'380',rooms:'',baths:'2',dirt:'слабое',pets:false,kids:false,specialZones:'',extras:[],address:'Наурызбай батыра, 63',zone:'ok',wishDate:'Вт/Чт',wishTime:'вечер',budget:'~120 тыс'},
+  history:[H('29.09 15:12','Лид получен','Источник: сайт'),H('29.09 16:00','Назначен менеджер','Алексей Смирнов'),H('29.09 16:00','Первый ответ','Время до первого ответа: 14 мин'),H('30.09 11:25','Статус изменён','Квалификация → Расчёт стоимости и формирование КП')]},
+ {id:'#1043',title:'Генеральная уборка · Квартиры · 50–100 м²',source:'Рекомендация',clientId:'cl1',information:'Генеральная уборка квартиры.',managerId:'Мария Ким',employeeId:'Олег Иванов',objectIds:['o12'],status:'TECH_REVIEW',createdAt:'29.09 10:40',firstResponseMin:22,
+  cat:{root:'home',service:'home-general',child:'apt',option:'50–100 м²'},
+  qualify:{cleanType:'генеральная',objType:'квартира',area:'64',rooms:'2',baths:'1',dirt:'среднее',pets:false,kids:false,specialZones:'',extras:['духовка'],address:'Жандосова, 12',zone:'ok',wishDate:'выходные',wishTime:'день',budget:'15–20 тыс'},
+  techReview:{decision:null,reviewer:'Татьяна Мастерова',notes:'',revisions:[]},
+  history:[H('29.09 10:40','Лид получен','Источник: рекомендация'),H('29.09 14:15','Первый ответ','Время до первого ответа: 22 мин'),H('29.09 14:15','Статус изменён','Квалификация → Расчёт стоимости и формирование КП'),H('30.09 09:40','Статус изменён','Расчёт стоимости и формирование КП → Согласование с технологом/бригадиром'),H('30.09 09:40','На согласование','Передано технологу: Татьяна Мастерова')]},
+ {id:'#1042',title:'Послестроительная уборка',source:'Телефон',clientId:'cl10',information:'Регулярная уборка производственного помещения.',managerId:'Алексей Смирнов',employeeId:'Сергей Петров',objectIds:['o13'],status:'SITE_VISIT',createdAt:'28.09 13:55',firstResponseMin:9,
+  cat:{root:'biz',service:'biz-post'},
+  qualify:{cleanType:'специализированная',objType:'офис',area:'5000',rooms:'',baths:'6',dirt:'сильное',pets:false,kids:false,specialZones:'цех, склад',extras:[],address:'Суюнбая, 220',zone:'ok',wishDate:'с 01.11',wishTime:'день',budget:'по КП'},
+  techReview:{decision:'measure',reviewer:'Игорь Технолог',notes:'Площадь и загрязнение по фото не оценить — нужен выезд.',revisions:[]},
+  siteVisit:{scheduledAt:'05.11 11:00',paid:false,price:'0',assignee:'Игорь Технолог',areaFact:'',cleaners:'',hours:'',equipment:'',photos:[],notes:'',outcome:null,refuseReason:''},
+  history:[H('28.09 13:55','Лид получен','Источник: телефон'),H('29.09 09:30','Первый ответ','Время до первого ответа: 9 мин'),H('29.09 09:30','Статус изменён','Квалификация → Расчёт стоимости и формирование КП'),H('30.09 12:00','Статус изменён','Расчёт стоимости и формирование КП → Согласование с технологом/бригадиром'),H('30.09 14:20','Решение технолога','Нужен выезд на замер'),H('01.10 10:00','Статус изменён','Согласование с технологом/бригадиром → Выезд на замер технолога/бригадира'),H('01.10 10:00','Замер назначен','05.11 11:00 · бесплатно · Игорь Технолог')]},
+ {id:'#1041',title:'Химчистка мебели и ковров',source:'WhatsApp',clientId:'cl11',information:'Уборка частного дома и мойка окон.',managerId:'Мария Ким',employeeId:'Олег Иванов',objectIds:['o14'],status:'CONFIRMATION',createdAt:'27.09 17:48',firstResponseMin:31,
+  cat:{root:'home',service:'home-chem'},
+  qualify:{cleanType:'специализированная',objType:'дом',area:'160',rooms:'4',baths:'2',dirt:'среднее',pets:true,kids:true,specialZones:'ковры',extras:['химчистка','окна'],address:'мкр. Мирас, 33',zone:'ok',wishDate:'будни',wishTime:'день',budget:'~25 тыс'},
+  techReview:{decision:'measure',reviewer:'Игорь Технолог',notes:'Ковры + окна 2 этажа — нужен осмотр на месте.',revisions:[]},
+  siteVisit:{scheduledAt:'28.09 16:00',paid:true,price:'5000',assignee:'Ольга Бригадир',areaFact:'168',cleaners:'3',hours:'7',equipment:'экстрактор, стремянка, пароочиститель',photos:['гостиная · ковры','окна 2 этаж','особые зоны · кухня'],notes:'Сильные пятна на ковре у дивана; окна снаружи только со стремянки.',outcome:'take',refuseReason:''},
+  confirm:{kpSent:true,objections:'Дороговато за окна — объяснили высоту и стремянку.',visitAt:'08.11 10:00',scopeOk:true,priceOk:true,payType:'prepay',prepayAmount:'8000',prepayDone:true,accessNotes:'Консьерж, парковка во дворе, ключи у охраны',prepareNotes:'Убрать хрупкое со столов, обеспечить доступ к воде',teamHint:'Ольга Бригадир + 2 клинера',clientNotified:false,orderConfirmed:false},
+  history:[H('27.09 17:48','Лид получен','Источник: WhatsApp'),H('28.09 12:05','Первый ответ','Время до первого ответа: 31 мин'),H('28.09 12:05','Статус изменён','Квалификация → Расчёт стоимости и формирование КП'),H('28.09 14:10','Статус изменён','Расчёт стоимости и формирование КП → Согласование с технологом/бригадиром'),H('28.09 14:40','Решение технолога','Нужен выезд на замер'),H('28.09 15:10','Статус изменён','Согласование с технологом/бригадиром → Выезд на замер технолога/бригадира'),H('28.09 15:10','Замер назначен','28.09 16:00 · платно 5 000 ₽ · Ольга Бригадир'),H('28.09 17:30','Результат замера','Берём · 3 клинера · 7 ч'),H('29.09 11:00','КП','КП отправлено клиенту'),H('29.09 11:00','Статус изменён','Выезд на замер технолога/бригадира → Согласование и подтверждение заказа'),H('30.09 12:20','Возражение','Цена окон — ответили про высоту'),H('01.10 09:15','Предоплата','Получено 8 000 ₽')]},
+ {id:'#1053',title:'Генеральная уборка · Квартиры · 50–100 м²',source:'Сайт',clientId:'cl15',information:'Типовая генеральная — согласование пропущено, КП ещё не отправлено.',managerId:'Алексей Смирнов',employeeId:null,objectIds:['o18'],status:'CONFIRMATION',createdAt:'03.10 11:05',firstResponseMin:11,
+  cat:{root:'home',service:'home-general',child:'apt',option:'50–100 м²'},
+  qualify:{cleanType:'генеральная',objType:'квартира',area:'92',rooms:'3',baths:'1',dirt:'среднее',pets:false,kids:true,specialZones:'',extras:['духовка','холодильник'],address:'мкр. Самал-2, 14',zone:'ok',wishDate:'суббота',wishTime:'утро',budget:'18–22 тыс'},
+  techReview:{decision:'ok',reviewer:'Татьяна Мастерова',notes:'Пропущено: типовой прайс',revisions:[]},
+  confirm:{kpSent:false,objections:'',visitAt:'',scopeOk:false,priceOk:false,payType:'prepay',prepayAmount:'5000',prepayDone:false,accessNotes:'',prepareNotes:'',teamHint:'',clientNotified:false,orderConfirmed:false},
+  history:[H('03.10 11:05','Лид получен','Источник: сайт'),H('03.10 11:16','Назначен менеджер','Алексей Смирнов'),H('03.10 11:16','Первый ответ','Время до первого ответа: 11 мин'),H('03.10 15:40','Статус изменён','Квалификация → Расчёт стоимости и формирование КП'),H('04.10 10:20','Согласование пропущено','Типовая уборка / знакомый объект'),H('04.10 10:20','Статус изменён','Расчёт стоимости и формирование КП → Согласование и подтверждение заказа')]},
+ {id:'#1054',title:'Уборка офисов и предприятий (по графику)',source:'Телефон',clientId:'cl16',information:'Ритейл-точка: торгуются по цене, просят постоплату.',managerId:'Мария Ким',employeeId:'Иван Петров',objectIds:['o19'],status:'CONFIRMATION',createdAt:'02.10 14:30',firstResponseMin:18,
+  cat:{root:'biz',service:'biz-office'},
+  qualify:{cleanType:'поддерживающая',objType:'офис',area:'240',rooms:'',baths:'2',dirt:'среднее',pets:false,kids:false,specialZones:'торговый зал, примерочные',extras:[],address:'ул. Фурманова, 101',zone:'ok',wishDate:'пн/ср/пт',wishTime:'до открытия',budget:'80–90 тыс'},
+  techReview:{decision:'adjusted',reviewer:'Ольга Бригадир',notes:'Добавить 30 мин на витрины.',revisions:[H('03.10 12:10','Ольга Бригадир','+30 мин на витрины')]},
+  confirm:{kpSent:true,objections:'Просят скидку 10% и постоплату по акту. Готовы к компромиссу −5%.',visitAt:'10.11 07:30',scopeOk:true,priceOk:false,payType:'postpay',prepayAmount:'0',prepayDone:false,accessNotes:'Вход со двора, код 4521, парковка для фургона',prepareNotes:'Открыть зал к 7:20, свет и вода',teamHint:'Никита Старший + 2',clientNotified:false,orderConfirmed:false},
+  history:[H('02.10 14:30','Лид получен','Источник: телефон'),H('02.10 14:48','Назначен менеджер','Мария Ким'),H('02.10 14:48','Первый ответ','Время до первого ответа: 18 мин'),H('03.10 09:00','Статус изменён','Квалификация → Расчёт стоимости и формирование КП'),H('03.10 11:50','Статус изменён','Расчёт стоимости и формирование КП → Согласование с технологом/бригадиром'),H('03.10 12:10','Решение технолога','Согласовано с корректировкой'),H('03.10 16:00','КП','КП отправлено клиенту'),H('03.10 16:00','Статус изменён','Согласование с технологом/бригадиром → Согласование и подтверждение заказа'),H('04.10 11:30','Возражение','Скидка 10% + постоплата')]},
+ {id:'#1055',title:'Генеральная уборка · Коттеджи · 100–200 м²',source:'Рекомендация',clientId:'cl17',information:'Заказ подтверждён, клиент уведомлён — осталось открыть договор.',managerId:'Алексей Смирнов',employeeId:'Сергей Петров',objectIds:['o20'],status:'CONFIRMATION',createdAt:'01.10 09:40',firstResponseMin:7,
+  cat:{root:'home',service:'home-general',child:'cottage',option:'100–200 м²'},
+  qualify:{cleanType:'генеральная',objType:'дом',area:'185',rooms:'4',baths:'2',dirt:'слабое',pets:true,kids:false,specialZones:'терраса, мансарда',extras:['окна','балкон'],address:'пос. Каменка, 9',zone:'ok',wishDate:'07.11',wishTime:'день',budget:'35 тыс'},
+  techReview:{decision:'ok',reviewer:'Игорь Технолог',notes:'Без выезда — объект знакомый по фото.',revisions:[]},
+  confirm:{kpSent:true,objections:'',visitAt:'07.11 12:00',scopeOk:true,priceOk:true,payType:'prepay',prepayAmount:'10000',prepayDone:true,accessNotes:'Калитка слева, собака на цепи до 11:30, парковка у ворот',prepareNotes:'Освободить террасу, доступ к воде и розеткам',teamHint:'Ольга Бригадир + 3',clientNotified:true,orderConfirmed:true},
+  history:[H('01.10 09:40','Лид получен','Источник: рекомендация'),H('01.10 09:47','Назначен менеджер','Алексей Смирнов'),H('01.10 09:47','Первый ответ','Время до первого ответа: 7 мин'),H('01.10 16:20','Статус изменён','Квалификация → Расчёт стоимости и формирование КП'),H('02.10 10:00','Статус изменён','Расчёт стоимости и формирование КП → Согласование с технологом/бригадиром'),H('02.10 11:15','Решение технолога','Согласовано'),H('02.10 14:00','КП','КП отправлено клиенту'),H('02.10 14:00','Статус изменён','Согласование с технологом/бригадиром → Согласование и подтверждение заказа'),H('03.10 10:40','Предоплата','Получено 10 000 ₽'),H('03.10 10:45','Подтверждение клиенту','07.11 12:00 · Ольга Бригадир + 3'),H('03.10 10:50','Заказ подтверждён','Договор · 07.11 12:00')]},
+ {id:'#1040',title:'Мойка окон · Промышленный альпинизм',source:'Тендер',clientId:'cl12',information:'Мойка фасадов производственного объекта.',managerId:'Алексей Смирнов',employeeId:null,objectIds:['o15'],status:'LOST',lostReason:'PARTNER',lostComment:'Передан партнёру по альпинизму',createdAt:'26.09 14:10',firstResponseMin:110,
+  cat:{root:'biz',service:'biz-windows',option:'Промышленный альпинизм'},
+  history:[H('26.09 14:10','Лид получен','Источник: тендер'),H('27.09 11:00','Первый ответ','Время до первого ответа: 1 ч 50 мин'),H('27.09 11:00','Статус изменён','Квалификация → Не квалифицирован'),H('27.09 11:00','Причина','Передача партнёру')]},
+ {id:'#1039',title:'Уборка после ремонта',source:'Сайт',clientId:'cl13',information:'Генеральная уборка квартиры после ремонта.',managerId:'Мария Ким',employeeId:null,objectIds:['o16'],status:'LOST',lostReason:'POLITE',lostComment:'Вежливо отказали — вне зоны',createdAt:'25.09 12:30',firstResponseMin:18,
+  cat:{root:'home',service:'home-after'},
+  history:[H('25.09 12:30','Лид получен','Источник: сайт'),H('26.09 10:15','Первый ответ','Время до первого ответа: 18 мин'),H('26.09 10:15','Статус изменён','Квалификация → Не квалифицирован'),H('26.09 10:15','Причина','Вежливый отказ')]},
+ {id:'#1038',title:'Уборка прилегающих территорий',source:'Телефон',clientId:'cl14',information:'Уборка территории склада.',managerId:'Алексей Смирнов',employeeId:null,objectIds:['o17'],status:'LOST',lostReason:'NO_CONTACT',lostComment:'Три звонка без ответа',createdAt:'24.09 09:20',firstResponseMin:null,
+  cat:{root:'biz',service:'biz-grounds'},
+  history:[H('24.09 09:20','Лид получен','Источник: телефон'),H('25.09 16:45','Статус изменён','Квалификация → Не квалифицирован'),H('25.09 16:45','Причина','Не удалось связаться')]},
+];
+
+const clientHistory = {};
+CLIENTS.forEach(c=>clientHistory[c.id]=[]);
+applications.forEach(a=>{
+  clientHistory[a.clientId].push({at:a.createdAt, action:`Лид ${a.id} получен · ${a.source}`});
+  if (a.status!=='RECEIVED') clientHistory[a.clientId].push({at:a.history.at(-2)?.at||a.createdAt, action:`Лид ${a.id} переведён в «${STATUSES[a.status][0]}»`});
+  if (a.status==='LOST') clientHistory[a.clientId].push({at:a.history.at(-1).at, action:`Лид ${a.id} не квалифицирован. Причина: ${REASONS[a.lostReason]}`});
+});
+const pushHist = (a,action,details='') => {
+  a.history.push(H(now(),action,details));
+  let txt;
+  if (action==='Лид получен') txt = `Лид ${a.id} получен · ${details}`;
+  else if (action==='Назначен менеджер') txt = `По лиду ${a.id} назначен менеджер ${details}`;
+  else if (action==='Снят менеджер') txt = `По лиду ${a.id} снят менеджер ${details}`;
+  else if (action==='Назначен сотрудник') txt = `По лиду ${a.id} назначен сотрудник ${details}`;
+  else if (action==='Снят сотрудник') txt = `По лиду ${a.id} снят сотрудник ${details}`;
+  else if (action==='Добавлен объект') txt = `По лиду ${a.id} добавлен объект «${details}»`;
+  else if (action==='Статус изменён') txt = `Лид ${a.id}: ${details}`;
+  else if (action==='Причина') txt = `Лид ${a.id} не квалифицирован. Причина: ${details}`;
+  else txt = `По лиду ${a.id}: ${details||action}`;
+  clientHistory[a.clientId].push({at:now(), action:txt});
+};
+
+/* Фильтры категорий */
+let fRoot = '', fService = '';
+const board=document.getElementById('board'), empty=document.getElementById('empty');
+const q=document.getElementById('q'), fSource=document.getElementById('fSource'),
+      fManager=document.getElementById('fManager'), fEmployee=document.getElementById('fEmployee');
+
+function updateRootCards(){
+  const homeN = applications.filter(a=>a.cat?.root==='home').length;
+  const bizN = applications.filter(a=>a.cat?.root==='biz').length;
+  cntHome.textContent = homeN;
+  cntBiz.textContent = bizN;
+  rootHome.classList.toggle('on-home', fRoot==='home');
+  rootBiz.classList.toggle('on-biz', fRoot==='biz');
+}
+function renderSvcChips(){
+  const wrap = document.getElementById('svcChips');
+  const list = [];
+  Object.values(CATALOG).forEach(root=>{
+    if (fRoot && root.id !== fRoot) return;
+    root.services.forEach(s=>list.push({root:root.id, tone:root.tone, id:s.id, label:s.label}));
+  });
+  wrap.innerHTML = list.map(s=>`
+    <button type="button" class="svc-chip${fService===s.id?' on':''}" data-svc="${s.id}" data-root="${s.root}">
+      <span class="dot ${s.tone}"></span>${esc(s.label)}
+    </button>`).join('');
+}
+function filtered(){
+  const s=q.value.trim().toLowerCase();
+  return applications.filter(a=>{
+    const cl=clientById(a.clientId);
+    const objs=a.objectIds.map(o=>objById(o).name).join(' ');
+    const path=catPath(a.cat).map(p=>p.text).join(' ');
+    const hay=[a.id,a.title,a.information,cl.name,cl.phone,objs,a.source,path].join(' ').toLowerCase();
+    return (!s||hay.includes(s))
+      &&(!fSource.value||a.source===fSource.value)
+      &&(!fManager.value||(fManager.value==='none'?!a.managerId:a.managerId===fManager.value))
+      &&(!fEmployee.value||(fEmployee.value==='none'?!a.employeeId:a.employeeId===fEmployee.value))
+      &&(!fRoot||a.cat?.root===fRoot)
+      &&(!fService||a.cat?.service===fService);
+  });
+}
+const card = a => {
+  const cl=clientById(a.clientId);
+  const root = CATALOG[a.cat?.root];
+  const leaf = catPath(a.cat).slice(1).map(p=>p.text);
+  return `<div class="kanban-card" draggable="true" data-id="${a.id}">
+    <div style="display:flex;justify-content:space-between;gap:6px;align-items:flex-start">
+      <b>${a.id}</b>
+      ${root?badge(root.short, root.tone):''}
+    </div>
+    <div class="cat-path" style="margin-top:6px">
+      ${leaf.map(t=>`<span class="badge leaf">${esc(t)}</span>`).join('<span class="sep">›</span>')||'<span class="c-sub">Без категории</span>'}
+    </div>
+    <div class="c-sub" style="margin-top:6px">${esc(cl.name)} · ${badge(a.source,'gray')}</div>
+    <div class="c-sub">${a.objectIds.length} объект(а) · М: ${a.managerId?esc(a.managerId.split(' ')[0]):'—'}</div>
+    <div class="c-sub">${a.createdAt}</div>
+    ${a.status==='QUALIFIED'?`<div class="card-actions">
+      <span class="btn sm primary btn-to-tech" data-id="${a.id}">На согласование</span>
+      ${a.quote?`<span class="c-sub" style="align-self:center">${money(a.quote.total)}</span>`:''}
+    </div>`:a.status==='TECH_REVIEW'?`<div class="card-actions">
+      ${a.techReview?.decision?badge(...TECH_DECISIONS[a.techReview.decision]):badge('ожидает проверки','sla-wait')}
+      ${a.quote?`<span class="c-sub" style="align-self:center">${money(a.quote.total)}</span>`:''}
+      ${a.techReview?.decision==='ok'||a.techReview?.decision==='adjusted'?`<span class="btn sm primary btn-to-confirm" data-id="${a.id}">Отправить КП</span>`:''}
+      ${a.techReview?.decision==='measure'?`<span class="btn sm primary btn-to-visit" data-id="${a.id}">На замер</span>`:''}
+    </div>`:a.status==='SITE_VISIT'?`<div class="card-actions">
+      ${a.siteVisit?.outcome?badge(...SITE_OUTCOMES[a.siteVisit.outcome]):badge(a.siteVisit?.scheduledAt||'не назначен','sla-wait')}
+      ${a.quote?`<span class="c-sub" style="align-self:center">${money(a.quote.total)}</span>`:''}
+      ${a.siteVisit?.outcome==='take'?`<span class="btn sm primary btn-to-confirm" data-id="${a.id}">Отправить КП</span>`:''}
+    </div>`:a.status==='CONFIRMATION'?`<div class="card-actions">
+      ${a.confirm?.orderConfirmed?badge('заказ подтверждён','green'):a.confirm?.kpSent?badge('КП отправлено','indigo'):''}
+      ${a.quote?`<span class="c-sub" style="align-self:center">${money(a.quote.total)}</span>`:''}
+      ${a.confirm?.orderConfirmed?`<a class="btn sm primary" href="deals.html?from=${a.id.slice(1)}" onclick="event.stopPropagation()">В договор →</a>`:!a.confirm?.kpSent?`<span class="btn sm primary btn-to-confirm" data-id="${a.id}">Отправить КП</span>`:''}
+    </div>`:''}
+  </div>`;
+};
+function render(){
+  updateRootCards();
+  renderSvcChips();
+  const rows=filtered();
+  empty.style.display = rows.length ? 'none' : '';
+  board.style.display = rows.length ? 'flex' : 'none';
+  board.innerHTML = COLS.map(([st,title,cls])=>{
+    const items=rows.filter(a=>a.status===st);
+    return `<div class="kanban-col ${cls}">
+      <h4>${title} <span class="cnt">${items.length}</span></h4>
+      <div class="c-sub" style="margin:-4px 0 8px">${RACI[st]||''}</div>
+      <div class="kanban-cards" data-s="${st}">
+        ${items.map(card).join('')||'<div class="c-sub" style="text-align:center;padding:12px 4px">Нет лидов</div>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+function resetFilters(){
+  q.value='';fSource.value='';fManager.value='';fEmployee.value='';
+  fRoot=''; fService=''; render();
+}
+[q,fSource,fManager,fEmployee].forEach(el=>{el.addEventListener('input',render);el.addEventListener('change',render);});
+btnReset.onclick=resetFilters; btnReset2.onclick=resetFilters;
+rootHome.onclick=()=>{ fRoot = fRoot==='home'?'':'home'; if(fRoot!=='home') fService=''; else if(fService && !findService('home',fService)) fService=''; render(); };
+rootBiz.onclick=()=>{ fRoot = fRoot==='biz'?'':'biz'; if(fRoot!=='biz') fService=''; else if(fService && !findService('biz',fService)) fService=''; render(); };
+svcChips.onclick=e=>{
+  const b=e.target.closest('.svc-chip'); if(!b) return;
+  const id=b.dataset.svc, root=b.dataset.root;
+  if(fService===id){ fService=''; }
+  else { fService=id; fRoot=root; }
+  render();
+};
+
+/* Drag & drop */
+let dragId=null, suppressUntil=0;
+board.addEventListener('dragstart',e=>{
+  if(e.target.closest('.btn-send-kp, .card-actions')){ e.preventDefault(); return; }
+  const c=e.target.closest('.kanban-card'); if(!c) return;
+  dragId=c.dataset.id; suppressUntil=Date.now()+60000;
+  e.dataTransfer.effectAllowed='move';
+  requestAnimationFrame(()=>c.classList.add('dragging'));
+});
+board.addEventListener('dragend',e=>{
+  e.target.closest('.kanban-card')?.classList.remove('dragging');
+  document.querySelectorAll('.kanban-cards.drop-over').forEach(x=>x.classList.remove('drop-over'));
+  suppressUntil=Date.now()+150; dragId=null;
+});
+const applyCalcInput = (root, a, inp) => {
+  const f=inp.dataset.f; if(!f||!a) return;
+  ensureQuote(a)[f]=inp.value;
+  recomputeQuote(a.quote);
+  const tot=root.querySelector('[data-total]'); if(tot) tot.textContent=money(a.quote.total);
+  const base=root.querySelector('[data-base]'); if(base) base.textContent=money(a.quote.base);
+  const btn=document.getElementById('btnToConfirm')||document.getElementById('btnSendKpHere');
+  if(btn && cur===a){
+    btn.textContent=btn.id==='btnToConfirm'
+      ?`→ Отправить КП и к подтверждению · ${money(a.quote.total)}`
+      :`Отправить КП · ${money(a.quote.total)}`;
+  }
+};
+board.addEventListener('dragover',e=>{
+  const zone=e.target.closest('.kanban-cards'); if(!zone) return;
+  e.preventDefault(); e.dataTransfer.dropEffect='move';
+  document.querySelectorAll('.kanban-cards.drop-over').forEach(x=>{if(x!==zone)x.classList.remove('drop-over');});
+  zone.classList.add('drop-over');
+});
+board.addEventListener('dragleave',e=>{
+  const zone=e.target.closest('.kanban-cards');
+  if(zone && !zone.contains(e.relatedTarget)) zone.classList.remove('drop-over');
+});
+board.addEventListener('drop',e=>{
+  const zone=e.target.closest('.kanban-cards'); if(!zone||!dragId) return;
+  e.preventDefault(); zone.classList.remove('drop-over');
+  const a=applications.find(x=>x.id===dragId); dragId=null;
+  const ns=zone.dataset.s; if(!a||ns===a.status) {suppressUntil=Date.now()+150; return;}
+  if(ns==='LOST'){ openLost(a); render(); suppressUntil=Date.now()+150; return; }
+  pushHist(a,'Статус изменён',`${STATUSES[a.status][0]} → ${STATUSES[ns][0]}`);
+  a.status=ns;
+  if(ns==='QUALIFIED'){ ensureQuote(a); toast(`Лид ${a.id}: расчёт и КП`); }
+  if(ns==='TECH_REVIEW'){
+    ensureQuote(a);
+    ensureTechReview(a);
+    toast(`Лид ${a.id}: на согласовании у технолога`);
+  }
+  if(ns==='SITE_VISIT'){
+    ensureQuote(a);
+    ensureSiteVisit(a);
+    toast(`Лид ${a.id}: выезд на замер`);
+  }
+  if(ns==='CONFIRMATION'){
+    ensureQuote(a);
+    ensureConfirm(a);
+    toast(`Лид ${a.id}: согласование с клиентом`);
+  }
+  render();
+  if(cur===a) openDrawer(a);
+  suppressUntil=Date.now()+150;
+});
+function ensureTechReview(a){
+  if(!a.techReview) a.techReview={decision:null,reviewer:TECHS[0],notes:'',revisions:[]};
+  return a.techReview;
+}
+function ensureSiteVisit(a){
+  if(!a.siteVisit) a.siteVisit={scheduledAt:'',paid:false,price:'0',assignee:TECHS[0],areaFact:'',cleaners:'',hours:'',equipment:'',photos:[],notes:'',outcome:null,refuseReason:''};
+  return a.siteVisit;
+}
+function ensureConfirm(a){
+  if(!a.confirm) a.confirm={kpSent:false,objections:'',visitAt:'',scopeOk:false,priceOk:false,payType:'prepay',prepayAmount:'',prepayDone:false,accessNotes:'',prepareNotes:'',teamHint:'',clientNotified:false,orderConfirmed:false};
+  return a.confirm;
+}
+function toTechReview(a){
+  ensureQuote(a);
+  ensureTechReview(a);
+  if(a.status!=='TECH_REVIEW'){
+    pushHist(a,'Статус изменён',`${STATUSES[a.status][0]} → ${STATUSES.TECH_REVIEW[0]}`);
+    a.status='TECH_REVIEW';
+    pushHist(a,'На согласование',`Передано технологу: ${a.techReview.reviewer||TECHS[0]}`);
+  }
+  render(); openDrawer(a); toast(`Лид ${a.id}: на согласовании у технолога`);
+}
+function toSiteVisit(a){
+  ensureQuote(a);
+  const tr=ensureTechReview(a);
+  if(!tr.decision) tr.decision='measure';
+  const sv=ensureSiteVisit(a);
+  if(!sv.assignee) sv.assignee=tr.reviewer||TECHS[0];
+  if(a.status!=='SITE_VISIT'){
+    pushHist(a,'Статус изменён',`${STATUSES[a.status][0]} → ${STATUSES.SITE_VISIT[0]}`);
+    a.status='SITE_VISIT';
+    pushHist(a,'Замер', sv.scheduledAt?`Назначен: ${sv.scheduledAt}`:'Ожидает согласования даты с клиентом');
+  }
+  render(); openDrawer(a); toast(`Лид ${a.id}: выезд на замер`);
+}
+function toConfirmation(a, {sendKp=true}={}){
+  ensureQuote(a);
+  const cf=ensureConfirm(a);
+  if(sendKp && !cf.kpSent){
+    cf.kpSent=true;
+    pushHist(a,'КП',`КП отправлено клиенту · ${money(a.quote.total)}`);
+  }
+  if(a.status!=='CONFIRMATION'){
+    pushHist(a,'Статус изменён',`${STATUSES[a.status][0]} → ${STATUSES.CONFIRMATION[0]}`);
+    a.status='CONFIRMATION';
+  }
+  render(); openDrawer(a);
+  toast(sendKp?`КП отправлено · ${money(a.quote.total)}`:`Лид ${a.id}: подтверждение заказа`);
+}
+function sendKp(a){
+  toConfirmation(a, {sendKp:true});
+}
+board.addEventListener('click',e=>{
+  if(Date.now()<suppressUntil) return;
+  const toTech=e.target.closest('.btn-to-tech');
+  if(toTech){
+    e.preventDefault(); e.stopPropagation();
+    const a=applications.find(x=>x.id===toTech.dataset.id); if(a) toTechReview(a);
+    return;
+  }
+  const toVisit=e.target.closest('.btn-to-visit');
+  if(toVisit){
+    e.preventDefault(); e.stopPropagation();
+    const a=applications.find(x=>x.id===toVisit.dataset.id); if(a) toSiteVisit(a);
+    return;
+  }
+  const toConf=e.target.closest('.btn-to-confirm');
+  if(toConf){
+    e.preventDefault(); e.stopPropagation();
+    const a=applications.find(x=>x.id===toConf.dataset.id); if(a) toConfirmation(a);
+    return;
+  }
+  const c=e.target.closest('.kanban-card'); if(!c) return;
+  openDrawer(applications.find(a=>a.id===c.dataset.id));
+});
+
+/* Detail modal */
+const drawer=document.getElementById('drawer'), backdrop=document.getElementById('backdrop');
+let cur=null;
+function closeDrawer(){backdrop.style.display='none';cur=null;}
+backdrop.onclick=e=>{if(e.target===backdrop)closeDrawer();};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();closeLost();closeNew();}});
+
+function openDrawer(a){
+  cur=a;
+  const cl=clientById(a.clientId);
+  drawer.innerHTML=`
+   <div class="card">
+    <div class="drawer-head">
+      <div>
+        <div style="font-size:18px;font-weight:700">Лид ${a.id} ${badge(...STATUSES[a.status])}</div>
+        <div class="c-sub" style="margin-top:4px">${esc(a.title)}</div>
+        <div class="sla-row">
+          <span class="sla-label">Время до первого ответа</span>
+          ${responseBadge(a)}
+        </div>
+      </div>
+      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+   </div>
+
+   <div class="card" style="margin-top:12px"><b>Ответственные</b>
+     <label class="field" style="margin-top:10px"><span>Менеджер</span>
+       <select class="input" id="dManager"><option value="">Не назначен</option>
+         ${MANAGERS.map(m=>`<option ${a.managerId===m?'selected':''}>${m}</option>`).join('')}</select></label>
+     <label class="field" style="margin-bottom:0"><span>Сотрудник</span>
+       <select class="input" id="dEmployee"><option value="">Не назначен</option>
+         ${EMPLOYEES.map(m=>`<option ${a.employeeId===m?'selected':''}>${m}</option>`).join('')}</select></label>
+   </div>
+
+   <div class="card" style="margin-top:12px"><b>Категория</b>
+     <div style="margin-top:8px">${catPathHtml(a.cat)}</div>
+     <div class="c-sub" style="margin-top:8px">${RACI[a.status]||''}</div>
+   </div>
+
+   ${a.status==='RECEIVED'?`<div class="card" style="margin-top:12px"><b>Квалификация</b>
+     <div class="c-sub" style="margin-top:6px">Скрипт появится после перевода в «Квалификация» (менеджер продаж).</div>
+     <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+       <span class="btn sm primary" id="btnStartQual">→ Взять в квалификацию</span>
+     </div>
+     <div class="qual-mistakes">
+       <b>Типичные ошибки</b>
+       <ul>
+         <li>заявки в мессенджерах теряются;</li>
+         <li>нет единого места хранения;</li>
+         <li>не фиксируется источник (потом не понять, что работает).</li>
+       </ul>
+     </div>
+   </div>`:a.status==='QUALIFICATION'?`<div class="card" style="margin-top:12px"><b>Квалификация</b>
+     <div class="c-sub" style="margin-top:4px">Цель: понять, подходит ли клиент, и собрать данные для точной сметы.</div>
+     <div class="qual-script">
+       <div class="qual-block">
+         <h4>1. Тип уборки</h4>
+         <div class="check-row" id="qCleanType">
+           ${CLEAN_TYPES.map(t=>radioPill('qCleanType',t,a.qualify?.cleanType===t)).join('')}
+         </div>
+       </div>
+       <div class="qual-block">
+         <h4>2. Объект</h4>
+         <div class="check-row" style="margin-bottom:10px" id="qObjType">
+           ${OBJ_TYPES.map(t=>radioPill('qObjType',t,a.qualify?.objType===t)).join('')}
+         </div>
+         <div class="qual-grid">
+           <label class="field" style="margin:0"><span>Площадь, м²</span><input class="input" id="qArea" value="${esc(a.qualify?.area||'')}"></label>
+           <label class="field" style="margin:0"><span>Комнат</span><input class="input" id="qRooms" value="${esc(a.qualify?.rooms||'')}" placeholder="—"></label>
+           <label class="field" style="margin:0"><span>Санузлов</span><input class="input" id="qBaths" value="${esc(a.qualify?.baths||'')}"></label>
+         </div>
+       </div>
+       <div class="qual-block">
+         <h4>3. Состояние</h4>
+         <div class="qual-grid">
+           <label class="field full" style="margin:0"><span>Степень загрязнения</span>
+             <select class="input" id="qDirt"><option value="">—</option>
+               ${DIRT_LEVELS.map(d=>`<option ${a.qualify?.dirt===d?'selected':''}>${d}</option>`).join('')}
+             </select></label>
+           <div class="full" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:2px">
+             ${pill('qPets','1',!!a.qualify?.pets,'Животные')}
+             ${pill('qKids','1',!!a.qualify?.kids,'Дети')}
+           </div>
+           <label class="field full" style="margin:0"><span>Особые зоны</span>
+             <input class="input" id="qSpecial" value="${esc(a.qualify?.specialZones||'')}" placeholder="кухня, лоджия, после стройки…"></label>
+         </div>
+       </div>
+       <div class="qual-block">
+         <h4>4. Допуслуги</h4>
+         <div class="check-row" id="qExtras">
+           ${EXTRA_OPTS.map(x=>pill('qExtra',x,(a.qualify?.extras||[]).includes(x))).join('')}
+         </div>
+       </div>
+       <div class="qual-block">
+         <h4>5. Адрес, зона, дата/время</h4>
+         <div class="qual-grid">
+           <label class="field full" style="margin:0"><span>Адрес</span><input class="input" id="qAddr" value="${esc(a.qualify?.address||'')}"></label>
+           <label class="field" style="margin:0"><span>Зона выезда</span>
+             <select class="input" id="qZone"><option value="">— проверить —</option>
+               <option value="ok" ${a.qualify?.zone==='ok'?'selected':''}>В зоне</option>
+               <option value="edge" ${a.qualify?.zone==='edge'?'selected':''}>Край зоны</option>
+               <option value="out" ${a.qualify?.zone==='out'?'selected':''}>Вне зоны</option>
+             </select></label>
+           <label class="field" style="margin:0"><span>Желаемая дата</span><input class="input" id="qWish" value="${esc(a.qualify?.wishDate||'')}" placeholder="дата / дни недели"></label>
+           <label class="field" style="margin:0"><span>Желаемое время</span><input class="input" id="qWishTime" value="${esc(a.qualify?.wishTime||'')}" placeholder="утро / день / вечер"></label>
+         </div>
+       </div>
+       <div class="qual-block">
+         <h4>6. Бюджетные ожидания</h4>
+         <label class="field" style="margin:0"><span>Бюджет</span>
+           <input class="input" id="qBudget" value="${esc(a.qualify?.budget||'')}" placeholder="диапазон или «по смете»"></label>
+       </div>
+       <div class="qual-block">
+         <h4>7. Источник лида</h4>
+         <label class="field" style="margin:0"><span>Источник</span>
+           <select class="input" id="qSource">
+             ${LEAD_SOURCES.map(s=>`<option ${a.source===s?'selected':''}>${s}</option>`).join('')}
+           </select></label>
+       </div>
+     </div>
+     <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+       <span class="btn sm primary" id="btnSaveQual">Сохранить скрипт</span>
+       <span class="btn sm" id="btnMarkQual">→ Расчёт / КП</span>
+       ${a.qualify?.zone==='out'?`<span class="c-sub" style="align-self:center;color:var(--danger)">Вне зоны — возможен отказ</span>`:''}
+     </div>
+     <div class="qual-mistakes">
+       <b>Типичные ошибки</b>
+       <ul>
+         <li>не спросили про допуслуги → недозаработали;</li>
+         <li>не проверили зону → сорванный выезд;</li>
+         <li>не уточнили состояние → недооценка трудоёмкости.</li>
+       </ul>
+     </div>
+   </div>`:`<div class="card" style="margin-top:12px"><b>Квалификация</b>
+     <div class="c-sub" style="margin-top:4px">Только просмотр · редактирование на стадии «Квалификация»</div>
+     <div style="margin-top:10px">${qualifyReadonly(a.qualify, a.source)}</div>
+   </div>`}
+
+   ${a.status==='QUALIFIED'?`<div class="card" style="margin-top:12px"><b>Расчёт стоимости и формирование КП</b>
+     <div class="c-sub" style="margin-top:4px">Цель: дать клиенту понятную цену и условия, которые не приведут к убытку.</div>
+     <div style="margin-top:12px">${calcDrawerHtml(a)}</div>
+     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+       <span class="btn sm primary" id="btnToTech">→ На согласование технологу</span>
+       <span class="btn sm" id="btnSkipTech" title="Типовая уборка по прайсу / повторный клиент">Пропустить согласование</span>
+     </div>
+     <div class="c-sub" style="margin-top:8px">После согласования (или пропуска для типового прайса) — отправка КП клиенту и создание договора.</div>
+     <div class="qual-mistakes">
+       <b>Типичные ошибки</b>
+       <ul>
+         <li>«размытый» состав работ (клиент ждёт больше, чем входит);</li>
+         <li>цена посчитана «на глаз»;</li>
+         <li>не заложены расходники и дорога.</li>
+       </ul>
+     </div>
+     <div class="qual-metrics">
+       <b>Метрики</b>
+       <ul>
+         <li>средний чек;</li>
+         <li>конверсия «КП → согласование»;</li>
+         <li>доля КП с допуслугами.</li>
+       </ul>
+     </div>
+   </div>`:''}
+
+   ${a.status==='TECH_REVIEW'?(()=>{
+     const tr=ensureTechReview(a);
+     const approved=tr.decision==='ok'||tr.decision==='adjusted';
+     return `<div class="card" style="margin-top:12px"><b>Согласование с технологом/бригадиром</b>
+     <div class="c-sub" style="margin-top:4px">Цель: проверить смету и состав работ на реалистичность до отправки клиенту — чтобы не продать то, что нельзя выполнить за эти деньги и в эти сроки.</div>
+     <div class="c-sub" style="margin-top:8px">Ответственный: технолог/бригадир (проверяющий) + менеджер (исполнитель правок).<br>Вход: черновик КП + данные квалификации. Выход: согласованная смета + решение «нужен ли замер».</div>
+
+     <div class="qual-block" style="margin-top:12px">
+       <h4>Что проверяет технолог</h4>
+       <ul class="tech-check">
+         <li>реалистичность трудозатрат (чел/часы) и количество клинеров;</li>
+         <li>достаточность химии и оборудования;</li>
+         <li>корректность надбавок (срочность, высота, загрязнение, дорога);</li>
+         <li>нет ли работ, которые клиент ожидает, но их нет в смете;</li>
+         <li>риски (доступ, парковка, животные, особые покрытия).</li>
+       </ul>
+     </div>
+
+     <div class="tech-scope">
+       <b>Когда обязательно</b>
+       <p>Уборка после ремонта/ЧП, сложные и нетиповые объекты, химчистка/окна/пароочистка, сумма выше порога, новый клиент с крупным чеком.</p>
+       <b style="margin-top:8px">Когда можно пропустить</b>
+       <p>Типовая уборка по прайсу, повторный клиент со знакомым объектом.</p>
+     </div>
+
+     <div style="margin-top:14px"><b style="font-size:13px">Черновик сметы</b></div>
+     <div style="margin-top:8px">${calcDrawerHtml(a)}</div>
+
+     <label class="field" style="margin-top:12px"><span>Технолог / бригадир</span>
+       <select class="input" id="techReviewer">
+         ${TECHS.map(t=>`<option ${tr.reviewer===t?'selected':''}>${t}</option>`).join('')}
+       </select></label>
+
+     <div class="qual-block" style="margin-top:4px">
+       <h4>Решение</h4>
+       <div class="check-row" id="techDecision">
+         ${Object.entries(TECH_DECISIONS).map(([k,[label]])=>radioPill('techDec',k,tr.decision===k,label)).join('')}
+       </div>
+       <label class="field" style="margin-top:10px;margin-bottom:0"><span>Комментарий проверки</span>
+         <textarea class="input" id="techNotes" rows="2" placeholder="Что изменить, какие риски, нужен ли замер…">${esc(tr.notes||'')}</textarea></label>
+     </div>
+
+     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+       <span class="btn sm primary" id="btnSaveTech">Сохранить решение</span>
+       <span class="btn sm" id="btnAddRev">+ Зафиксировать правку сметы</span>
+     </div>
+
+     <div style="margin-top:14px"><b style="font-size:13px">Правки в смете</b>
+       <div id="techRevs" style="margin-top:8px">${(tr.revisions||[]).length
+         ? tr.revisions.slice().reverse().map(r=>`<div class="hist-item"><span class="when">${r.at}</span><span style="flex:1"><b>${esc(r.action)}</b>${r.details?`<div class="c-sub">${esc(r.details)}</div>`:''}</span></div>`).join('')
+         :'<span class="c-sub">Пока нет зафиксированных правок</span>'}</div>
+       <div style="display:flex;gap:8px;margin-top:8px">
+         <input class="input" id="techRevText" placeholder="Кто и что изменил…" style="flex:1">
+       </div>
+     </div>
+
+     ${approved?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
+       <span class="btn sm primary" id="btnToConfirm">→ Отправить КП и к подтверждению · ${money(ensureQuote(a).total)}</span>
+     </div>`:tr.decision==='measure'?`<div style="margin-top:14px">
+       <div class="c-sub" style="margin-bottom:8px">Нужен выезд на замер — КП клиенту не отправляем, пока не уточним состав работ.</div>
+       <span class="btn sm primary" id="btnToVisit">→ Назначить выезд на замер</span>
+     </div>`:''}
+
+     <div class="qual-mistakes">
+       <b>Типичные ошибки</b>
+       <ul>
+         <li>смета «продавлена» без проверки → бригада не укладывается;</li>
+         <li>согласование «на глаз» без данных;</li>
+         <li>правки не зафиксированы → при выполнении другой состав.</li>
+       </ul>
+     </div>
+     <div class="qual-metrics">
+       <b>Метрики</b>
+       <ul>
+         <li>% заказов, прошедших согласование;</li>
+         <li>% смет, скорректированных после проверки;</li>
+         <li>отклонение факт/план по трудозатратам.</li>
+       </ul>
+     </div>
+   </div>`;
+   })():''}
+
+   ${a.status==='SITE_VISIT'?(()=>{
+     const sv=ensureSiteVisit(a);
+     const taken=sv.outcome==='take';
+     return `<div class="card" style="margin-top:12px"><b>Выезд на замер технолога/бригадира</b>
+     <div class="c-sub" style="margin-top:4px">Цель: увидеть объект на месте и дать точную смету/план работ там, где по телефону и фото оценить нельзя.</div>
+     <div class="c-sub" style="margin-top:8px">Ответственный: технолог/бригадир.<br>Вход: решение «нужен замер» + согласованное с клиентом время. Выход: точная смета + план работ + фото объекта в карточке.</div>
+
+     <div class="tech-scope">
+       <b>Когда нужен</b>
+       <p>После ремонта/ЧП/сильное загрязнение; площадь выше порога или нестандартная планировка; химчистка, высотные окна, спецработы; клиент сомневается в цене; технолог поставил «нужен замер»; крупный чек или новый корпоративный клиент.</p>
+       <b style="margin-top:8px">Когда не нужен</b>
+       <p>Типовые уборки по прайсу, объект понятен по фото/описанию, повторный клиент с известным объектом.</p>
+     </div>
+
+     <div class="qual-block" style="margin-top:12px">
+       <h4>1. Согласование замера с клиентом</h4>
+       <div class="qual-grid">
+         <label class="field"><span>Дата и время</span>
+           <input class="input" id="svWhen" value="${esc(sv.scheduledAt||'')}" placeholder="05.11 11:00"></label>
+         <label class="field"><span>Кто выезжает</span>
+           <select class="input" id="svWho">${TECHS.map(t=>`<option ${sv.assignee===t?'selected':''}>${t}</option>`).join('')}</select></label>
+         <label class="field"><span>Оплата замера</span>
+           <select class="input" id="svPaid">
+             <option value="0" ${!sv.paid?'selected':''}>Бесплатно</option>
+             <option value="1" ${sv.paid?'selected':''}>Платно</option>
+           </select></label>
+         <label class="field"><span>Стоимость замера, ₽</span>
+           <input class="input" id="svPrice" type="number" min="0" value="${esc(sv.price||'0')}" ${sv.paid?'':'disabled'}></label>
+       </div>
+       <div style="margin-top:10px"><span class="btn sm" id="btnSaveVisitSchedule">Сохранить назначение</span></div>
+     </div>
+
+     <div class="qual-block">
+       <h4>2. Результат осмотра</h4>
+       <div class="c-sub" style="margin-bottom:8px">Осмотр, замеры, фото, фиксация состояния и особых зон; оценка трудозатрат и допуслуг.</div>
+       <div class="qual-grid">
+         <label class="field"><span>Площадь факт, м²</span>
+           <input class="input" id="svArea" value="${esc(sv.areaFact||'')}" placeholder="168"></label>
+         <label class="field"><span>Клинеров</span>
+           <input class="input" id="svCleaners" value="${esc(sv.cleaners||'')}" placeholder="3"></label>
+         <label class="field"><span>Часов</span>
+           <input class="input" id="svHours" value="${esc(sv.hours||'')}" placeholder="7"></label>
+         <label class="field full"><span>Оборудование</span>
+           <input class="input" id="svEquip" value="${esc(sv.equipment||'')}" placeholder="экстрактор, стремянка…"></label>
+         <label class="field full"><span>Заметки с объекта</span>
+           <textarea class="input" id="svNotes" rows="2" placeholder="Состояние, особые зоны, риски…">${esc(sv.notes||'')}</textarea></label>
+       </div>
+       <div style="margin-top:10px"><b style="font-size:12px">Фото объекта</b>
+         <div class="photo-chips" id="svPhotos">${(sv.photos||[]).length
+           ? sv.photos.map((p,i)=>`<span class="photo-chip">${esc(p)} <span class="sv-ph-del" data-i="${i}" style="cursor:pointer;color:var(--muted);margin-left:4px">✕</span></span>`).join('')
+           :'<span class="c-sub">Пока нет фото</span>'}</div>
+         <div style="display:flex;gap:8px;margin-top:8px">
+           <input class="input" id="svPhotoText" placeholder="Описание фото (мок: URL не загружаем)" style="flex:1">
+           <span class="btn sm" id="btnAddPhoto">+ Фото</span>
+         </div>
+       </div>
+     </div>
+
+     <div style="margin-top:4px"><b style="font-size:13px">Точная смета после замера</b></div>
+     <div style="margin-top:8px">${calcDrawerHtml(a)}</div>
+
+     <div class="qual-block" style="margin-top:12px">
+       <h4>3. Решение</h4>
+       <div class="check-row">
+         ${Object.entries(SITE_OUTCOMES).map(([k,[label]])=>radioPill('svOut',k,sv.outcome===k,label)).join('')}
+       </div>
+       <label class="field" style="margin-top:10px;margin-bottom:0"><span>Причина отказа (если не берём)</span>
+         <input class="input" id="svRefuse" value="${esc(sv.refuseReason||'')}" placeholder="Нерентабельно / вне компетенций…"></label>
+       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+         <span class="btn sm primary" id="btnSaveVisitResult">Сохранить результат замера</span>
+       </div>
+     </div>
+
+     ${taken?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
+       <span class="btn sm primary" id="btnToConfirm">→ Отправить КП и к подтверждению · ${money(ensureQuote(a).total)}</span>
+     </div>`:sv.outcome==='refuse'?`<div class="c-sub" style="margin-top:14px">Замер показал отказ — переведите лид в «Не квалифицирован» с причиной.</div>
+       <span class="btn sm" id="btnVisitRefuse" style="margin-top:8px">→ Не квалифицирован</span>`:''}
+
+     <div class="qual-mistakes">
+       <b>Типичные ошибки</b>
+       <ul>
+         <li>бесплатный замер, а клиент «слился» → потерянное время;</li>
+         <li>не зафиксировали фото/замеры → споры;</li>
+         <li>замер сделал не тот, кто будет убирать → расхождение ожиданий.</li>
+       </ul>
+     </div>
+     <div class="qual-metrics">
+       <b>Метрики</b>
+       <ul>
+         <li>конверсия «замер → заказ»;</li>
+         <li>стоимость замера;</li>
+         <li>отклонение сметы «до/после замера»;</li>
+         <li>время от замера до КП.</li>
+       </ul>
+     </div>
+   </div>`;
+   })():''}
+
+   ${a.status==='CONFIRMATION'?(()=>{
+     const cf=ensureConfirm(a);
+     const qt=ensureQuote(a);
+     return `<div class="card" style="margin-top:12px"><b>Согласование и подтверждение заказа</b>
+     <div class="c-sub" style="margin-top:4px">Цель: получить твёрдое «да» и зафиксировать условия.</div>
+     <div class="c-sub" style="margin-top:8px">Ответственный: менеджер по продажам.<br>Выход: подтверждённый заказ в CRM, предоплата (если есть), клиент проинформирован.</div>
+
+     <div class="qual-block" style="margin-top:12px">
+       <h4>КП и возражения</h4>
+       <div class="kv"><b>КП:</b> ${cf.kpSent?badge('отправлено','green'):badge('не отправлено','sla-wait')} · ${money(qt.total)}</div>
+       ${!cf.kpSent?`<div style="margin-top:8px"><span class="btn sm primary" id="btnSendKpHere">Отправить КП · ${money(qt.total)}</span></div>`:''}
+       <label class="field" style="margin-top:10px;margin-bottom:0"><span>Дожим / ответы на возражения</span>
+         <textarea class="input" id="cfObj" rows="2" placeholder="Цена, состав, сроки…">${esc(cf.objections||'')}</textarea></label>
+     </div>
+
+     <div class="qual-block">
+       <h4>Условия заказа</h4>
+       <div class="qual-grid">
+         <label class="field"><span>Дата и время выезда</span>
+           <input class="input" id="cfWhen" value="${esc(cf.visitAt||'')}" placeholder="08.11 10:00"></label>
+         <label class="field"><span>Бригада (черновик)</span>
+           <input class="input" id="cfTeam" value="${esc(cf.teamHint||'')}" placeholder="Бригадир + N клинеров"></label>
+         <label class="field full" style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;padding-top:8px">
+           <label class="check-pill"><input type="checkbox" id="cfScope" ${cf.scopeOk?'checked':''}> Состав работ подтверждён письменно</label>
+           <label class="check-pill"><input type="checkbox" id="cfPrice" ${cf.priceOk?'checked':''}> Цена подтверждена</label>
+         </label>
+       </div>
+       <div style="margin-top:10px">${calcDrawerHtml(a)}</div>
+     </div>
+
+     <div class="qual-block">
+       <h4>Оплата</h4>
+       <div class="check-row" style="margin-bottom:10px">
+         ${Object.entries(PAY_TYPES).map(([k,label])=>radioPill('cfPay',k,cf.payType===k,label)).join('')}
+       </div>
+       <div class="qual-grid">
+         <label class="field"><span>Сумма предоплаты, ₽</span>
+           <input class="input" id="cfPrepay" type="number" min="0" value="${esc(cf.prepayAmount||'')}" placeholder="0"></label>
+         <label class="field" style="display:flex;align-items:flex-end">
+           <label class="check-pill" style="margin-bottom:8px"><input type="checkbox" id="cfPrepayDone" ${cf.prepayDone?'checked':''}> Предоплата получена</label>
+         </label>
+       </div>
+     </div>
+
+     <div class="qual-block">
+       <h4>Доступ и подготовка</h4>
+       <label class="field"><span>Правила доступа (консьерж, парковка, ключи)</span>
+         <textarea class="input" id="cfAccess" rows="2" placeholder="Как пройти, где парковаться…">${esc(cf.accessNotes||'')}</textarea></label>
+       <label class="field" style="margin-bottom:0"><span>Что подготовить клиенту</span>
+         <textarea class="input" id="cfPrep" rows="2" placeholder="Убрать хрупкое, доступ к воде…">${esc(cf.prepareNotes||'')}</textarea></label>
+     </div>
+
+     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+       <span class="btn sm" id="btnSaveConfirm">Сохранить условия</span>
+       <span class="btn sm" id="btnNotifyClient">${cf.clientNotified?'✓ Подтверждение отправлено':'Отправить подтверждение клиенту'}</span>
+       <span class="btn sm primary" id="btnConfirmOrder">${cf.orderConfirmed?'✓ Заказ подтверждён':'Подтвердить заказ → договор'}</span>
+     </div>
+     ${cf.orderConfirmed?`<div style="margin-top:12px"><a class="btn sm primary" href="deals.html?from=${a.id.slice(1)}">Открыть договор →</a>
+       <div class="c-sub" style="margin-top:8px">Лид переведён в статус «Заказ подтверждён». Дальше — планирование в договорах.</div></div>`:''}
+
+     <div class="qual-mistakes">
+       <b>Типичные ошибки</b>
+       <ul>
+         <li>не зафиксировали «что входит» письменно → споры на месте;</li>
+         <li>не взяли предоплату → риск отмены/неоплаты;</li>
+         <li>не согласовали доступ (консьерж, парковка, ключи).</li>
+       </ul>
+     </div>
+     <div class="qual-metrics">
+       <b>Метрики</b>
+       <ul>
+         <li>конверсия «КП → Заказ»;</li>
+         <li>доля предоплатных заказов;</li>
+         <li>% отмен после подтверждения.</li>
+       </ul>
+     </div>
+   </div>`;
+   })():''}
+
+   <div class="card" style="margin-top:12px"><b>Информация</b>
+     <p style="margin:8px 0 10px;font-size:14px">${esc(a.information)||'<span class="c-sub">Нет доп. информации</span>'}</p>
+     <div class="kv"><b>Источник:</b> ${badge(a.source,'gray')}</div>
+     <div class="kv"><b>Клиент:</b> <a href="clients.html">${esc(cl.name)}</a> · ${esc(cl.phone)}</div>
+     <div class="kv"><b>Дата:</b> ${a.createdAt}</div>
+     <div class="kv"><b>Время до первого ответа:</b> ${responseBadge(a)}</div>
+     ${a.status==='LOST'?`<div class="kv"><b>Причина:</b> ${REASONS[a.lostReason]}${a.lostComment?` — ${esc(a.lostComment)}`:''}</div>`:''}
+   </div>
+
+   <div class="card" style="margin-top:12px"><b>Объекты</b>
+     <div id="dObjs">${a.objectIds.map(oid=>{const o=objById(oid);return `<div class="mini-card"><b>${esc(o.name)}</b>
+        <div class="sub">Тип: ${esc(o.type)} · ${esc(o.addr)} · ${esc(o.area)} · ${badge(o.status,'green')}</div></div>`;}).join('')||'<span class="c-sub">Нет объектов</span>'}</div>
+     <div style="display:flex;gap:8px;margin-top:8px">
+       <select class="input" id="addObjSel" style="flex:1"><option value="">— объект —</option>
+         ${OBJECTS.filter(o=>!a.objectIds.includes(o.id)).map(o=>`<option value="${o.id}">${esc(o.name)} · ${esc(o.type)}</option>`).join('')}</select>
+       <span class="btn sm" id="addObjBtn">+ Добавить объект</span>
+     </div>
+   </div>
+
+   <div class="card" style="margin-top:12px">
+     <label class="field" style="margin-bottom:0"><span>Статус</span>
+       <select class="input" id="dStatus">
+         ${Object.entries(STATUSES).map(([k,[t]])=>`<option value="${k}" ${a.status===k?'selected':''}>${t}</option>`).join('')}
+       </select></label>
+   </div>
+
+   <div class="card" style="margin-top:12px"><b>Заметки</b>
+     <div id="dHist">${a.history.slice().reverse().map((h,i)=>`<div class="hist-item"><span class="when">${h.at}</span><span style="flex:1"><b>${esc(h.action)}</b>${h.details?`<div class="c-sub">${esc(h.details)}</div>`:''}</span><span class="h-del" data-i="${a.history.length-1-i}" title="Удалить" style="cursor:pointer;color:var(--muted);padding:0 4px">✕</span></div>`).join('')}</div>
+     <div style="display:flex;gap:8px;margin-top:10px">
+       <input class="input" id="hText" placeholder="Например: позвонить клиенту, отправить КП..." style="flex:1">
+       <span class="btn sm" id="btnHist">Добавить</span>
+     </div>
+   </div>`;
+  backdrop.style.display='flex';
+
+  document.getElementById('btnStartQual')?.addEventListener('click',()=>{
+    markFirstResponse(a);
+    pushHist(a,'Статус изменён',`${STATUSES[a.status][0]} → Квалификация`);
+    a.status='QUALIFICATION';
+    if(!a.qualify) a.qualify={cleanType:'',objType:'',area:'',rooms:'',baths:'',dirt:'',pets:false,kids:false,specialZones:'',extras:[],address:'',zone:'',wishDate:'',wishTime:'',budget:''};
+    render(); openDrawer(a); toast('Лид в квалификации');
+  });
+  const saveQual=()=>{
+    if(!document.getElementById('qSource')) return;
+    const cleanType=document.querySelector('input[name="qCleanType"]:checked')?.value||'';
+    const objType=document.querySelector('input[name="qObjType"]:checked')?.value||'';
+    const extras=[...document.querySelectorAll('input[name="qExtra"]:checked')].map(el=>el.value);
+    const source=document.getElementById('qSource').value;
+    a.qualify={
+      cleanType, objType,
+      area:document.getElementById('qArea').value.trim(),
+      rooms:document.getElementById('qRooms').value.trim(),
+      baths:document.getElementById('qBaths').value.trim(),
+      dirt:document.getElementById('qDirt').value,
+      pets:!!document.querySelector('input[name="qPets"]:checked'),
+      kids:!!document.querySelector('input[name="qKids"]:checked'),
+      specialZones:document.getElementById('qSpecial').value.trim(),
+      extras,
+      zone:document.getElementById('qZone').value,
+      address:document.getElementById('qAddr').value.trim(),
+      wishDate:document.getElementById('qWish').value.trim(),
+      wishTime:document.getElementById('qWishTime').value.trim(),
+      budget:document.getElementById('qBudget').value.trim(),
+    };
+    if(source && source!==a.source) a.source=source;
+  };
+  document.getElementById('btnSaveQual')?.addEventListener('click',()=>{
+    saveQual();
+    pushHist(a,'Квалификация','Скрипт обновлён');
+    toast('Скрипт квалификации сохранён');
+    openDrawer(a); render();
+  });
+  document.getElementById('btnMarkQual')?.addEventListener('click',()=>{
+    saveQual();
+    if(a.qualify.zone==='out'){ toast('Объект вне зоны — уточните отказ или партнёра',true); }
+    pushHist(a,'Статус изменён',`${STATUSES[a.status][0]} → ${STATUSES.QUALIFIED[0]}`);
+    a.status='QUALIFIED';
+    a.quote=defaultQuote(a);
+    render(); openDrawer(a); toast(`Лид ${a.id}: расчёт стоимости и КП`);
+  });
+  document.getElementById('btnToTech')?.addEventListener('click',()=>toTechReview(a));
+  document.getElementById('btnSkipTech')?.addEventListener('click',()=>{
+    ensureQuote(a);
+    const tr=ensureTechReview(a);
+    tr.decision='ok';
+    tr.notes=tr.notes||'Пропущено: типовой прайс / повторный клиент';
+    pushHist(a,'Статус изменён',`${STATUSES[a.status][0]} → ${STATUSES.TECH_REVIEW[0]}`);
+    a.status='TECH_REVIEW';
+    pushHist(a,'Согласование пропущено','Типовая уборка / знакомый объект');
+    render(); openDrawer(a); toast('Согласование пропущено — можно отправлять КП');
+  });
+  document.getElementById('btnSaveTech')?.addEventListener('click',()=>{
+    const tr=ensureTechReview(a);
+    const dec=document.querySelector('input[name="techDec"]:checked')?.value||null;
+    tr.reviewer=document.getElementById('techReviewer')?.value||tr.reviewer;
+    tr.notes=document.getElementById('techNotes')?.value.trim()||'';
+    tr.decision=dec;
+    if(dec) pushHist(a,'Решение технолога',TECH_DECISIONS[dec][0]+(tr.notes?` — ${tr.notes}`:''));
+    else pushHist(a,'Согласование','Черновик проверки сохранён');
+    render(); openDrawer(a); toast(dec?`Решение: ${TECH_DECISIONS[dec][0]}`:'Сохранено');
+  });
+  document.getElementById('btnAddRev')?.addEventListener('click',()=>{
+    const inp=document.getElementById('techRevText');
+    const t=inp?.value.trim(); if(!t) return;
+    const tr=ensureTechReview(a);
+    const who=document.getElementById('techReviewer')?.value||tr.reviewer||'Технолог';
+    tr.revisions=tr.revisions||[];
+    tr.revisions.push(H(now(), who, t));
+    pushHist(a,'Правка сметы',`${who}: ${t}`);
+    inp.value='';
+    render(); openDrawer(a); toast('Правка зафиксирована');
+  });
+  document.getElementById('btnToVisit')?.addEventListener('click',()=>toSiteVisit(a));
+  document.getElementById('btnToConfirm')?.addEventListener('click',()=>toConfirmation(a));
+  document.getElementById('svPaid')?.addEventListener('change',e=>{
+    const price=document.getElementById('svPrice');
+    if(price) price.disabled=e.target.value!=='1';
+  });
+  document.getElementById('btnSaveVisitSchedule')?.addEventListener('click',()=>{
+    const sv=ensureSiteVisit(a);
+    sv.scheduledAt=document.getElementById('svWhen')?.value.trim()||'';
+    sv.assignee=document.getElementById('svWho')?.value||sv.assignee;
+    sv.paid=document.getElementById('svPaid')?.value==='1';
+    sv.price=document.getElementById('svPrice')?.value||'0';
+    const pay=sv.paid?`платно ${money(sv.price)}`:'бесплатно';
+    pushHist(a,'Замер назначен',`${sv.scheduledAt||'без даты'} · ${pay} · ${sv.assignee}`);
+    render(); openDrawer(a); toast('Замер согласован с клиентом');
+  });
+  document.getElementById('btnAddPhoto')?.addEventListener('click',()=>{
+    const inp=document.getElementById('svPhotoText');
+    const t=inp?.value.trim(); if(!t) return;
+    const sv=ensureSiteVisit(a);
+    sv.photos=sv.photos||[];
+    sv.photos.push(t);
+    pushHist(a,'Фото объекта',t);
+    inp.value='';
+    render(); openDrawer(a); toast('Фото добавлено в карточку');
+  });
+  document.getElementById('svPhotos')?.addEventListener('click',e=>{
+    const b=e.target.closest('.sv-ph-del'); if(!b) return;
+    const sv=ensureSiteVisit(a);
+    sv.photos.splice(+b.dataset.i,1);
+    render(); openDrawer(a);
+  });
+  document.getElementById('btnSaveVisitResult')?.addEventListener('click',()=>{
+    const sv=ensureSiteVisit(a);
+    sv.areaFact=document.getElementById('svArea')?.value.trim()||'';
+    sv.cleaners=document.getElementById('svCleaners')?.value.trim()||'';
+    sv.hours=document.getElementById('svHours')?.value.trim()||'';
+    sv.equipment=document.getElementById('svEquip')?.value.trim()||'';
+    sv.notes=document.getElementById('svNotes')?.value.trim()||'';
+    sv.outcome=document.querySelector('input[name="svOut"]:checked')?.value||null;
+    sv.refuseReason=document.getElementById('svRefuse')?.value.trim()||'';
+    if(sv.areaFact){
+      const q=ensureQuote(a);
+      q.area=parseFloat(String(sv.areaFact).replace(',','.'))||q.area;
+      recomputeQuote(q);
+    }
+    if(sv.outcome){
+      const plan=[sv.cleaners&&`${sv.cleaners} клинера`,sv.hours&&`${sv.hours} ч`].filter(Boolean).join(' · ');
+      pushHist(a,'Результат замера',`${SITE_OUTCOMES[sv.outcome][0]}${plan?` · ${plan}`:''}${sv.refuseReason?` — ${sv.refuseReason}`:''}`);
+    } else pushHist(a,'Замер','Данные осмотра сохранены');
+    render(); openDrawer(a); toast(sv.outcome?`Решение: ${SITE_OUTCOMES[sv.outcome][0]}`:'Сохранено');
+  });
+  document.getElementById('btnVisitRefuse')?.addEventListener('click',()=>{
+    const sv=ensureSiteVisit(a);
+    openLost(a);
+    const sel=document.getElementById('lostReason');
+    if(sel) sel.value='OBJECT';
+    const c=document.getElementById('lostComment');
+    if(c) c.value=sv.refuseReason||'После замера: нерентабельно / вне компетенций';
+  });
+  const readConfirmForm=()=>{
+    const cf=ensureConfirm(a);
+    cf.objections=document.getElementById('cfObj')?.value.trim()||'';
+    cf.visitAt=document.getElementById('cfWhen')?.value.trim()||'';
+    cf.teamHint=document.getElementById('cfTeam')?.value.trim()||'';
+    cf.scopeOk=!!document.getElementById('cfScope')?.checked;
+    cf.priceOk=!!document.getElementById('cfPrice')?.checked;
+    cf.payType=document.querySelector('input[name="cfPay"]:checked')?.value||cf.payType;
+    cf.prepayAmount=document.getElementById('cfPrepay')?.value||'';
+    cf.prepayDone=!!document.getElementById('cfPrepayDone')?.checked;
+    cf.accessNotes=document.getElementById('cfAccess')?.value.trim()||'';
+    cf.prepareNotes=document.getElementById('cfPrep')?.value.trim()||'';
+    return cf;
+  };
+  document.getElementById('btnSendKpHere')?.addEventListener('click',()=>{
+    const cf=ensureConfirm(a);
+    cf.kpSent=true;
+    pushHist(a,'КП',`КП отправлено клиенту · ${money(ensureQuote(a).total)}`);
+    render(); openDrawer(a); toast(`КП · ${money(a.quote.total)}`);
+  });
+  document.getElementById('btnSaveConfirm')?.addEventListener('click',()=>{
+    const cf=readConfirmForm();
+    if(cf.objections) pushHist(a,'Возражение',cf.objections);
+    if(cf.prepayDone && cf.prepayAmount) pushHist(a,'Предоплата',`Получено ${money(cf.prepayAmount)}`);
+    pushHist(a,'Условия','Согласование с клиентом обновлено');
+    render(); openDrawer(a); toast('Условия сохранены');
+  });
+  document.getElementById('btnNotifyClient')?.addEventListener('click',()=>{
+    const cf=readConfirmForm();
+    if(!cf.visitAt){ toast('Укажите дату и время выезда',true); return; }
+    cf.clientNotified=true;
+    pushHist(a,'Подтверждение клиенту',`${cf.visitAt} · ${cf.teamHint||'бригада'} · доступ: ${cf.accessNotes||'—'}`);
+    render(); openDrawer(a); toast('Клиенту отправлено подтверждение');
+  });
+  document.getElementById('btnConfirmOrder')?.addEventListener('click',()=>{
+    const cf=readConfirmForm();
+    if(!cf.scopeOk||!cf.priceOk){ toast('Подтвердите состав работ и цену письменно',true); return; }
+    if(!cf.visitAt){ toast('Согласуйте дату и время выезда',true); return; }
+    if(cf.payType==='prepay' && !cf.prepayDone){ toast('Зафиксируйте предоплату или смените на постоплату',true); return; }
+    cf.orderConfirmed=true;
+    if(!cf.clientNotified){
+      cf.clientNotified=true;
+      pushHist(a,'Подтверждение клиенту',`${cf.visitAt} · ${cf.teamHint||'бригада'}`);
+    }
+    pushHist(a,'Заказ подтверждён',`Договор · ${cf.visitAt} · ${money(ensureQuote(a).total)}`);
+    render(); openDrawer(a); toast('Заказ подтверждён — можно открыть договор');
+  });
+  document.getElementById('drawerCalc')?.addEventListener('input',e=>{
+    const inp=e.target.closest('input'); if(!inp) return;
+    applyCalcInput(document.getElementById('drawerCalc'), a, inp);
+  });
+  document.getElementById('dManager').onchange=e=>{
+    const v=e.target.value||null;
+    if(v===a.managerId) return;
+    pushHist(a, v?'Назначен менеджер':'Снят менеджер', v||a.managerId);
+    a.managerId=v;
+    if(v) markFirstResponse(a);
+    render(); openDrawer(a);
+  };
+  document.getElementById('dEmployee').onchange=e=>{
+    const v=e.target.value||null;
+    if(v===a.employeeId) return;
+    pushHist(a, v?'Назначен сотрудник':'Снят сотрудник', v||a.employeeId);
+    a.employeeId=v; render(); openDrawer(a);
+  };
+  document.getElementById('addObjBtn').onclick=()=>{
+    const sel=document.getElementById('addObjSel'); if(!sel.value) return;
+    a.objectIds.push(sel.value);
+    pushHist(a,'Добавлен объект',objById(sel.value).name);
+    render(); openDrawer(a);
+  };
+  document.getElementById('btnHist').onclick=()=>{
+    const inp=document.getElementById('hText'), t=inp.value.trim(); if(!t) return;
+    pushHist(a,'Заметка',t); render(); openDrawer(a);
+  };
+  document.getElementById('dHist').onclick=e=>{
+    const b=e.target.closest('.h-del'); if(!b) return;
+    a.history.splice(+b.dataset.i,1); render(); openDrawer(a);
+  };
+  document.getElementById('dStatus').onchange=e=>{
+    const ns=e.target.value; if(ns===a.status) return;
+    if(ns==='LOST'){ e.target.value=a.status; openLost(a); return; }
+    pushHist(a,'Статус изменён',`${STATUSES[a.status][0]} → ${STATUSES[ns][0]}`);
+    a.status=ns;
+    if(ns==='QUALIFIED'){ ensureQuote(a); toast(`Лид ${a.id}: расчёт и КП`); }
+    if(ns==='TECH_REVIEW'){
+      ensureQuote(a);
+      ensureTechReview(a);
+      toast(`Лид ${a.id}: на согласовании у технолога`);
+    }
+    if(ns==='SITE_VISIT'){
+      ensureQuote(a);
+      ensureSiteVisit(a);
+      toast(`Лид ${a.id}: выезд на замер`);
+    }
+    if(ns==='CONFIRMATION'){
+      ensureQuote(a);
+      ensureConfirm(a);
+      toast(`Лид ${a.id}: согласование с клиентом`);
+    }
+    render(); openDrawer(a);
+  };
+}
+
+/* Lost modal */
+const modalLost=document.getElementById('modalLost'); let lostTarget=null;
+function openLost(a){ lostTarget=a; document.getElementById('lostReason').value=''; document.getElementById('lostComment').value=''; document.getElementById('eReason').style.display='none'; modalLost.style.display='flex'; }
+function closeLost(){ modalLost.style.display='none'; lostTarget=null; }
+modalLost.addEventListener('click',e=>{if(e.target===modalLost)closeLost();});
+document.getElementById('btnLostSave').onclick=()=>{
+  const r=document.getElementById('lostReason').value;
+  if(!r){document.getElementById('eReason').style.display='block';return;}
+  const a=lostTarget;
+  pushHist(a,'Статус изменён',`${STATUSES[a.status][0]} → Не квалифицирован`);
+  a.status='LOST'; a.lostReason=r; a.lostComment=document.getElementById('lostComment').value.trim();
+  pushHist(a,'Причина',REASONS[r]);
+  closeLost(); render(); if(cur===a)openDrawer(a);
+};
+
+/* Category picker state */
+let draftCat = { root:null, service:null, child:null, option:null };
+
+function updateCatSummary(){
+  const el = document.getElementById('nCatSummary');
+  if (!draftCat.root) {
+    el.className = 'pick-summary empty';
+    el.textContent = 'Категория не выбрана';
+    return;
+  }
+  el.className = 'pick-summary';
+  el.innerHTML = '<b>Выбрано:</b> ' + catPath(draftCat).map(p => esc(p.text)).join(' › ');
+}
+function renderPickServices(){
+  const sec = document.getElementById('secService');
+  const grid = document.getElementById('pickServices');
+  if (!draftCat.root) { sec.style.display='none'; return; }
+  sec.style.display='';
+  const services = CATALOG[draftCat.root].services;
+  grid.innerHTML = services.map(s=>`
+    <button type="button" class="pick-card${draftCat.service===s.id?' on':''}" data-svc="${s.id}">
+      <span class="mark"></span><span>${esc(s.label)}</span>
+    </button>`).join('');
+}
+function renderPickChildren(){
+  const sec = document.getElementById('secChild');
+  const grid = document.getElementById('pickChildren');
+  const svc = findService(draftCat.root, draftCat.service);
+  if (!svc?.children) { sec.style.display='none'; return; }
+  sec.style.display='';
+  document.getElementById('lblChild').textContent = `3. ${svc.childLabel || 'Уточнение'}`;
+  grid.innerHTML = svc.children.map(c=>`
+    <button type="button" class="pick-card${draftCat.child===c.id?' on':''}" data-child="${c.id}">
+      <span class="mark"></span><span>${esc(c.label)}</span>
+    </button>`).join('');
+}
+function renderPickOptions(){
+  const sec = document.getElementById('secOpt');
+  const wrap = document.getElementById('pickOptions');
+  const svc = findService(draftCat.root, draftCat.service);
+  let opts = null, label = '4. Параметр';
+  if (svc?.children && draftCat.child) {
+    const ch = findChild(svc, draftCat.child);
+    if (ch?.options) { opts = ch.options; label = `4. ${ch.optLabel || 'Параметр'}`; }
+  } else if (svc?.options) {
+    opts = svc.options; label = `3. ${svc.childLabel || 'Параметр'}`;
+  }
+  if (!opts) { sec.style.display='none'; return; }
+  sec.style.display='';
+  document.getElementById('lblOpt').textContent = label;
+  wrap.innerHTML = opts.map(o=>`
+    <button type="button" class="pick-opt${draftCat.option===o?' on':''}" data-opt="${esc(o)}">${esc(o)}</button>
+  `).join('');
+}
+function refreshPicker(){
+  document.getElementById('pickHome').className = `pick-root${draftCat.root==='home'?' on home':''}`;
+  document.getElementById('pickBiz').className = `pick-root${draftCat.root==='biz'?' on biz':''}`;
+  renderPickServices();
+  renderPickChildren();
+  renderPickOptions();
+  updateCatSummary();
+}
+
+document.getElementById('pickHome').onclick=()=>{ draftCat={root:'home',service:null,child:null,option:null}; refreshPicker(); };
+document.getElementById('pickBiz').onclick=()=>{ draftCat={root:'biz',service:null,child:null,option:null}; refreshPicker(); };
+document.getElementById('pickServices').onclick=e=>{
+  const b=e.target.closest('.pick-card'); if(!b) return;
+  draftCat={...draftCat, service:b.dataset.svc, child:null, option:null};
+  refreshPicker();
+};
+document.getElementById('pickChildren').onclick=e=>{
+  const b=e.target.closest('.pick-card'); if(!b) return;
+  draftCat={...draftCat, child:b.dataset.child, option:null};
+  refreshPicker();
+};
+document.getElementById('pickOptions').onclick=e=>{
+  const b=e.target.closest('.pick-opt'); if(!b) return;
+  draftCat={...draftCat, option:b.dataset.opt};
+  refreshPicker();
+};
+
+/* New application modal */
+const modalNew=document.getElementById('modalNew');
+function openNew(){
+  document.getElementById('nClient').innerHTML='<option value="">— выберите —</option>'+CLIENTS.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  document.getElementById('nObjects').innerHTML=OBJECTS.map(o=>`<label style="display:flex;gap:8px;padding:3px 0"><input type="checkbox" value="${o.id}"> ${esc(o.name)} <span class="c-sub">${esc(o.type)}</span></label>`).join('');
+  ['nSource','nClient','nInfo','nManager','nEmployee'].forEach(id=>document.getElementById(id).value='');
+  document.querySelectorAll('#nObjects input').forEach(i=>i.checked=false);
+  ['eSource','eClient','eCat'].forEach(id=>document.getElementById(id).style.display='none');
+  draftCat={root:null,service:null,child:null,option:null};
+  refreshPicker();
+  modalNew.style.display='flex';
+}
+function closeNew(){modalNew.style.display='none';}
+document.getElementById('btnNew').onclick=openNew;
+modalNew.addEventListener('click',e=>{if(e.target===modalNew)closeNew();});
+document.getElementById('btnCreate').onclick=()=>{
+  const src=document.getElementById('nSource').value,
+        cid=document.getElementById('nClient').value,
+        info=document.getElementById('nInfo').value.trim();
+  let ok=true;
+  document.getElementById('eCat').style.display=catComplete(draftCat)?'none':'block'; if(!catComplete(draftCat))ok=false;
+  document.getElementById('eSource').style.display=src?'none':'block'; if(!src)ok=false;
+  document.getElementById('eClient').style.display=cid?'none':'block'; if(!cid)ok=false;
+  if(!ok) return;
+  const cat={...draftCat};
+  const num=Math.max(...applications.map(a=>+a.id.slice(1)))+1;
+  const a={id:'#'+num, title:catTitle(cat), source:src, clientId:cid, cat,
+    information:info, managerId:document.getElementById('nManager').value||null,
+    employeeId:document.getElementById('nEmployee').value||null,
+    objectIds:[...document.querySelectorAll('#nObjects input:checked')].map(i=>i.value),
+    status:'RECEIVED', createdAt:now(), history:[H(now(),'Лид получен',`Источник: ${src.toLowerCase()} · ${catPath(cat).map(p=>p.text).join(' › ')}`)]};
+  applications.unshift(a);
+  clientHistory[cid].push({at:now(),action:`Лид ${a.id} получен · ${src}`});
+  try {
+    const ev = JSON.parse(localStorage.getItem('gavan_client_events')||'[]');
+    ev.push({name: clientById(cid).name, at: now(), action: `Лид ${a.id} получен · ${src}`});
+    localStorage.setItem('gavan_client_events', JSON.stringify(ev));
+  } catch (e) {}
+  closeNew(); render(); toast(`Лид ${a.id} создан`);
+};
+function toast(msg,err){
+  const t=document.createElement('div'); t.className='toast';
+  if(err)t.style.background='var(--danger)';
+  t.textContent=msg; document.getElementById('toasts').appendChild(t);
+  setTimeout(()=>t.remove(),2600);
+}
+render();
+</script>
+</body>
+</html>

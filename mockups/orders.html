@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Заказы — мокап</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .c-sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .err { color: var(--danger); font-size: 12px; margin-top: 4px; display: none; }
+  .seg2 { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .seg2 button { border: none; background: var(--panel); padding: 7px 14px; font-size: 13px; cursor: pointer; color: var(--muted); }
+  .seg2 button.on { background: var(--primary); color: #fff; }
+  .calhead { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+  .calhead .ttl { font-size: 17px; font-weight: 700; min-width: 190px; }
+
+  /* Неделя / день */
+  .wk { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .wk-head { display: flex; border-bottom: 1px solid var(--border); }
+  .wk-head .hh { width: 52px; flex-shrink: 0; }
+  .wk-head .dh { flex: 1; text-align: center; padding: 8px 4px; font-size: 13px; border-left: 1px solid var(--border); }
+  .wk-head .dh.today { color: var(--primary); font-weight: 700; }
+  .wk-body { display: flex; }
+  .wk-hours { width: 52px; flex-shrink: 0; }
+  .wk-hours div { height: 44px; font-size: 10px; color: var(--muted); text-align: right; padding-right: 6px; transform: translateY(-6px); }
+  .wk-days { flex: 1; display: flex; }
+  .wk-day {
+    flex: 1; position: relative; border-left: 1px solid var(--border); min-width: 0;
+    background: repeating-linear-gradient(to bottom, transparent 0, transparent 43px, #eef0f3 43px, #eef0f3 44px);
+  }
+  .wk-day.today { background-color: #f5f8ff; }
+  .wk-day.drop-over { outline: 2px dashed var(--primary); outline-offset: -2px; }
+  .evt {
+    position: absolute; left: 2px; right: 2px; border-radius: 6px; padding: 3px 6px;
+    font-size: 11px; line-height: 1.25; overflow: hidden; cursor: grab;
+    border-left: 3px solid; z-index: 2;
+  }
+  .evt b { display: block; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .evt .rz { position: absolute; left: 0; right: 0; bottom: 0; height: 7px; cursor: ns-resize; }
+  .evt.dragging { opacity: .5; }
+  .evt.resizing { z-index: 5; }
+
+  /* Месяц */
+  .mo { display: grid; grid-template-columns: repeat(7,1fr); gap: 0; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .mo .mn { padding: 8px; font-size: 12px; font-weight: 700; color: var(--muted); border-bottom: 1px solid var(--border); text-align: center; }
+  .mo .mc { min-height: 104px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 4px; font-size: 11px; }
+  .mo .mc:nth-child(7n) { border-right: none; }
+  .mo .mc .d { font-weight: 700; color: var(--muted); margin-bottom: 4px; }
+  .mo .mc.today .d { color: var(--primary); }
+  .mo .mc.off { background: #f8f9fb; }
+  .mo .mc.drop-over { outline: 2px dashed var(--primary); outline-offset: -2px; }
+  .mo .chip { border-radius: 5px; padding: 2px 5px; margin-bottom: 3px; cursor: pointer; border-left: 3px solid; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .mo .more { color: var(--muted); font-size: 10px; }
+
+  /* Расписание */
+  .sch-day { margin-bottom: 14px; }
+  .sch-day h4 { margin: 0 0 6px; font-size: 14px; }
+  .sch-row { display: flex; gap: 14px; padding: 8px 10px; border: 1px solid var(--border); border-left-width: 3px; border-radius: 8px; background: var(--panel); margin-bottom: 6px; cursor: pointer; font-size: 13px; }
+  .sch-row .t { width: 46px; font-weight: 700; flex-shrink: 0; }
+  .sch-row:hover { background: #f8fafc; }
+
+  /* Цвета статусов (bg|fg) задаются инлайном из JS */
+
+  /* Чек-лист-аккордеон */
+  .cl-item { border-bottom:1px solid var(--border); }
+  .cl-item:last-child { border-bottom:none; }
+  .cl-head { display:flex; gap:8px; align-items:center; padding:8px 0; cursor:pointer; }
+  .cl-head .cl-title { flex:1; min-width:0; font-size:13px; }
+  .cl-head .badge { width:88px; text-align:center; flex-shrink:0; }
+  .cl-head .btn { flex-shrink:0; }
+  .cl-caret { color:var(--muted); font-size:12px; transition:transform .15s; }
+  .cl-item.open .cl-caret { transform:rotate(180deg); }
+  .cl-body { display:none; padding:0 0 12px; }
+  .cl-item.open .cl-body { display:block; }
+  .cl-note { width:100%; box-sizing:border-box; resize:vertical; }
+  .cl-photos { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+  .cl-ph { position:relative; width:72px; height:72px; }
+  .cl-ph img { width:100%; height:100%; object-fit:cover; border-radius:8px; border:1px solid var(--border); }
+  .cl-ph-x { position:absolute; top:-6px; right:-6px; width:18px; height:18px; border-radius:50%; border:0; background:#111827; color:#fff; font-size:10px; line-height:1; padding:0; cursor:pointer; }
+  .cl-addph { margin-top:8px; cursor:pointer; display:inline-block; }
+  #backdrop .modal { max-width: 1200px; width: 96vw; max-height: 94vh; }
+  #modalNew .modal { max-width: 720px; max-height: 94vh; overflow: auto; }
+</style>
+</head>
+<body>
+<input class="navtoggle" id="navtoggle" type="checkbox">
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">Чистая Гавань <label class="side-close" for="navtoggle" title="Свернуть меню">«</label></div>
+    <nav>
+      <a href="map.html">← Схема процесса</a>
+      <a href="login.html">Вход</a>
+      <a href="dashboard.html">Дашборд</a>
+      <a href="clients.html">Клиенты</a>
+      <a href="objects.html">Объекты</a>
+      <a href="leads.html">Лиды</a>
+      <a href="deals.html">Договора</a>
+      <a href="orders.html" class="active">Заказы</a>
+      <a href="recurring.html">Постоянные</a>
+      <a href="employees.html">Сотрудники</a>
+      <a href="tasks.html">Задачи</a>
+      <a href="history.html">История</a>
+    </nav>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <label class="btn navhide" for="navtoggle" title="Скрыть/показать меню">☰</label>
+      <strong>Гавань — клининг CRM</strong>
+      <div class="topbar-right">
+        <details class="dd">
+          <summary><span class="icon-btn">🔔<span class="n-dot">3</span></span></summary>
+          <div class="dd-menu">
+            <div class="dd-title">Уведомления</div>
+            <a href="order-quality.html">ORD-SEED-003 сдан на проверку</a>
+            <a href="deals.html">Договор «Вектра» выигран · 96 000 ₽</a>
+            <a href="leads.html">Новый лид с сайта</a>
+          </div>
+        </details>
+        <details class="dd">
+          <summary>
+            <span class="avatar">ЕМ</span>
+            <span class="u-meta"><b>Елена Менеджерова</b><i>Менеджер</i></span>
+            <span style="color:var(--muted)">▾</span>
+          </summary>
+          <div class="dd-menu">
+            <a href="#">Профиль</a>
+            <a href="#">Сменить пароль</a>
+            <a href="login.html">Выйти</a>
+          </div>
+        </details>
+      </div>
+    </div>
+    <div class="content">
+
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap">
+        <h2 style="margin:0">Заказы</h2>
+        <span class="btn primary" id="btnNew">+ Новый заказ</span>
+      </div>
+
+      <div class="calhead" style="margin-top:14px">
+        <span class="btn sm" id="navPrev">←</span>
+        <span class="btn sm" id="navToday">Сегодня</span>
+        <span class="btn sm" id="navNext">→</span>
+        <span class="ttl" id="calTitle"></span>
+        <span style="flex:1"></span>
+        <span class="seg2" id="views">
+          <button data-v="day">День</button>
+          <button data-v="week" class="on">Неделя</button>
+          <button data-v="month">Месяц</button>
+          <button data-v="agenda">Расписание</button>
+        </span>
+      </div>
+
+      <div class="toolbar" style="margin-bottom:12px">
+        <label style="font-size:14px; display:flex; align-items:center; gap:6px"><input type="checkbox" id="fMine"> Мои заказы</label>
+        <select class="input" id="fStatus" style="max-width:170px">
+          <option value="">Статус: все</option>
+          <option value="scheduled">Запланирован</option><option value="confirmed">Подтверждён</option>
+          <option value="in_progress">В работе</option><option value="quality_check">На проверке</option>
+          <option value="completed">Выполнен</option><option value="cancelled">Отменён</option>
+        </select>
+        <select class="input" id="fEmp" style="max-width:160px">
+          <option value="">Исполнитель: все</option><option>Иван Петров</option><option>Олег Иванов</option><option>Сергей Петров</option><option value="none">Не назначен</option>
+        </select>
+        <span class="btn sm" id="btnReset">Сбросить</span>
+      </div>
+
+      <div id="calWrap"></div>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="backdrop" style="display:none">
+  <div class="modal" id="drawer" role="dialog" aria-modal="true"></div>
+</div>
+
+<div class="modal-backdrop" id="modalNew" style="display:none">
+  <div class="modal">
+    <h3>Новый заказ</h3>
+    <div style="display:flex; gap:10px">
+      <label class="field" style="flex:1"><span>Клиент *</span><select class="input" id="oClient"><option value="">— выберите —</option></select>
+        <div class="err" id="eClient">Выберите клиента</div></label>
+      <label class="field" style="flex:1"><span>Договор</span><select class="input" id="oDeal"><option value="">— нет —</option></select></label>
+    </div>
+    <div style="display:flex; gap:10px">
+      <label class="field" style="flex:1"><span>Объект *</span><select class="input" id="oObject"><option value="">— выберите —</option></select>
+        <div class="err" id="eObject">Выберите объект</div></label>
+      <label class="field" style="flex:1"><span>Услуга *</span><input class="input" id="oService" placeholder="Уборка БЦ">
+        <div class="err" id="eService">Укажите услугу</div></label>
+    </div>
+    <div style="display:flex; gap:10px">
+      <label class="field" style="flex:1"><span>Дата *</span><input class="input" type="date" id="oDate">
+        <div class="err" id="eDate">Укажите дату</div></label>
+      <label class="field" style="flex:.8"><span>Начало *</span><input class="input" type="time" id="oStart"></label>
+      <label class="field" style="flex:.8"><span>Окончание *</span><input class="input" type="time" id="oEnd">
+        <div class="err" id="eTime">Окончание позже начала</div></label>
+    </div>
+    <div style="display:flex; gap:10px">
+      <label class="field" style="flex:1"><span>Исполнитель</span>
+        <select class="input" id="oEmp"><option value="">— не назначен —</option><option>Иван Петров</option><option>Олег Иванов</option><option>Сергей Петров</option></select></label>
+      <label class="field" style="flex:1"><span>Статус</span>
+        <select class="input" id="oStatus"><option value="scheduled">Запланирован</option><option value="confirmed">Подтверждён</option></select></label>
+    </div>
+    <label class="field"><span>Повторение</span>
+      <select class="input" id="oRepeat">
+        <option value="none">Не повторять</option><option value="daily">Ежедневно</option>
+        <option value="weekly">Еженедельно</option><option value="weekdays">По рабочим дням</option>
+      </select></label>
+    <div id="repWeek" style="display:none; margin-bottom:12px">
+      <div style="display:flex; gap:6px" id="repDays">
+        <label class="btn sm"><input type="checkbox" value="1"> Пн</label>
+        <label class="btn sm"><input type="checkbox" value="2"> Вт</label>
+        <label class="btn sm"><input type="checkbox" value="3"> Ср</label>
+        <label class="btn sm"><input type="checkbox" value="4"> Чт</label>
+        <label class="btn sm"><input type="checkbox" value="5"> Пт</label>
+        <label class="btn sm"><input type="checkbox" value="6"> Сб</label>
+        <label class="btn sm"><input type="checkbox" value="0"> Вс</label>
+      </div>
+    </div>
+    <div id="repUntilW" style="display:none">
+      <label class="field"><span>Дата окончания повторов</span><input class="input" type="date" id="oUntil"></label>
+    </div>
+    <label class="field"><span>Комментарий</span><textarea class="input" id="oComment" rows="2"></textarea></label>
+    <div class="actions">
+      <span class="btn" onclick="closeNew()">Отмена</span>
+      <span class="btn primary" id="btnCreate">Создать заказ</span>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+const STATUS = {
+  scheduled:['Запланирован','#dbeafe','#1e40af'],
+  confirmed:['Подтверждён','#cffafe','#155e75'],
+  in_progress:['В работе','#fef3c7','#92400e'],
+  quality_check:['На проверке','#ede9fe','#5b21b6'],
+  completed:['Выполнен','#dcfce7','#166534'],
+  cancelled:['Отменён','#e5e7eb','#6b7280'],
+};
+const STATUS_BADGE = { scheduled:'blue', confirmed:'blue', in_progress:'amber', quality_check:'purple', completed:'green', cancelled:'gray' };
+const TIMELINE = ['Запланирован','Подтверждён','В работе','На проверке','Выполнен'];
+const TIMELINE_DONE = { scheduled:1, confirmed:2, in_progress:3, quality_check:4, completed:5, cancelled:0 };
+const ME = 'Иван Петров';
+const EMPLOYEES = ['Иван Петров','Олег Иванов','Сергей Петров'];
+const CLIENTS = [
+ {id:'cl1',name:'Анна Петрова'},{id:'cl2',name:'ООО «Меридиан»'},{id:'cl5',name:'ООО «Вектор»'},
+ {id:'cl6',name:'ТОО «Альфа Сервис»'},{id:'cl7',name:'БЦ «Орбита»'},{id:'cl8',name:'Елена Морозова'},
+ {id:'cl9',name:'ООО «Стандарт»'},{id:'cl10',name:'ООО «Горизонт»'},{id:'cl11',name:'Сергей Волков'},
+ {id:'cl15',name:'ИП «Северный ветер»'},{id:'cl16',name:'ЖК «Солнечный» (ТСЖ)'},
+ {id:'cl17',name:'Кофейня «Бариста»'},{id:'cl19',name:'ООО «Вектра»'}];
+const OBJECTS = [
+ {id:'o1',name:'Квартира клиента'},{id:'o2',name:'Офис «Меридиан»'},{id:'o5',name:'Бизнес-центр «Вектор»'},
+ {id:'o6',name:'Склад «Вектор»'},{id:'o7',name:'Производственный корпус'},{id:'o9',name:'Бизнес-центр «Орбита»'},
+ {id:'o10',name:'Частный дом'},{id:'o11',name:'Офис «Стандарт»'},{id:'o13',name:'Производственный корпус «Горизонт»'},
+ {id:'o14',name:'Частный дом (Волков)'},{id:'o18',name:'Офисы «Северный ветер»'},{id:'o19',name:'Подъезды ЖК «Солнечный»'},
+ {id:'o20',name:'Зал кофейни «Бариста»'},{id:'o22',name:'Склад «Вектра»'}];
+const DEALS = [289,291,292,293,294,295,296,297,300,301,302,303];
+const clientById=id=>CLIENTS.find(c=>c.id===id);
+const objById=id=>OBJECTS.find(o=>o.id===id);
+const esc=s=>String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const badge=(t,cls)=>`<span class="badge ${cls}">${t}</span>`;
+const O=(id,clientId,dealId,objectId,service,day,st,en,status,employeeId,comment='')=>({
+  id,clientId,dealId,objectId,service,status,employeeId,comment,
+  start:`${day}T${st}:00`,end:`${day}T${en}:00`,
+  history:[{at:`${day.slice(8,10)}.${day.slice(5,7)} ${st}`,who:'Система',text:'Заказ создан'}]});
+const orders=[
+ O(501,'cl5',302,'o5','Уборка БЦ','2026-10-05','09:00','13:00','completed','Иван Петров'),
+ O(505,'cl16',292,'o19','Уборка подъездов','2026-10-05','08:00','10:00','completed','Олег Иванов'),
+ O(506,'cl17',291,'o20','Утренняя уборка','2026-10-05','07:00','08:30','completed','Сергей Петров'),
+ O(502,'cl5',302,'o6','Уборка склада','2026-10-06','09:00','13:00','in_progress','Иван Петров'),
+ O(504,'cl19',289,'o22','Уборка склада','2026-10-06','11:00','14:00','quality_check','Сергей Петров'),
+ O(507,'cl9',301,'o11','Уборка офиса','2026-10-06','10:00','12:00','confirmed','Олег Иванов'),
+ O(508,'cl17',291,'o20','Утренняя уборка','2026-10-06','07:00','08:30','completed','Сергей Петров'),
+ O(509,'cl8',296,'o10','Генеральная уборка дома','2026-10-06','14:00','18:00','scheduled','Иван Петров','Перед заселением'),
+ O(503,'cl5',302,'o5','Уборка БЦ','2026-10-07','09:00','13:00','scheduled','Иван Петров'),
+ O(510,'cl6',303,'o7','Уборка производства','2026-10-07','08:00','12:00','confirmed','Олег Иванов'),
+ O(511,'cl2',294,'o2','Мойка окон','2026-10-07','13:00','15:00','scheduled','Сергей Петров'),
+ O(512,'cl15',293,'o18','Уборка офисов','2026-10-08','09:00','12:00','confirmed','Иван Петров'),
+ O(513,'cl5',302,'o5','Уборка БЦ','2026-10-08','09:00','13:00','scheduled','Сергей Петров'),
+ O(514,'cl7',297,'o9','Вечерняя уборка БЦ','2026-10-08','15:00','19:00','scheduled','Олег Иванов'),
+ O(515,'cl16',292,'o19','Уборка подъездов','2026-10-09','08:00','10:00','confirmed','Олег Иванов'),
+ O(516,'cl19',289,'o22','Уборка склада','2026-10-09','10:00','14:00','scheduled','Сергей Петров'),
+ O(517,'cl17',291,'o20','Утренняя уборка','2026-10-09','07:00','08:30','scheduled','Сергей Петров'),
+ O(518,'cl1',299,'o1','Генеральная уборка','2026-10-10','10:00','13:00','scheduled','Иван Петров'),
+ O(519,'cl2',294,'o2','Уборка офиса','2026-10-10','11:00','13:00','cancelled','Олег Иванов','Клиент перенёс'),
+ O(520,'cl11',298,'o14','Мойка окон','2026-10-11','12:00','15:00','scheduled','Сергей Петров'),
+ O(521,'cl5',302,'o5','Уборка БЦ','2026-10-12','09:00','13:00','scheduled','Иван Петров'),
+ O(522,'cl9',301,'o11','Уборка офиса','2026-10-12','10:00','12:00','confirmed','Олег Иванов'),
+ O(523,'cl10',300,'o13','Уборка производства','2026-10-13','08:00','14:00','scheduled','Сергей Петров'),
+ O(524,'cl17',291,'o20','Утренняя уборка','2026-10-13','07:00','08:30','scheduled','Сергей Петров'),
+ O(525,'cl7',297,'o9','Генеральная уборка БЦ','2026-10-15','09:00','15:00','confirmed','Иван Петров'),
+ O(526,'cl5',302,'o5','Уборка БЦ','2026-10-19','09:00','13:00','scheduled','Иван Петров'),
+ O(527,'cl5',302,'o5','Уборка БЦ','2026-10-21','09:00','13:00','scheduled','Иван Петров'),
+ O(528,'cl15',293,'o18','Уборка офисов','2026-10-22','09:00','12:00','scheduled','Олег Иванов'),
+ O(529,'cl16',292,'o19','Уборка подъездов','2026-10-26','08:00','10:00','scheduled','Олег Иванов'),
+ O(530,'cl19',289,'o22','Уборка склада','2026-10-27','10:00','14:00','scheduled','Сергей Петров'),
+ O(531,'cl5',302,'o6','Уборка склада','2026-11-03','09:00','13:00','scheduled','Иван Петров'),
+ O(532,'cl9',301,'o11','Уборка офиса','2026-11-05','10:00','12:00','scheduled','Олег Иванов'),
+];
+let orderSeq=533;
+
+/* state */
+const today=new Date(2026,9,6);
+let view='week', cursor=new Date(today), suppressUntil=0, resizingNow=false, cur=null;
+const calWrap=document.getElementById('calWrap'), calTitle=document.getElementById('calTitle');
+const q={status:document.getElementById('fStatus'),emp:document.getElementById('fEmp'),mine:document.getElementById('fMine')};
+const GRID_START=7, GRID_END=19, ROWH=44;
+const WD=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+const MONTHS=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const sameDay=(a,b)=>a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();
+const mins=t=>{const[h,m]=t.split('T')[1].split(':');return +h*60+ +m;};
+const hm=v=>`${String(Math.floor(v/60)).padStart(2,'0')}:${String(v%60).padStart(2,'0')}`;
+const fmtD=d=>`${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`;
+const range=o=>`${o.start.slice(11,16)}–${o.end.slice(11,16)}`;
+
+function filtered(){
+  return orders.filter(o=>
+    (!q.mine.checked||o.employeeId===ME)
+    &&(!q.status.value||o.status===q.status.value)
+    &&(!q.emp.value||(q.emp.value==='none'?!o.employeeId:o.employeeId===q.emp.value)));
+}
+const evStyle=o=>{const[,bg,fg]=STATUS[o.status];return `background:${bg};color:${fg};border-color:${fg}`;};
+
+/* overlap lanes */
+function lanes(dayOrders){
+  const sorted=[...dayOrders].sort((a,b)=>mins(a.start)-mins(b.start));
+  const lanes=[];
+  sorted.forEach(o=>{
+    let i=lanes.findIndex(end=>end<=mins(o.start));
+    if(i<0){lanes.push(mins(o.end));i=lanes.length-1;}else lanes[i]=mins(o.end);
+    o._lane=i;
+  });
+  sorted.forEach(o=>o._lanes=lanes.length);
+  return sorted;
+}
+
+function render(){
+  const f=filtered();
+  if(view==='week'||view==='day'){
+    const start=new Date(cursor);
+    const days=[];
+    if(view==='week'){
+      const dow=(start.getDay()+6)%7; start.setDate(start.getDate()-dow);
+      for(let i=0;i<7;i++){days.push(new Date(start));start.setDate(start.getDate()+1);}
+      calTitle.textContent=`${fmtD(days[0]).slice(0,5)} — ${fmtD(days[6])}`;
+    } else { days.push(new Date(cursor)); calTitle.textContent=fmtD(days[0]); }
+    let hours=''; for(let h=GRID_START;h<GRID_END;h++) hours+=`<div>${h}:00</div>`;
+    const bodyH=(GRID_END-GRID_START)*ROWH;
+    calWrap.innerHTML=`<div class="wk">
+      <div class="wk-head"><div class="hh"></div>${days.map(d=>`<div class="dh${sameDay(d,today)?' today':''}">${WD[(d.getDay()+6)%7]} ${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}</div>`).join('')}</div>
+      <div class="wk-body">
+        <div class="wk-hours">${hours}</div>
+        <div class="wk-days">${days.map(d=>{
+          const ds=iso(d);
+          const evs=lanes(f.filter(o=>o.start.slice(0,10)===ds));
+          return `<div class="wk-day${sameDay(d,today)?' today':''}" data-date="${ds}" style="height:${bodyH}px">
+            ${evs.map(o=>{
+              const top=(mins(o.start)-GRID_START*60)/60*ROWH, h=Math.max(18,(mins(o.end)-mins(o.start))/60*ROWH);
+              const w=100/o._lanes;
+              return `<div class="evt" draggable="true" data-id="${o.id}" style="${evStyle(o)};top:${top}px;height:${h}px;left:calc(${o._lane*w}% + 2px);right:auto;width:calc(${w}% - 4px)">
+                <b>${esc(clientById(o.clientId).name)}</b>${esc(o.service)} · ${range(o)}${o.employeeId?`<br>${esc(o.employeeId)}`:''}
+                <div class="rz"></div></div>`;
+            }).join('')}</div>`;}).join('')}
+        </div>
+      </div></div>`;
+  }
+  else if(view==='month'){
+    const y=cursor.getFullYear(),m=cursor.getMonth();
+    calTitle.textContent=`${MONTHS[m]} ${y}`;
+    const first=new Date(y,m,1),off=(first.getDay()+6)%7;
+    const cells=[];const d0=new Date(y,m,1-off);
+    for(let i=0;i<42;i++){cells.push(new Date(d0));d0.setDate(d0.getDate()+1);}
+    calWrap.innerHTML=`<div class="mo">${WD.map(w=>`<div class="mn">${w}</div>`).join('')}
+      ${cells.map(d=>{
+        const ds=iso(d),inM=d.getMonth()===m;
+        const evs=f.filter(o=>o.start.slice(0,10)===ds);
+        return `<div class="mc${inM?'':' off'}${sameDay(d,today)?' today':''}" data-date="${ds}">
+          <div class="d">${d.getDate()}</div>
+          ${evs.slice(0,3).map(o=>`<div class="chip" draggable="true" data-id="${o.id}" style="${evStyle(o)}">${o.start.slice(11,16)} ${esc(clientById(o.clientId).name)}</div>`).join('')}
+          ${evs.length>3?`<div class="more">+${evs.length-3} ещё</div>`:''}</div>`;
+      }).join('')}</div>`;
+  }
+  else { /* agenda */
+    calTitle.textContent='Расписание';
+    const byDate={};
+    f.forEach(o=>{(byDate[o.start.slice(0,10)]=byDate[o.start.slice(0,10)]||[]).push(o);});
+    const dates=Object.keys(byDate).sort();
+    const nowIso=iso(cursor), nowT=today.getHours()*60+today.getMinutes();
+    calWrap.innerHTML=dates.length?dates.map(ds=>{
+      const d=new Date(ds+'T00:00');
+      const lbl=`${['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'][d.getDay()]}, ${fmtD(d)}`;
+      return `<div class="sch-day"><h4>${lbl}</h4>
+        ${byDate[ds].sort((a,b)=>mins(a.start)-mins(b.start)).map(o=>`<div class="sch-row" data-id="${o.id}" style="border-left-color:${STATUS[o.status][2]}">
+          <span class="t">${o.start.slice(11,16)}</span>
+          <span style="flex:1"><b>${esc(clientById(o.clientId).name)}</b> · ${esc(o.service)}<div class="c-sub">${range(o)} · ${o.employeeId||'не назначен'} · ${esc(objById(o.objectId).name)}</div></span>
+          ${badge(STATUS[o.status][0],STATUS_BADGE[o.status])}
+        </div>`).join('')}</div>`;
+    }).join(''):'<div class="card empty">Нет заказов в выбранном периоде</div>';
+  }
+}
+
+/* view switch + nav */
+document.getElementById('views').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-v]'); if(!b) return;
+  view=b.dataset.v;
+  document.querySelectorAll('#views button').forEach(x=>x.classList.toggle('on',x===b));
+  render();
+});
+document.getElementById('navPrev').onclick=()=>{shift(-1);};
+document.getElementById('navNext').onclick=()=>{shift(1);};
+document.getElementById('navToday').onclick=()=>{cursor=new Date(today);render();};
+function shift(dir){
+  if(view==='day')cursor.setDate(cursor.getDate()+dir);
+  else if(view==='week'||view==='agenda')cursor.setDate(cursor.getDate()+7*dir);
+  else cursor.setMonth(cursor.getMonth()+dir);
+  render();
+}
+[q.status,q.emp,q.mine].forEach(el=>{el.addEventListener('input',render);el.addEventListener('change',render);});
+document.getElementById('btnReset').onclick=()=>{q.status.value='';q.emp.value='';q.mine.checked=false;render();};
+
+/* DnD: перенос заказа */
+let dragId=null;
+calWrap.addEventListener('dragstart',e=>{
+  const c=e.target.closest('[data-id]'); if(!c||!c.classList.contains('evt')&&!c.classList.contains('chip')) return;
+  dragId=+c.dataset.id; suppressUntil=Date.now()+60000; e.dataTransfer.effectAllowed='move';
+  requestAnimationFrame(()=>c.classList.add('dragging'));
+});
+calWrap.addEventListener('dragend',e=>{
+  e.target.closest('[data-id]')?.classList.remove('dragging');
+  document.querySelectorAll('.drop-over').forEach(x=>x.classList.remove('drop-over'));
+  suppressUntil=Date.now()+150; dragId=null;
+});
+calWrap.addEventListener('dragover',e=>{
+  const zone=e.target.closest('.wk-day,.mc'); if(!zone) return;
+  e.preventDefault(); e.dataTransfer.dropEffect='move';
+  document.querySelectorAll('.drop-over').forEach(x=>{if(x!==zone)x.classList.remove('drop-over');});
+  zone.classList.add('drop-over');
+});
+calWrap.addEventListener('dragleave',e=>{
+  const zone=e.target.closest('.wk-day,.mc');
+  if(zone&&!zone.contains(e.relatedTarget)) zone.classList.remove('drop-over');
+});
+calWrap.addEventListener('drop',e=>{
+  const zone=e.target.closest('.wk-day,.mc'); if(!zone||dragId==null) return;
+  e.preventDefault(); zone.classList.remove('drop-over');
+  const o=orders.find(x=>x.id===dragId); dragId=null; if(!o) return;
+  const newDate=zone.dataset.date, dur=mins(o.end)-mins(o.start);
+  let startM=mins(o.start);
+  if(zone.classList.contains('wk-day')){
+    const r=zone.getBoundingClientRect();
+    startM=GRID_START*60+Math.round((e.clientY-r.top)/ROWH*60/30)*30;
+    startM=Math.max(GRID_START*60,Math.min(GRID_END*60-30,startM));
+  }
+  o.start=`${newDate}T${hm(startM)}:00`;
+  o.end=`${newDate}T${hm(Math.min(startM+dur,24*60-1))}:00`;
+  o.history.push({at:nowStr(),who:'Елена Менеджерова',text:`Заказ перенесён на ${fmtD(new Date(newDate))}, ${hm(startM)}`});
+  render(); if(cur===o)openDrawer(o);
+  suppressUntil=Date.now()+150;
+});
+
+/* Resize: изменение длительности */
+let rzO=null,rzY=0,rzH=0;
+calWrap.addEventListener('mousedown',e=>{
+  const h=e.target.closest('.evt .rz'); if(!h) return;
+  e.preventDefault(); e.stopPropagation();
+  const el=h.closest('.evt');
+  rzO=orders.find(o=>o.id===+el.dataset.id); rzY=e.clientY; rzH=el.offsetHeight;
+  el.classList.add('resizing'); resizingNow=true; suppressUntil=Date.now()+60000;
+  const mv=ev=>{
+    const dm=Math.round((ev.clientY-rzY)/ROWH*60/30)*30;
+    const newEnd=Math.max(mins(rzO.start)+30,mins(rzO.end)+dm);
+    el.style.height=Math.max(18,(newEnd-mins(rzO.start))/60*ROWH)+'px';
+  };
+  const up=ev=>{
+    document.removeEventListener('mousemove',mv);document.removeEventListener('mouseup',up);
+    el.classList.remove('resizing');
+    const dm=Math.round((ev.clientY-rzY)/ROWH*60/30)*30;
+    const newEnd=Math.max(mins(rzO.start)+30,mins(rzO.end)+dm);
+    rzO.end=`${rzO.start.slice(0,10)}T${hm(Math.min(newEnd,24*60-1))}:00`;
+    rzO.history.push({at:nowStr(),who:'Елена Менеджерова',text:`Длительность изменена: ${range(rzO)}`});
+    render(); if(cur===rzO)openDrawer(rzO);
+    resizingNow=false; suppressUntil=Date.now()+150;
+  };
+  document.addEventListener('mousemove',mv);document.addEventListener('mouseup',up);
+});
+
+/* клики: событие → drawer, пустое место → создание */
+calWrap.addEventListener('click',e=>{
+  if(resizingNow||Date.now()<suppressUntil) return;
+  const ev=e.target.closest('.evt,.chip,.sch-row');
+  if(ev){openDrawer(orders.find(o=>o.id===+ev.dataset.id));return;}
+  const zone=e.target.closest('.wk-day,.mc');
+  if(zone){
+    const ds=zone.dataset.date;
+    let t=`${GRID_START+2}:00`;
+    if(zone.classList.contains('wk-day')){
+      const r=zone.getBoundingClientRect();
+      t=hm(Math.min(GRID_END*60-120,GRID_START*60+Math.floor((e.clientY-r.top)/ROWH*60/60)*60));
+    }
+    openNew({date:ds,start:t,end:hm((+t.slice(0,2)+2)*60)});
+  }
+});
+
+/* Drawer */
+const CL_ITEMS=[
+ {t:'Полы вымыты во всех помещениях',n:'Моющее средство стандартное, разводов нет',p:['images/images.jpeg']},
+ {t:'Санузлы продезинфицированы',n:'',p:['images/images%20(1).jpeg']},
+ {t:'Мусор вынесен, корзины заменены',n:'',p:['images/k1-KkpYWH2Lz2S078hSmm6Gwx_gYReMmOkTLny9hS9ko-gRtyNGDXjhFqVM349k_YzEJoTHWzrpfQP0DNmgblr3D.jpg']},
+ {t:'Стёкла и зеркала без разводов',n:'',p:[]},
+ {t:'Кухня: поверхности и мойка',n:'',p:[]},
+];
+const drawer=document.getElementById('drawer'),backdrop=document.getElementById('backdrop');
+function closeDrawer(){backdrop.style.display='none';cur=null;}
+backdrop.onclick=e=>{if(e.target===backdrop)closeDrawer();};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();closeNew();}});
+function openDrawer(o){
+  cur=o;const cl=clientById(o.clientId);
+  drawer.innerHTML=`
+   <div class="card">
+    <div class="drawer-head">
+      <div>
+        <div style="font-size:18px;font-weight:700">Заказ #${o.id} ${badge(STATUS[o.status][0],STATUS_BADGE[o.status])}</div>
+        <div class="c-sub" style="margin-top:4px">${esc(o.service)}</div>
+      </div>
+      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+   </div>
+   <div class="card" style="margin-top:12px">
+     <div class="timeline">
+       ${TIMELINE.map((t,i)=>{
+         const done=TIMELINE_DONE[o.status]||0;
+         return `<div class="timeline-step${i<done?' done':''}"><div class="dot"></div><div class="label">${t}</div></div>`;
+       }).join('')}
+     </div>
+   </div>
+   <div class="card" style="margin-top:12px">
+     <div class="kv"><b>Клиент:</b> <a href="clients.html">${esc(cl.name)}</a></div>
+     <div class="kv"><b>Объект:</b> <a href="objects.html">${esc(objById(o.objectId).name)}</a></div>
+     ${o.dealId?`<div class="kv"><b>Договор:</b> <a href="deals.html">#${o.dealId}</a></div>`:''}
+     <div class="kv"><b>Дата:</b> ${fmtD(new Date(o.start.slice(0,10)+'T00:00'))}</div>
+     <div class="kv"><b>Время:</b> ${range(o)}</div>
+     <div class="kv"><b>Исполнитель:</b>
+       <select class="input" id="dEmp" style="max-width:220px;margin-top:4px"><option value="">Не назначен</option>
+         ${EMPLOYEES.map(m=>`<option ${o.employeeId===m?'selected':''}>${m}</option>`).join('')}</select></div>
+     ${o.comment?`<div class="kv"><b>Комментарий:</b> ${esc(o.comment)}</div>`:''}
+     <label class="field" style="margin-top:10px"><span>Статус</span>
+       <select class="input" id="dStatus">
+         ${Object.entries(STATUS).map(([k,[t]])=>`<option value="${k}" ${o.status===k?'selected':''}>${t}</option>`).join('')}
+       </select></label>
+   </div>
+   <div class="card" style="margin-top:12px"><b>Чек-лист</b>
+     <div style="margin-top:6px">${CL_ITEMS.map((it,i)=>{
+       const done=o.status==='completed'||o.status==='in_progress'&&i<3;
+       return `<div class="cl-item" data-s="${done?'PASSED':'PENDING'}">
+         <div class="cl-head"><span class="badge ${done?'green':'gray'}">${done?'Выполнен':'Ожидает'}</span><span class="cl-title">${it.t}</span>
+           <span class="cl-caret">▾</span></div>
+         <div class="cl-body">
+           ${done&&it.n?`<div style="font-size:13px;margin-bottom:6px">${esc(it.n)}</div>`:''}
+           <div class="cl-photos">${done?it.p.map(src=>`<span class="cl-ph"><img src="${src}" alt="Фото"></span>`).join(''):''}</div>
+           ${done&&!it.n&&!it.p.length?'<div class="c-sub">Нет комментариев и фото</div>':''}
+         </div>
+       </div>`;
+     }).join('')}</div>
+   </div>
+   <div class="card" style="margin-top:12px"><b>Контроль качества</b>
+     <label class="field" style="margin-top:8px"><span>Комментарий QA</span>
+       <textarea class="input" id="qaText" rows="2" placeholder="Обязателен при отклонении"></textarea></label>
+     <div style="display:flex;gap:8px;margin-top:8px">
+       <span class="btn primary" id="qaAccept" style="flex:1">Принять</span>
+       <span class="btn danger" id="qaReject" style="flex:1">Отклонить</span>
+     </div>
+     <span class="btn primary" id="qaDone" style="display:block;text-align:center;margin-top:10px">Завершить заказ</span>
+   </div>
+   <div class="card" style="margin-top:12px"><b>Заметки</b>
+     <div id="dHist">${o.history.slice().reverse().map((h,i)=>`<div class="hist-item"><span class="when">${h.at}</span><span style="flex:1"><b>${esc(h.text)}</b><div class="c-sub">${esc(h.who)}</div></span><span class="h-del" data-i="${o.history.length-1-i}" title="Удалить" style="cursor:pointer;color:var(--muted);padding:0 4px">✕</span></div>`).join('')}</div>
+     <div style="display:flex;gap:8px;margin-top:10px">
+       <input class="input" id="hText" placeholder="Например: подтвердить выезд, позвонить клиенту..." style="flex:1">
+       <span class="btn sm" id="btnHist">Добавить</span>
+     </div>
+   </div>`;
+  backdrop.style.display='flex';
+  document.getElementById('dStatus').onchange=e=>{
+    const ns=e.target.value;if(ns===o.status)return;
+    o.history.push({at:nowStr(),who:'Елена Менеджерова',text:`Заказ переведён в «${STATUS[ns][0]}»`});
+    o.status=ns;render();openDrawer(o);
+  };
+  document.getElementById('btnHist').onclick=()=>{
+    const inp=document.getElementById('hText'), t=inp.value.trim(); if(!t) return;
+    o.history.push({at:nowStr(),who:'Елена Менеджерова',text:t});
+    render(); openDrawer(o);
+  };
+  document.getElementById('dHist').onclick=e=>{
+    const b=e.target.closest('.h-del'); if(!b) return;
+    o.history.splice(+b.dataset.i,1); render(); openDrawer(o);
+  };
+  document.getElementById('dEmp').onchange=e=>{
+    const v=e.target.value||null;if(v===o.employeeId)return;
+    o.employeeId=v;
+    o.history.push({at:nowStr(),who:'Елена Менеджерова',text:v?`Назначен исполнитель ${v}`:'Исполнитель снят'});
+    render();openDrawer(o);
+  };
+  drawer.querySelectorAll('.cl-item').forEach(r=>{
+    r.querySelector('.cl-head').onclick=()=>r.classList.toggle('open');
+  });
+  document.getElementById('qaAccept').onclick=()=>{
+    o.history.push({at:nowStr(),who:'Елена Менеджерова',text:'Контроль качества: принято'});
+    render();openDrawer(o);
+  };
+  document.getElementById('qaReject').onclick=()=>{
+    const c=document.getElementById('qaText').value.trim();
+    o.status='in_progress';
+    o.history.push({at:nowStr(),who:'Елена Менеджерова',text:'Проверка не пройдена — возврат в работу'+(c?`: ${c}`:'')});
+    render();openDrawer(o);
+  };
+  document.getElementById('qaDone').onclick=()=>{
+    o.status='completed';
+    o.history.push({at:nowStr(),who:'Елена Менеджерова',text:'Заказ завершён'});
+    render();openDrawer(o);
+  };
+}
+const nowStr=()=>{const d=new Date();return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;};
+
+/* New order modal */
+const modalNew=document.getElementById('modalNew');
+function openNew(pref={}){
+  document.getElementById('oClient').innerHTML='<option value="">— выберите —</option>'+CLIENTS.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  document.getElementById('oDeal').innerHTML='<option value="">— нет —</option>'+DEALS.map(d=>`<option value="${d}">#${d}</option>`).join('');
+  document.getElementById('oObject').innerHTML='<option value="">— выберите —</option>'+OBJECTS.map(o=>`<option value="${o.id}">${esc(o.name)}</option>`).join('');
+  ['oService','oComment'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('oDate').value=pref.date||iso(cursor);
+  document.getElementById('oStart').value=pref.start||'10:00';
+  document.getElementById('oEnd').value=pref.end||'12:00';
+  document.getElementById('oRepeat').value='none';
+  document.getElementById('oUntil').value='';
+  document.getElementById('repWeek').style.display='none';
+  document.getElementById('repUntilW').style.display='none';
+  document.querySelectorAll('#repDays input').forEach(i=>i.checked=false);
+  ['eClient','eObject','eService','eDate','eTime'].forEach(id=>document.getElementById(id).style.display='none');
+  modalNew.style.display='flex';
+}
+function closeNew(){modalNew.style.display='none';}
+document.getElementById('btnNew').onclick=()=>openNew();
+modalNew.addEventListener('click',e=>{if(e.target===modalNew)closeNew();});
+document.getElementById('oRepeat').onchange=e=>{
+  const v=e.target.value;
+  document.getElementById('repWeek').style.display=v==='weekly'?'':'none';
+  document.getElementById('repUntilW').style.display=v!=='none'?'':'none';
+};
+document.getElementById('btnCreate').onclick=()=>{
+  const cid=oClient.value,oid=oObject.value,svc=oService.value.trim(),dt=oDate.value,st=oStart.value,en=oEnd.value;
+  let ok=true;
+  eClient.style.display=cid?'none':'block';if(!cid)ok=false;
+  eObject.style.display=oid?'none':'block';if(!oid)ok=false;
+  eService.style.display=svc?'none':'block';if(!svc)ok=false;
+  eDate.style.display=dt?'none':'block';if(!dt)ok=false;
+  eTime.style.display=(st&&en&&en>st)?'none':'block';if(!(st&&en&&en>st))ok=false;
+  if(!ok)return;
+  const rep=oRepeat.value,until=oUntil.value||null,days=[...document.querySelectorAll('#repDays input:checked')].map(i=>+i.value);
+  const dates=[dt];
+  if(rep!=='none'){
+    const end=until?new Date(until+'T00:00'):new Date(new Date(dt+'T00:00').getTime()+56*864e5);
+    const d=new Date(dt+'T00:00');d.setDate(d.getDate()+1);
+    while(d<=end&&dates.length<24){
+      const dow=d.getDay();
+      if(rep==='daily'||(rep==='weekly'&&days.includes(dow))||(rep==='weekdays'&&dow>=1&&dow<=5))
+        dates.push(iso(d));
+      d.setDate(d.getDate()+1);
+    }
+  }
+  dates.forEach(dd=>{
+    orders.push({id:orderSeq++,clientId:cid,dealId:oDeal.value?+oDeal.value:undefined,objectId:oid,
+      service:svc,start:`${dd}T${st}:00`,end:`${dd}T${en}:00`,status:oStatus.value,
+      employeeId:oEmp.value||null,comment:oComment.value.trim(),
+      history:[{at:nowStr(),who:'Елена Менеджерова',text:'Заказ создан'}]});
+  });
+  closeNew();render();
+  toast(dates.length>1?`Создано заказов: ${dates.length}`:`Заказ создан на ${fmtD(new Date(dt+'T00:00'))} ${st}`);
+};
+function toast(msg){
+  const t=document.createElement('div');t.className='toast';t.textContent=msg;
+  document.getElementById('toasts').appendChild(t);setTimeout(()=>t.remove(),2600);
+}
+render();
+</script>
+</body>
+</html>

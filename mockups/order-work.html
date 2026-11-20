@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Заказ — уборка и чек-лист · мокап</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .cl-item { border-bottom:1px solid var(--border); }
+  .cl-item:last-child { border-bottom:none; }
+  .cl-head { display:flex; gap:8px; align-items:center; padding:8px 0; cursor:pointer; }
+  .cl-head .cl-title { flex:1; min-width:0; font-size:13px; }
+  .cl-head .badge { width:88px; text-align:center; flex-shrink:0; }
+  .cl-head .btn { flex-shrink:0; }
+  .cl-caret { color:var(--muted); font-size:12px; transition:transform .15s; }
+  .cl-item.open .cl-caret { transform:rotate(180deg); }
+  .cl-body { display:none; padding:0 0 12px; }
+  .cl-item.open .cl-body { display:block; }
+  .cl-note { width:100%; box-sizing:border-box; resize:vertical; }
+  .cl-photos { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+  .cl-ph { position:relative; width:72px; height:72px; }
+  .cl-ph img { width:100%; height:100%; object-fit:cover; border-radius:8px; border:1px solid var(--border); }
+  .cl-ph-x { position:absolute; top:-6px; right:-6px; width:18px; height:18px; border-radius:50%; border:0; background:#111827; color:#fff; font-size:10px; line-height:1; padding:0; cursor:pointer; }
+  .cl-addph { margin-top:8px; cursor:pointer; display:inline-block; }
+  #checklist.locked .btn, #checklist.locked .cl-addph { opacity:.35; }
+  #checklist.locked .cl-head { opacity:.55; }
+  .p-nav { display: flex; border-top: 1px solid var(--border); background: var(--panel); }
+  .p-nav a { flex: 1; text-align: center; padding: 10px 4px; font-size: 11px; color: var(--muted); text-decoration: none; }
+  .p-nav a.on { color: var(--primary); font-weight: 700; }
+  .p-nav a span { display: block; font-size: 16px; margin-bottom: 2px; }
+  .phone { position:relative; }
+  .obj-modal-backdrop { position:absolute; inset:0; z-index:100; display:none; background:rgba(17,24,39,.45); }
+  .obj-modal-backdrop.open { display:block; }
+  .obj-modal { position:absolute; inset:0; overflow:auto; background:var(--bg); padding:12px; }
+  .obj-photos { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:8px; }
+  .obj-photos img { width:100%; height:90px; object-fit:cover; border-radius:8px; display:block; }
+</style>
+</head>
+<body>
+<div class="phone-wrap">
+  <div class="phone">
+    <div class="p-top"><span>09:41</span><span>Чистая Гавань</span><span>Игорь С.</span></div>
+    <div class="p-body">
+      <a href="calendar.html" style="font-size:13px">← Мой календарь</a>
+
+      <h3 style="margin:10px 0 4px">ORD-SEED-001</h3>
+      <div><span class="badge blue" id="stBadge">Подтверждён</span> <span class="badge gray" id="stageBadge" style="display:none">Уборка</span> <span class="badge gray">Выполнение · бригадир + клинеры</span></div>
+
+      <div class="card" id="objCard" style="margin-top:12px; padding:14px; cursor:pointer">
+        <div style="font-size:13px; line-height:1.7">
+          <div><b>Клиент:</b> ООО «Ромашка»</div>
+          <div><b>Объект:</b> БЦ «Меркурий», оф. 402</div>
+          <div><b>Услуга:</b> Генеральная уборка офиса</div>
+          <div><b>Запланировано:</b> 06.10.2026 09:00</div>
+          <div><b>Исполнитель:</b> Бригада А</div>
+        </div>
+        <div class="c-sub" style="margin-top:8px">Нажмите — карта, заметки и фото объекта</div>
+      </div>
+
+      <span class="btn primary" id="btnArrive" style="display:block; text-align:center; margin-top:12px">Прибыл на место</span>
+
+      <div class="card" style="margin-top:12px; padding:14px">
+        <b>Чек-лист</b> <span class="c-sub" id="clProgress"></span>
+        <div class="c-sub" id="clHint" style="margin-top:4px">Доступен после кнопки «Прибыл на место»</div>
+        <div id="checklist" class="locked" style="margin-top:6px">
+          <div class="cl-item" data-s="PENDING">
+            <div class="cl-head"><span class="badge gray">Ожидает</span><span class="cl-title">Полы вымыты во всех помещениях</span>
+              <span class="btn sm cl-ok">✓</span><span class="btn sm danger cl-no">✗</span><span class="cl-caret">▾</span></div>
+            <div class="cl-body">
+              <textarea class="input cl-note" rows="2" placeholder="Комментарий к пункту…" disabled></textarea>
+              <div class="cl-photos"></div>
+              <label class="btn sm cl-addph">+ Фото<input type="file" accept="image/*" hidden disabled></label>
+            </div>
+          </div>
+          <div class="cl-item" data-s="PENDING">
+            <div class="cl-head"><span class="badge gray">Ожидает</span><span class="cl-title">Санузлы продезинфицированы</span>
+              <span class="btn sm cl-ok">✓</span><span class="btn sm danger cl-no">✗</span><span class="cl-caret">▾</span></div>
+            <div class="cl-body">
+              <textarea class="input cl-note" rows="2" placeholder="Комментарий к пункту…" disabled></textarea>
+              <div class="cl-photos"></div>
+              <label class="btn sm cl-addph">+ Фото<input type="file" accept="image/*" hidden disabled></label>
+            </div>
+          </div>
+          <div class="cl-item" data-s="PENDING">
+            <div class="cl-head"><span class="badge gray">Ожидает</span><span class="cl-title">Мусор вынесен, корзины заменены</span>
+              <span class="btn sm cl-ok">✓</span><span class="btn sm danger cl-no">✗</span><span class="cl-caret">▾</span></div>
+            <div class="cl-body">
+              <textarea class="input cl-note" rows="2" placeholder="Комментарий к пункту…" disabled></textarea>
+              <div class="cl-photos"></div>
+              <label class="btn sm cl-addph">+ Фото<input type="file" accept="image/*" hidden disabled></label>
+            </div>
+          </div>
+          <div class="cl-item" data-s="PENDING">
+            <div class="cl-head"><span class="badge gray">Ожидает</span><span class="cl-title">Стёкла и зеркала без разводов</span>
+              <span class="btn sm cl-ok">✓</span><span class="btn sm danger cl-no">✗</span><span class="cl-caret">▾</span></div>
+            <div class="cl-body">
+              <textarea class="input cl-note" rows="2" placeholder="Комментарий к пункту…" disabled></textarea>
+              <div class="cl-photos"></div>
+              <label class="btn sm cl-addph">+ Фото<input type="file" accept="image/*" hidden disabled></label>
+            </div>
+          </div>
+          <div class="cl-item" data-s="PENDING">
+            <div class="cl-head"><span class="badge gray">Ожидает</span><span class="cl-title">Кухня: поверхности и мойка</span>
+              <span class="btn sm cl-ok">✓</span><span class="btn sm danger cl-no">✗</span><span class="cl-caret">▾</span></div>
+            <div class="cl-body">
+              <textarea class="input cl-note" rows="2" placeholder="Комментарий к пункту…" disabled></textarea>
+              <div class="cl-photos"></div>
+              <label class="btn sm cl-addph">+ Фото<input type="file" accept="image/*" hidden disabled></label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:12px; padding:14px">
+        <a class="btn primary disabled" id="btnSubmit" style="display:none; text-align:center" title="Все пункты чек-листа должны быть выполнены">Сдать на проверку</a>
+      </div>
+    </div>
+    <nav class="p-nav">
+      <a href="order-work.html" class="on"><span>✓</span>Заказ</a>
+      <a href="calendar.html"><span>◷</span>Календарь</a>
+      <a href="login.html"><span>⎋</span>Выйти</a>
+    </nav>
+    <div class="obj-modal-backdrop" id="objModal">
+      <div class="obj-modal" role="dialog" aria-modal="true">
+        <div class="card" style="padding:14px">
+          <div class="drawer-head">
+            <div>
+              <div style="font-size:18px;font-weight:700">БЦ «Меркурий», оф. 402</div>
+              <div class="c-sub">ул. Центральная, 12 · офисное здание · QR <code>pub-obj-15</code></div>
+            </div>
+            <button class="drawer-close" onclick="closeObjModal()">✕</button>
+          </div>
+        </div>
+        <div class="card" style="margin-top:10px; padding:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b>Карта</b>
+            <a href="https://www.google.com/maps/search/?api=1&query=%D1%83%D0%BB.%20%D0%A6%D0%B5%D0%BD%D1%82%D1%80%D0%B0%D0%BB%D1%8C%D0%BD%D0%B0%D1%8F%2012" target="_blank" rel="noopener noreferrer">Открыть в Google Maps ↗</a></div>
+          <iframe title="Карта объекта" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+            src="https://maps.google.com/maps?q=%D1%83%D0%BB.%20%D0%A6%D0%B5%D0%BD%D1%82%D1%80%D0%B0%D0%BB%D1%8C%D0%BD%D0%B0%D1%8F%2012&output=embed"
+            style="width:100%;height:240px;border:0;border-radius:8px;margin-top:8px" allowfullscreen></iframe>
+        </div>
+        <div class="card" style="margin-top:10px; padding:14px"><b>Заметки по объекту</b>
+          <div class="hist-item" style="margin-top:6px"><span class="when">03.10</span><span>Ключи у консьержа, код домофона 4521</span></div>
+          <div class="hist-item"><span class="when">28.09</span><span>Кладовая на 4 этаже — инвентарь внутри, не выносить</span></div>
+          <div class="hist-item"><span class="when">15.09</span><span>Паркинг: гостевое место №7, сказать охране «клининг»</span></div>
+        </div>
+        <div class="card" style="margin-top:10px; padding:14px"><b>Фотографии</b>
+          <div class="obj-photos">
+            <img src="images/images.jpeg" alt="Фото объекта 1">
+            <img src="images/images%20(1).jpeg" alt="Фото объекта 2">
+            <img src="images/k1-KkpYWH2Lz2S078hSmm6Gwx_gYReMmOkTLny9hS9ko-gRtyNGDXjhFqVM349k_YzEJoTHWzrpfQP0DNmgblr3D.jpg" alt="Фото объекта 3">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toasts"></div>
+<script>
+const objModal=document.getElementById('objModal');
+document.getElementById('objCard').onclick=()=>objModal.classList.add('open');
+function closeObjModal(){objModal.classList.remove('open');}
+objModal.addEventListener('click',e=>{if(e.target===objModal||e.target.classList.contains('obj-modal'))closeObjModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeObjModal();});
+
+let started=false;
+const rows=[...document.querySelectorAll('.cl-item')];
+const btn=document.getElementById('btnSubmit');
+document.getElementById('btnArrive').onclick=()=>{location.href='scan.html';};
+function startWork(){
+  started=true;
+  document.getElementById('btnArrive').style.display='none';
+  btn.style.display='block';
+  const st=document.getElementById('stBadge');
+  st.textContent='В работе'; st.className='badge amber';
+  document.getElementById('stageBadge').style.display='';
+  document.getElementById('clHint').style.display='none';
+  const cl=document.getElementById('checklist');
+  cl.classList.remove('locked');
+  cl.querySelectorAll('[disabled]').forEach(el=>el.disabled=false);
+}
+if(new URLSearchParams(location.search).get('started')==='1')startWork();
+function refresh(){
+  const passed=rows.filter(r=>r.dataset.s==='PASSED').length;
+  document.getElementById('clProgress').textContent=`${passed}/${rows.length}`;
+  const all=passed===rows.length;
+  btn.classList.toggle('disabled',!all);
+  if(all)btn.href='calendar.html';else btn.removeAttribute('href');
+}
+rows.forEach(r=>{
+  r.querySelector('.cl-head').onclick=e=>{
+    if(!started||e.target.closest('.cl-ok,.cl-no'))return;
+    r.classList.toggle('open');
+  };
+  r.querySelector('.cl-ok').onclick=()=>{if(started)setS(r,'PASSED');};
+  r.querySelector('.cl-no').onclick=()=>{if(started)setS(r,'FAILED');};
+  const fi=r.querySelector('input[type=file]');
+  fi.onchange=()=>{
+    const f=fi.files[0];
+    if(!f)return;
+    const rd=new FileReader();
+    rd.onload=()=>{
+      const w=document.createElement('span');
+      w.className='cl-ph';
+      w.innerHTML=`<img alt="Фото"><button type="button" class="cl-ph-x">✕</button>`;
+      w.querySelector('img').src=rd.result;
+      w.querySelector('.cl-ph-x').onclick=()=>w.remove();
+      r.querySelector('.cl-photos').appendChild(w);
+    };
+    rd.readAsDataURL(f);
+    fi.value='';
+  };
+});
+function setS(r,s){
+  r.dataset.s=s;
+  const b=r.querySelector('.badge');
+  b.className='badge '+(s==='PASSED'?'green':s==='FAILED'?'red':'gray');
+  b.textContent={PENDING:'Ожидает',PASSED:'Выполнен',FAILED:'Не выполнен'}[s];
+  refresh();
+}
+refresh();
+</script>
+</body>
+</html>

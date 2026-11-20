@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Объекты — мокап</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .c-sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .object-modal-backdrop { position:fixed; inset:0; z-index:100; display:none; background:rgba(17,24,39,.58); }
+  .object-modal-backdrop.open { display:block; }
+  .object-modal { position:absolute; inset:0; overflow:auto; background:var(--bg); padding:clamp(16px,3vw,36px); }
+  .object-modal-inner { max-width:1100px; margin:0 auto; }
+  .obj-photos { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:10px; }
+  .obj-photos img { width:100%; height:170px; object-fit:cover; border-radius:8px; border:1px solid var(--border); display:block; }
+  @media (max-width:600px) { .object-modal { padding:12px; } .obj-photos { grid-template-columns:repeat(2,1fr); } }
+</style>
+</head>
+<body>
+<input class="navtoggle" id="navtoggle" type="checkbox">
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">Чистая Гавань <label class="side-close" for="navtoggle" title="Свернуть меню">«</label></div>
+    <nav>
+      <a href="map.html">← Схема процесса</a>
+      <a href="login.html">Вход</a>
+      <a href="dashboard.html">Дашборд</a>
+      <a href="clients.html">Клиенты</a>
+      <a href="objects.html" class="active">Объекты</a>
+      <a href="leads.html">Лиды</a>
+      <a href="deals.html">Договора</a>
+      <a href="orders.html">Заказы</a>
+      <a href="recurring.html">Постоянные</a>
+      <a href="employees.html">Сотрудники</a>
+      <a href="tasks.html">Задачи</a>
+      <a href="history.html">История</a>
+    </nav>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <label class="btn navhide" for="navtoggle" title="Скрыть/показать меню">☰</label>
+      <strong>Гавань — клининг CRM</strong>
+      <div class="topbar-right">
+        <details class="dd">
+          <summary><span class="icon-btn">🔔<span class="n-dot">3</span></span></summary>
+          <div class="dd-menu">
+            <div class="dd-title">Уведомления</div>
+            <a href="order-quality.html">ORD-SEED-003 сдан на проверку</a>
+            <a href="deals.html">Договор «Вектра» выигран · 96 000 ₽</a>
+            <a href="leads.html">Новый лид с сайта</a>
+          </div>
+        </details>
+        <details class="dd">
+          <summary>
+            <span class="avatar">ЕМ</span>
+            <span class="u-meta"><b>Елена Менеджерова</b><i>Менеджер</i></span>
+            <span style="color:var(--muted)">▾</span>
+          </summary>
+          <div class="dd-menu">
+            <a href="#">Профиль</a>
+            <a href="#">Сменить пароль</a>
+            <a href="login.html">Выйти</a>
+          </div>
+        </details>
+      </div>
+    </div>
+    <div class="content">
+
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap">
+        <div>
+          <h2 style="margin:0">Объекты</h2>
+          <p class="c-sub" style="margin:4px 0 0">Адреса обслуживания и связанные клиенты, договора и заказы</p>
+        </div>
+        <span class="btn primary" onclick="toast('Форма объекта — в разработке')">+ Новый объект</span>
+      </div>
+
+      <div class="toolbar" style="margin-top:14px">
+        <input class="input" id="q" placeholder="Поиск по объекту, адресу или клиенту..." style="flex:1; min-width:220px">
+        <select class="input" id="fType" style="max-width:170px">
+          <option value="">Тип: все</option><option>Офис</option><option>Бизнес-центр</option><option>Склад</option>
+          <option>Производство</option><option>Квартира</option><option>Частный дом</option><option>Общепит</option><option>МКД</option>
+        </select>
+        <select class="input" id="fStatus" style="max-width:150px">
+          <option value="">Статус: все</option><option value="active">Активен</option><option value="archived">Архив</option>
+        </select>
+        <span class="btn sm" id="btnReset">Сбросить</span>
+      </div>
+
+      <div class="card" style="padding:0">
+        <table class="table" id="tbl">
+          <thead><tr>
+            <th>Объект</th><th>Клиент</th><th>Тип</th><th>Адрес</th><th>Площадь</th><th>Заказов</th><th>Ближайший заказ</th><th>Статус</th>
+          </tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+        <div class="empty" id="empty" style="display:none; padding:24px">
+          <b>Объекты не найдены</b>
+          <p style="color:var(--muted)">Попробуйте изменить поиск или сбросить фильтры</p>
+          <span class="btn sm" onclick="resetFilters()">Сбросить фильтры</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="object-modal-backdrop" id="backdrop">
+  <section class="object-modal" role="dialog" aria-modal="true" aria-labelledby="objectModalTitle">
+    <div class="object-modal-inner" id="drawer"></div>
+  </section>
+</div>
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+const esc=s=>String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const badge=(t,cls)=>`<span class="badge ${cls}">${t}</span>`;
+const OST={'Запланирован':'blue','Подтверждён':'blue','В работе':'amber','На проверке':'purple','Выполнен':'green','Отменён':'gray'};
+
+const OBJECTS=[
+ {id:'o5', name:'Бизнес-центр «Вектор»',client:'ООО «Вектор»',type:'Бизнес-центр',addr:'Ленинский пр., 100',area:'800 м²',schedule:'Пн, Ср, Пт · 09:00–13:00',status:'active',qr:'pub-obj-1',dealId:302,
+  orders:[{num:501,service:'Уборка БЦ',date:'05.10.2026 09:00',status:'Выполнен'},{num:503,service:'Уборка БЦ',date:'07.10.2026 09:00',status:'Запланирован'},{num:513,service:'Уборка БЦ',date:'08.10.2026 09:00',status:'Запланирован'},{num:521,service:'Уборка БЦ',date:'12.10.2026 09:00',status:'Запланирован'}]},
+ {id:'o6', name:'Склад «Вектор»',client:'ООО «Вектор»',type:'Склад',addr:'пр. Индустриальный, 12',area:'4 800 м²',schedule:'Вт, Чт · 09:00–13:00',status:'active',qr:'pub-obj-2',dealId:302,
+  orders:[{num:502,service:'Уборка склада',date:'06.10.2026 09:00',status:'В работе'},{num:504,service:'Уборка склада',date:'06.10.2026 11:00',status:'На проверке'},{num:531,service:'Уборка склада',date:'03.11.2026 09:00',status:'Запланирован'}]},
+ {id:'o11',name:'Офис «Стандарт»',client:'ООО «Стандарт»',type:'Офис',addr:'ул. Центральная, 8',area:'200 м²',schedule:'Вт, Чт · 10:00–12:00',status:'active',qr:'pub-obj-3',dealId:301,
+  orders:[{num:507,service:'Уборка офиса',date:'06.10.2026 10:00',status:'Подтверждён'},{num:522,service:'Уборка офиса',date:'12.10.2026 10:00',status:'Подтверждён'},{num:532,service:'Уборка офиса',date:'05.11.2026 10:00',status:'Запланирован'}]},
+ {id:'o13',name:'Производственный корпус «Горизонт»',client:'ООО «Горизонт»',type:'Производство',addr:'Заводская, 4',area:'2 600 м²',schedule:'ежедневно',status:'active',qr:'pub-obj-4',dealId:300,
+  orders:[{num:523,service:'Уборка производства',date:'13.10.2026 08:00',status:'Запланирован'}]},
+ {id:'o18',name:'Офисы «Северный ветер»',client:'ИП «Северный ветер»',type:'Офис',addr:'3 офиса, разные адреса',area:'540 м²',schedule:'ежедневно',status:'active',qr:'pub-obj-5',dealId:293,
+  orders:[{num:512,service:'Уборка офисов',date:'08.10.2026 09:00',status:'Подтверждён'},{num:528,service:'Уборка офисов',date:'22.10.2026 09:00',status:'Запланирован'}]},
+ {id:'o19',name:'Подъезды ЖК «Солнечный»',client:'ЖК «Солнечный» (ТСЖ)',type:'МКД',addr:'ул. Солнечная, 7, 12 подъездов',area:'—',schedule:'Пн, Пт · 08:00–10:00',status:'active',qr:'pub-obj-6',dealId:292,
+  orders:[{num:505,service:'Уборка подъездов',date:'05.10.2026 08:00',status:'Выполнен'},{num:515,service:'Уборка подъездов',date:'09.10.2026 08:00',status:'Подтверждён'},{num:529,service:'Уборка подъездов',date:'26.10.2026 08:00',status:'Запланирован'}]},
+ {id:'o20',name:'Зал кофейни «Бариста»',client:'Кофейня «Бариста»',type:'Общепит',addr:'ул. Кофейная, 2',area:'85 м²',schedule:'ежедневно · 07:00–08:30',status:'active',qr:'pub-obj-7',dealId:291,
+  orders:[{num:506,service:'Утренняя уборка',date:'05.10.2026 07:00',status:'Выполнен'},{num:508,service:'Утренняя уборка',date:'06.10.2026 07:00',status:'Выполнен'},{num:517,service:'Утренняя уборка',date:'09.10.2026 07:00',status:'Запланирован'},{num:524,service:'Утренняя уборка',date:'13.10.2026 07:00',status:'Запланирован'}]},
+ {id:'o22',name:'Склад «Вектра»',client:'ООО «Вектра»',type:'Склад',addr:'Северный р-н, пр. Индустриальный 42',area:'1 200 м²',schedule:'разово',status:'active',qr:'pub-obj-8',dealId:289,
+  orders:[{num:516,service:'Уборка склада',date:'09.10.2026 10:00',status:'Запланирован'},{num:530,service:'Уборка склада',date:'27.10.2026 10:00',status:'Запланирован'}]},
+ {id:'o9', name:'Бизнес-центр «Орбита»',client:'БЦ «Орбита»',type:'Бизнес-центр',addr:'Орбитальный б-р, 3',area:'1 400 м²',schedule:'по ночам, 6 дней в неделю',status:'active',qr:'pub-obj-9',dealId:297,
+  orders:[{num:514,service:'Вечерняя уборка БЦ',date:'08.10.2026 15:00',status:'Запланирован'},{num:525,service:'Генеральная уборка БЦ',date:'15.10.2026 09:00',status:'Подтверждён'}]},
+ {id:'o7', name:'Производственный корпус',client:'ТОО «Альфа Сервис»',type:'Производство',addr:'ул. Заводская, 9',area:'3 100 м²',schedule:'ежедневно',status:'active',qr:'pub-obj-10',dealId:303,
+  orders:[{num:510,service:'Уборка производства',date:'07.10.2026 08:00',status:'Подтверждён'}]},
+ {id:'o2', name:'Офис «Меридиан»',client:'ООО «Меридиан»',type:'Офис',addr:'ул. Деловая, 15',area:'180 м²',schedule:'Пн, Ср, Пт',status:'active',qr:'pub-obj-11',dealId:294,
+  orders:[{num:511,service:'Мойка окон',date:'07.10.2026 13:00',status:'Запланирован'},{num:519,service:'Уборка офиса',date:'10.10.2026 11:00',status:'Отменён'}]},
+ {id:'o1', name:'Квартира клиента',client:'Анна Петрова',type:'Квартира',addr:'ул. Тихая, 4, кв. 21',area:'64 м²',schedule:'разово',status:'active',qr:'pub-obj-12',dealId:299,
+  orders:[{num:518,service:'Генеральная уборка',date:'10.10.2026 10:00',status:'Запланирован'}]},
+ {id:'o10',name:'Частный дом',client:'Елена Морозова',type:'Частный дом',addr:'пос. Лесной, 8',area:'160 м²',schedule:'разово',status:'active',qr:'pub-obj-13',dealId:296,
+  orders:[{num:509,service:'Генеральная уборка дома',date:'06.10.2026 14:00',status:'Запланирован'}]},
+ {id:'o14',name:'Частный дом (Волков)',client:'Сергей Волков',type:'Частный дом',addr:'пос. Речной, 3',area:'140 м²',schedule:'разово',status:'archived',qr:'pub-obj-14',dealId:298,
+  orders:[{num:520,service:'Мойка окон',date:'11.10.2026 12:00',status:'Запланирован'}]},
+];
+
+const PHOTOS=['images/images.jpeg','images/images%20(1).jpeg','images/k1-KkpYWH2Lz2S078hSmm6Gwx_gYReMmOkTLny9hS9ko-gRtyNGDXjhFqVM349k_YzEJoTHWzrpfQP0DNmgblr3D.jpg'];
+const OBJ_NOTES={
+ o5:[['03.10','Пропуска заказывать у В.Орлова за день до визита'],['28.09','Лифт C, 12 этаж — ключи у администратора БЦ']],
+ o6:[['03.10','Ворота 2, позвонить охране по прибытии'],['20.09','Инвентарь в кладовой у входа, не выносить']],
+ o11:[['01.10','Код домофона 4521, кабинет 301']],
+ o13:[['02.10','Вход через проходную №2, нужен паспорт']],
+ o18:[['30.09','3 офиса на разных адресах — маршрут в приложении']],
+ o19:[['29.09','Ключи от подъездов у старшего по дому'],['15.09','Мусоропровод на −1 этаже']],
+ o20:[['05.10','Уборка до открытия — 07:00–08:30'],['01.10','Запасные ключи у баристы']],
+ o22:[['03.10','Стыковка с охраной у ворот 2']],
+ o9:[['02.10','Ночной доступ — охрана на 1 этаже']],
+ o7:[['04.10','СИЗ обязательны: каска и жилет у входа']],
+ o2:[['28.09','Домофон 15, офис на 3 этаже']],
+ o1:[['01.10','Клиент встречает на месте, телефон в карточке клиента']],
+ o10:[['02.10','Собака во дворе — в вольере'],['25.09','Вода из скважины, напор слабый']],
+ o14:[['20.09','Архивный объект — уточнить доступ у клиента']],
+};
+
+let cur=null;
+const tbody=document.getElementById('tbody'), empty=document.getElementById('empty'), tbl=document.getElementById('tbl');
+const q=document.getElementById('q'), fType=document.getElementById('fType'), fStatus=document.getElementById('fStatus');
+
+function filtered(){
+  const s=q.value.trim().toLowerCase();
+  return OBJECTS.filter(o=>
+    (!s||[o.name,o.addr,o.client].join(' ').toLowerCase().includes(s))
+    &&(!fType.value||o.type===fType.value)
+    &&(!fStatus.value||o.status===fStatus.value));
+}
+const nextOrder=o=>o.orders.find(x=>['Запланирован','Подтверждён','В работе','На проверке'].includes(x.status));
+function render(){
+  const rows=filtered();
+  tbl.style.display=rows.length?'':'none';
+  empty.style.display=rows.length?'none':'';
+  tbody.innerHTML=rows.map(o=>{
+    const nx=nextOrder(o);
+    return `<tr data-id="${o.id}">
+      <td><div class="c-name">${esc(o.name)}</div><div class="c-sub"><code>${o.qr}</code></div></td>
+      <td>${esc(o.client)}</td>
+      <td>${esc(o.type)}</td>
+      <td>${esc(o.addr)}</td>
+      <td>${esc(o.area)}</td>
+      <td>${o.orders.length}</td>
+      <td>${nx?`#${nx.num} · ${esc(nx.date.slice(0,10))}`:'—'}</td>
+      <td>${o.status==='active'?badge('Активен','green'):badge('Архив','gray')}</td></tr>`;
+  }).join('');
+}
+function resetFilters(){q.value='';fType.value='';fStatus.value='';render();}
+document.getElementById('btnReset').onclick=resetFilters;
+[q,fType,fStatus].forEach(el=>{el.addEventListener('input',render);el.addEventListener('change',render);});
+
+tbody.onclick=e=>{
+  const tr=e.target.closest('tr[data-id]'); if(!tr) return;
+  openDrawer(OBJECTS.find(o=>o.id===tr.dataset.id));
+};
+
+const drawer=document.getElementById('drawer'), backdrop=document.getElementById('backdrop');
+function closeDrawer(){backdrop.classList.remove('open');cur=null;}
+backdrop.onclick=e=>{if(e.target===backdrop)closeDrawer();};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer();});
+function openDrawer(o){
+  cur=o;
+  const nx=nextOrder(o);
+  drawer.innerHTML=`
+   <div class="card">
+    <div class="drawer-head">
+      <div>
+        <div id="objectModalTitle" style="font-size:22px;font-weight:700">${esc(o.name)}</div>
+        <div class="c-sub">${o.status==='active'?badge('Активен','green'):badge('Архив','gray')} · QR <code>${o.qr}</code></div>
+      </div>
+      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+   </div>
+   <div class="card" style="margin-top:12px"><b>Информация</b>
+     <div class="kv" style="margin-top:8px"><b>Клиент:</b> <a href="clients.html">${esc(o.client)}</a></div>
+     <div class="kv"><b>Тип:</b> ${esc(o.type)}</div>
+     <div class="kv"><b>Адрес:</b> ${esc(o.addr)}</div>
+     <div class="kv"><b>Площадь:</b> ${esc(o.area)}</div>
+     <div class="kv"><b>График:</b> ${esc(o.schedule)}</div>
+     ${o.dealId?`<div class="kv"><b>Договор:</b> <a href="deals.html">#${o.dealId}</a></div>`:''}
+   </div>
+   <div class="card" style="margin-top:12px"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b>Карта</b><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.addr)}" target="_blank" rel="noopener noreferrer">Открыть в Google Maps ↗</a></div>
+     <iframe title="Карта объекта ${esc(o.name)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=${encodeURIComponent(o.addr)}&output=embed" style="width:100%;height:360px;border:0;border-radius:8px;margin-top:10px" allowfullscreen></iframe>
+   </div>
+   <div class="card" style="margin-top:12px"><b>Заметки по объекту</b>
+     <div style="margin-top:6px">${(OBJ_NOTES[o.id]||[]).map(n=>`<div class="hist-item"><span class="when">${n[0]}</span><span>${esc(n[1])}</span></div>`).join('')||'<span class="c-sub">Заметок нет</span>'}</div>
+   </div>
+   <div class="card" style="margin-top:12px"><b>Фотографии</b>
+     <div class="obj-photos">${PHOTOS.map(src=>`<img src="${src}" alt="Фото объекта ${esc(o.name)}">`).join('')}</div>
+   </div>
+   ${nx?`<div class="card" style="margin-top:12px"><b>Ближайший заказ</b>
+     <div class="mini-card" style="margin-top:8px"><b>Заказ #${nx.num} · ${esc(nx.service)}</b>
+       <div class="sub">${esc(nx.date)} · ${badge(nx.status,OST[nx.status])}</div></div>
+   </div>`:''}
+   <div class="card" style="margin-top:12px"><b>Заказы по объекту (${o.orders.length})</b>
+     <div style="margin-top:8px">
+       ${o.orders.slice().reverse().map(x=>`<a class="ord-row" href="orders.html"><span><b>Заказ #${x.num}</b> · ${esc(x.service)}<div class="c-sub">${esc(x.date)}</div></span>${badge(x.status,OST[x.status])}</a>`).join('')||'<span class="c-sub">Заказов нет</span>'}
+     </div>
+     <a class="btn sm" href="orders.html" style="margin-top:10px">+ Новый заказ</a>
+   </div>`;
+  backdrop.classList.add('open');
+}
+function toast(msg){
+  const t=document.createElement('div');t.className='toast';t.textContent=msg;
+  document.getElementById('toasts').appendChild(t);setTimeout(()=>t.remove(),2600);
+}
+render();
+</script>
+</body>
+</html>

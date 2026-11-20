@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Сотрудники — мокап</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .c-sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .sum { cursor: pointer; }
+  .sum.on { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+  .sum .num { font-size: 24px; font-weight: 700; }
+  .sum .lbl { color: var(--muted); font-size: 12px; margin-top: 3px; }
+  tbody tr { cursor: pointer; }
+  .role-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600;
+    border: 1px solid var(--border); background: #f8fafc; color: var(--text);
+  }
+  .role-chip i { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+  .emp-photo {
+    width: 40px; height: 40px; border-radius: 10px; object-fit: cover;
+    background: #e8eef8; border: 1px solid var(--border);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 12px; font-weight: 700; flex-shrink: 0;
+  }
+  .emp-photo.lg { width: 96px; height: 96px; border-radius: 14px; font-size: 22px; }
+  .emp-photo img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; display: block; }
+  .stars { display: inline-flex; gap: 2px; align-items: center; line-height: 1; }
+  .stars .s { color: #d1d5db; font-size: 15px; }
+  .stars .s.on { color: #f59e0b; }
+  .stars.edit .s { cursor: pointer; font-size: 22px; }
+  .stars.edit .s:hover, .stars.edit .s.hov { color: #fbbf24; }
+  .photo-box {
+    width: 120px; height: 120px; border-radius: 14px; border: 1px dashed var(--border);
+    background: #f8fafc; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 6px; color: var(--muted); font-size: 12px; overflow: hidden; position: relative;
+  }
+  .photo-box img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+  .photo-box .ph-actions { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 6px; align-items: center; }
+  .photo-box.has-photo .ph-actions { opacity: 0; transition: opacity .15s; }
+  .photo-box.has-photo:hover .ph-actions { opacity: 1; background: rgba(15,23,42,.55); inset: 0; position: absolute; justify-content: center; width: 100%; height: 100%; color: #fff; }
+  .rating-num { color: var(--muted); font-size: 12px; margin-left: 6px; }
+  #backdrop .modal { max-width: 1200px; width: 96vw; max-height: 94vh; }
+  #modalNew .modal { max-width: 640px; }
+</style>
+</head>
+<body>
+<input class="navtoggle" id="navtoggle" type="checkbox">
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">Чистая Гавань <label class="side-close" for="navtoggle" title="Свернуть меню">«</label></div>
+    <nav>
+      <a href="map.html">← Схема процесса</a>
+      <a href="login.html">Вход</a>
+      <a href="dashboard.html">Дашборд</a>
+      <a href="clients.html">Клиенты</a>
+      <a href="objects.html">Объекты</a>
+      <a href="leads.html">Лиды</a>
+      <a href="deals.html">Договора</a>
+      <a href="orders.html">Заказы</a>
+      <a href="recurring.html">Постоянные</a>
+      <a href="employees.html" class="active">Сотрудники</a>
+      <a href="tasks.html">Задачи</a>
+      <a href="history.html">История</a>
+    </nav>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <label class="btn navhide" for="navtoggle" title="Скрыть/показать меню">☰</label>
+      <strong>Гавань — клининг CRM</strong>
+      <div class="topbar-right">
+        <details class="dd">
+          <summary><span class="icon-btn">🔔<span class="n-dot">3</span></span></summary>
+          <div class="dd-menu">
+            <div class="dd-title">Уведомления</div>
+            <a href="order-quality.html">ORD-SEED-003 сдан на проверку</a>
+            <a href="deals.html">Договор #300 · планирование слота</a>
+            <a href="leads.html">Новый лид с сайта</a>
+          </div>
+        </details>
+        <details class="dd">
+          <summary>
+            <span class="avatar">ЕМ</span>
+            <span class="u-meta"><b>Елена Менеджерова</b><i>Менеджер продаж</i></span>
+            <span style="color:var(--muted)">▾</span>
+          </summary>
+          <div class="dd-menu">
+            <a href="#">Профиль</a>
+            <a href="#">Сменить пароль</a>
+            <a href="login.html">Выйти</a>
+          </div>
+        </details>
+      </div>
+    </div>
+    <div class="content">
+
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap">
+        <div>
+          <h2 style="margin-bottom:2px">Сотрудники</h2>
+          <p style="color:var(--muted); margin:0 0 16px; font-size:14px">Роли по RACI: диспетчер, продажи, бригада, бухгалтерия, клиентский сервис</p>
+        </div>
+        <span class="btn primary" id="btnNew">+ Новый сотрудник</span>
+      </div>
+
+      <div class="grid" style="grid-template-columns:repeat(4,1fr); margin-bottom:16px" id="sum">
+        <div class="card sum" data-role=""><div class="num" id="sumAll">0</div><div class="lbl">Всего</div></div>
+        <div class="card sum" data-role="active"><div class="num" id="sumActive">0</div><div class="lbl">Активных</div></div>
+        <div class="card sum" data-role="field"><div class="num" id="sumField">0</div><div class="lbl">На объекте</div></div>
+        <div class="card sum" data-role="office"><div class="num" id="sumOffice">0</div><div class="lbl">В офисе</div></div>
+      </div>
+
+      <div class="toolbar">
+        <input class="input" id="q" style="max-width:320px" placeholder="Поиск по имени, телефону, филиалу…">
+        <select class="input" id="fRole" style="max-width:200px">
+          <option value="">Роль: все</option>
+        </select>
+        <select class="input" id="fBranch" style="max-width:160px">
+          <option value="">Филиал: все</option>
+          <option>Центр</option>
+          <option>Северный</option>
+        </select>
+        <select class="input" id="fStatus" style="max-width:150px">
+          <option value="">Статус: все</option>
+          <option value="active">Активен</option>
+          <option value="vacation">Отпуск</option>
+          <option value="archived">Архив</option>
+        </select>
+        <span class="btn" id="btnReset">Сбросить</span>
+      </div>
+
+      <div class="card table-scroll" style="padding:0">
+        <table class="table" id="tbl">
+          <thead>
+            <tr>
+              <th>Сотрудник</th>
+              <th>Роль</th>
+              <th>Рейтинг</th>
+              <th>Филиал</th>
+              <th>Телефон</th>
+              <th>Сейчас</th>
+              <th>Статус</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+        <div id="empty" class="empty" style="display:none;padding:24px">
+          <b>Сотрудники не найдены</b>
+          <p style="color:var(--muted)">Попробуйте изменить поиск или сбросить фильтры.</p>
+          <span class="btn" id="btnReset2">Сбросить фильтры</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="backdrop" style="display:none">
+  <div class="modal" id="drawer" role="dialog" aria-modal="true"></div>
+</div>
+
+<div class="modal-backdrop" id="modalNew" style="display:none">
+  <div class="modal">
+    <h3>Новый сотрудник</h3>
+    <label class="field"><span>ФИО *</span><input class="input" id="nName" placeholder="Иван Петров"></label>
+    <label class="field"><span>Роль *</span>
+      <select class="input" id="nRole"></select>
+    </label>
+    <label class="field"><span>Фото (URL)</span><input class="input" id="nPhoto" placeholder="https://… или оставьте пустым"></label>
+    <label class="field"><span>Рейтинг</span>
+      <div class="stars edit" id="nStars" aria-label="Рейтинг"></div>
+      <input type="hidden" id="nRating" value="5">
+    </label>
+    <label class="field"><span>Филиал</span>
+      <select class="input" id="nBranch"><option>Центр</option><option>Северный</option></select>
+    </label>
+    <label class="field"><span>Телефон</span><input class="input" id="nPhone" placeholder="+7 900 000-00-00"></label>
+    <div class="actions">
+      <span class="btn" id="btnCancel">Отмена</span>
+      <span class="btn primary" id="btnCreate">Создать</span>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+const ROLES = [
+  'Диспетчер',
+  'Менеджер продаж',
+  'Бригадир',
+  'Бухгалтер',
+  'Магистр',
+  'Клинер',
+  'Водитель',
+];
+const ROLE_COLOR = {
+  'Диспетчер':'#1e56c8',
+  'Менеджер продаж':'#7c3aed',
+  'Бригадир':'#0f766e',
+  'Бухгалтер':'#b45309',
+  'Магистр':'#be185d',
+  'Клинер':'#2563eb',
+  'Водитель':'#475569',
+};
+const FIELD_ROLES = new Set(['Бригадир','Магистр','Клинер','Водитель']);
+const STATUS = {
+  active:['Активен','green'],
+  vacation:['Отпуск','amber'],
+  archived:['Архив','gray'],
+};
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+const badge = (t,c) => `<span class="badge ${c}">${esc(t)}</span>`;
+const roleChip = r => `<span class="role-chip"><i style="background:${ROLE_COLOR[r]||'#64748b'}"></i>${esc(r)}</span>`;
+const initials = name => name.split(/\s+/).map(p=>p[0]).slice(0,2).join('').toUpperCase();
+const numRating = n => Math.max(0, Math.min(5, Number(n)||0));
+const clampRating = n => Math.round(numRating(n));
+const starsHtml = (rating, {edit=false, id=''}={}) => {
+  const raw=numRating(rating);
+  const filled=clampRating(raw);
+  const cls = `stars${edit?' edit':''}`;
+  const stars = [1,2,3,4,5].map(i=>`<span class="s ${i<=filled?'on':''}" data-v="${i}" ${edit?`role="button" tabindex="0" aria-label="${i} из 5"`:''}>★</span>`).join('');
+  return `<span class="${cls}" ${id?`id="${id}"`:''} data-rating="${filled}" title="${raw.toFixed(1)} / 5">${stars}${edit?'':`<span class="rating-num">${raw.toFixed(1)}</span>`}</span>`;
+};
+const photoHtml = (e, lg=false) => e.photo
+  ? `<span class="emp-photo${lg?' lg':''}"><img src="${esc(e.photo)}" alt="${esc(e.name)}"></span>`
+  : `<span class="emp-photo${lg?' lg':''}">${esc(initials(e.name))}</span>`;
+
+const employees = [
+  {id:1,name:'Анна Диспетчерова',role:'Диспетчер',branch:'Центр',phone:'+7 900 111-01-01',status:'active',now:'На линии · 3 заказа',photo:null,rating:4.8},
+  {id:2,name:'Пётр Координатов',role:'Диспетчер',branch:'Северный',phone:'+7 900 111-01-02',status:'active',now:'Свободен',photo:null,rating:4.2},
+  {id:3,name:'Елена Менеджерова',role:'Менеджер продаж',branch:'Центр',phone:'+7 900 222-02-01',status:'active',now:'Договор #300 · КП',photo:null,rating:5},
+  {id:4,name:'Алексей Смирнов',role:'Менеджер продаж',branch:'Центр',phone:'+7 900 222-02-02',status:'active',now:'Подтверждение заказа в лидах',photo:null,rating:4.6},
+  {id:5,name:'Мария Ким',role:'Менеджер продаж',branch:'Северный',phone:'+7 900 222-02-03',status:'active',now:'Квалификация лидов',photo:null,rating:4.9},
+  {id:6,name:'Ольга Бригадир',role:'Бригадир',branch:'Центр',phone:'+7 900 333-03-01',status:'active',now:'ORD-502 · на объекте',photo:null,rating:4.7},
+  {id:7,name:'Никита Старший',role:'Бригадир',branch:'Северный',phone:'+7 900 333-03-02',status:'active',now:'Планирование смены',photo:null,rating:4.4},
+  {id:8,name:'Светлана Счетов',role:'Бухгалтер',branch:'Центр',phone:'+7 900 444-04-01',status:'active',now:'Закрытие договоров',photo:null,rating:4.5},
+  {id:9,name:'Игорь Технолог',role:'Магистр',branch:'Центр',phone:'+7 900 555-05-01',status:'active',now:'Смета #300',photo:null,rating:5},
+  {id:11,name:'Иван Петров',role:'Клинер',branch:'Центр',phone:'+7 900 666-06-01',status:'active',now:'ORD-502 · уборка',photo:null,rating:4.8},
+  {id:12,name:'Олег Иванов',role:'Клинер',branch:'Центр',phone:'+7 900 666-06-02',status:'active',now:'ORD-480 · уборка',photo:null,rating:4.1},
+  {id:13,name:'Сергей Петров',role:'Клинер',branch:'Северный',phone:'+7 900 666-06-03',status:'active',now:'Свободен',photo:null,rating:3.9},
+  {id:14,name:'Дарья Чистая',role:'Клинер',branch:'Северный',phone:'+7 900 666-06-04',status:'active',now:'ORD-512 · выезд',photo:null,rating:4.6},
+  {id:15,name:'Михаил Водилов',role:'Водитель',branch:'Центр',phone:'+7 900 777-07-01',status:'active',now:'Рейс · БЦ Орбита',photo:null,rating:4.5},
+  {id:16,name:'Артём Колёсов',role:'Водитель',branch:'Северный',phone:'+7 900 777-07-02',status:'archived',now:'—',photo:null,rating:3.5},
+];
+
+const q=document.getElementById('q');
+const fRole=document.getElementById('fRole');
+const fBranch=document.getElementById('fBranch');
+const fStatus=document.getElementById('fStatus');
+const tbody=document.getElementById('tbody');
+const empty=document.getElementById('empty');
+const drawer=document.getElementById('drawer');
+const backdrop=document.getElementById('backdrop');
+let sumMode='';
+let cur=null;
+
+fRole.innerHTML='<option value="">Роль: все</option>'+ROLES.map(r=>`<option>${r}</option>`).join('');
+document.getElementById('nRole').innerHTML=ROLES.map(r=>`<option>${r}</option>`).join('');
+
+function toast(t){
+  const w=document.getElementById('toasts');
+  const el=document.createElement('div'); el.className='toast'; el.textContent=t;
+  w.appendChild(el); setTimeout(()=>el.remove(),2400);
+}
+function filtered(){
+  const s=q.value.trim().toLowerCase();
+  return employees.filter(e=>{
+    const hay=[e.name,e.phone,e.branch,e.role,e.now].join(' ').toLowerCase();
+    return (!s||hay.includes(s))
+      &&(!fRole.value||e.role===fRole.value)
+      &&(!fBranch.value||e.branch===fBranch.value)
+      &&(!fStatus.value||e.status===fStatus.value)
+      &&(sumMode!=='active'||e.status==='active')
+      &&(sumMode!=='field'||(FIELD_ROLES.has(e.role)&&e.status==='active'))
+      &&(sumMode!=='office'||(!FIELD_ROLES.has(e.role)&&e.status==='active'));
+  });
+}
+function summary(){
+  sumAll.textContent=employees.length;
+  sumActive.textContent=employees.filter(e=>e.status==='active').length;
+  sumField.textContent=employees.filter(e=>FIELD_ROLES.has(e.role)&&e.status==='active').length;
+  sumOffice.textContent=employees.filter(e=>!FIELD_ROLES.has(e.role)&&e.status==='active').length;
+  document.querySelectorAll('#sum .sum').forEach(el=>el.classList.toggle('on',sumMode===el.dataset.role||(sumMode===''&&el.dataset.role==='')));
+}
+function render(){
+  summary();
+  const rows=filtered();
+  empty.style.display=rows.length?'none':'';
+  tbody.innerHTML=rows.map(e=>`<tr data-id="${e.id}">
+    <td><div style="display:flex;align-items:center;gap:10px">
+      ${photoHtml(e)}
+      <div><div style="font-weight:600">${esc(e.name)}</div><div class="c-sub">ID ${e.id}</div></div>
+    </div></td>
+    <td>${roleChip(e.role)}</td>
+    <td>${starsHtml(e.rating)}</td>
+    <td>${esc(e.branch)}</td>
+    <td>${esc(e.phone)}</td>
+    <td><span class="c-sub">${esc(e.now)}</span></td>
+    <td>${badge(...STATUS[e.status])}</td>
+  </tr>`).join('');
+}
+function resetFilters(){
+  q.value=''; fRole.value=''; fBranch.value=''; fStatus.value=''; sumMode=''; render();
+}
+[q,fRole,fBranch,fStatus].forEach(el=>{el.addEventListener('input',render);el.addEventListener('change',render);});
+btnReset.onclick=resetFilters; btnReset2.onclick=resetFilters;
+document.getElementById('sum').addEventListener('click',e=>{
+  const c=e.target.closest('.sum'); if(!c) return;
+  sumMode=sumMode===c.dataset.role?'':c.dataset.role;
+  render();
+});
+tbody.addEventListener('click',e=>{
+  const tr=e.target.closest('tr'); if(!tr) return;
+  openDrawer(employees.find(x=>x.id===+tr.dataset.id));
+});
+
+function closeDrawer(){backdrop.style.display='none';cur=null;}
+backdrop.onclick=e=>{if(e.target===backdrop)closeDrawer();};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();closeNew();}});
+
+function bindStars(el, value, onChange){
+  if(!el) return;
+  const paint = (v, hover=0) => {
+    el.dataset.rating=v;
+    el.querySelectorAll('.s').forEach(s=>{
+      const n=+s.dataset.v;
+      s.classList.toggle('on', n<=v);
+      s.classList.toggle('hov', hover && n<=hover);
+    });
+  };
+  paint(clampRating(value));
+  el.querySelectorAll('.s').forEach(s=>{
+    s.addEventListener('mouseenter',()=>paint(+el.dataset.rating, +s.dataset.v));
+    s.addEventListener('mouseleave',()=>paint(+el.dataset.rating));
+    s.addEventListener('click',()=>{ const v=+s.dataset.v; paint(v); onChange?.(v); });
+    s.addEventListener('keydown',ev=>{ if(ev.key==='Enter'||ev.key===' '){ ev.preventDefault(); s.click(); }});
+  });
+}
+
+function openDrawer(e){
+  cur=e;
+  drawer.innerHTML=`
+    <div class="card">
+      <div class="drawer-head">
+        <div style="display:flex;gap:14px;align-items:flex-start">
+          <div class="photo-box ${e.photo?'has-photo':''}" id="photoBox">
+            ${e.photo?`<img src="${esc(e.photo)}" alt="">`:''}
+            <div class="ph-actions">
+              ${e.photo?'':'<span>Нет фото</span>'}
+              <span class="btn sm" id="btnPhoto">${e.photo?'Сменить':'Добавить фото'}</span>
+              ${e.photo?'<span class="btn sm" id="btnPhotoClear">Удалить</span>':''}
+            </div>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:18px;font-weight:700">${esc(e.name)}</div>
+            <div style="margin-top:6px">${roleChip(e.role)}</div>
+            <div style="margin-top:10px">${starsHtml(e.rating)}</div>
+          </div>
+        </div>
+        <button class="drawer-close" onclick="closeDrawer()">✕</button>
+      </div>
+    </div>
+    <div class="card" style="margin-top:12px"><b>Фото и рейтинг</b>
+      <label class="field" style="margin-top:10px"><span>URL фото</span>
+        <input class="input" id="dPhoto" value="${esc(e.photo||'')}" placeholder="https://…">
+      </label>
+      <div class="field" style="margin-bottom:0"><span>Рейтинг</span>
+        <div style="margin-top:6px">${starsHtml(e.rating,{edit:true,id:'dStars'})}</div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:12px"><b>Контакты</b>
+      <div class="kv" style="margin-top:8px"><b>Телефон:</b> ${esc(e.phone)}</div>
+      <div class="kv"><b>Филиал:</b> ${esc(e.branch)}</div>
+      <div class="kv"><b>Статус:</b> ${badge(...STATUS[e.status])}</div>
+      <div class="kv"><b>Сейчас:</b> ${esc(e.now)}</div>
+    </div>
+    <div class="card" style="margin-top:12px"><b>Роль в процессе</b>
+      <p style="margin:8px 0 0;font-size:14px;color:var(--muted)">${esc(roleHint(e.role))}</p>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <label class="field"><span>Роль</span>
+        <select class="input" id="dRole">${ROLES.map(r=>`<option ${r===e.role?'selected':''}>${r}</option>`).join('')}</select>
+      </label>
+      <label class="field" style="margin-bottom:0"><span>Статус</span>
+        <select class="input" id="dStatus">
+          ${Object.entries(STATUS).map(([k,[t]])=>`<option value="${k}" ${e.status===k?'selected':''}>${t}</option>`).join('')}
+        </select>
+      </label>
+    </div>`;
+  backdrop.style.display='flex';
+  document.getElementById('dRole').onchange=ev=>{ e.role=ev.target.value; render(); openDrawer(e); toast('Роль обновлена'); };
+  document.getElementById('dStatus').onchange=ev=>{ e.status=ev.target.value; render(); openDrawer(e); toast('Статус обновлён'); };
+  document.getElementById('dPhoto').onchange=ev=>{
+    const v=ev.target.value.trim();
+    e.photo=v||null; render(); openDrawer(e); toast(v?'Фото обновлено':'Фото удалено');
+  };
+  document.getElementById('btnPhoto')?.addEventListener('click',()=>{
+    const url=prompt('URL фото сотрудника', e.photo||'');
+    if(url===null) return;
+    e.photo=url.trim()||null; render(); openDrawer(e); toast(e.photo?'Фото добавлено':'Фото удалено');
+  });
+  document.getElementById('btnPhotoClear')?.addEventListener('click',()=>{
+    e.photo=null; render(); openDrawer(e); toast('Фото удалено');
+  });
+  bindStars(document.getElementById('dStars'), e.rating, v=>{
+    e.rating=v; render(); openDrawer(e); toast(`Рейтинг: ${v}/5`);
+  });
+}
+function roleHint(role){
+  return ({
+    'Диспетчер':'Приём лида и планирование заказов: слоты, бригады, подтверждение выезда.',
+    'Менеджер продаж':'Квалификация лида, расчёт/КП, передача технологу, согласование с клиентом.',
+    'Бригадир':'Согласование смет до КП, планирование, выполнение на объекте.',
+    'Бухгалтер':'Закрытие договора: оплата, акты, сверка.',
+    'Магистр':'Согласование смет до КП: трудозатраты, химия, риски, замер.',
+    'Клинер':'Выполнение уборки по чек-листу под бригадиром.',
+    'Водитель':'Логистика бригады и оборудования на объект.',
+  })[role]||'';
+}
+
+const modalNew=document.getElementById('modalNew');
+function openNew(){
+  nName.value=''; nPhone.value=''; nPhoto.value=''; nRole.value=ROLES[0]; nBranch.value='Центр'; nRating.value='5';
+  bindStars(document.getElementById('nStars'), 5, v=>{ nRating.value=String(v); });
+  modalNew.style.display='flex';
+}
+function closeNew(){ modalNew.style.display='none'; }
+btnNew.onclick=openNew;
+btnCancel.onclick=closeNew;
+modalNew.addEventListener('click',e=>{ if(e.target===modalNew) closeNew(); });
+btnCreate.onclick=()=>{
+  const name=nName.value.trim(); if(!name){ toast('Укажите ФИО'); return; }
+  const id=Math.max(0,...employees.map(e=>e.id))+1;
+  const photo=nPhoto.value.trim()||null;
+  employees.unshift({
+    id,name,role:nRole.value,branch:nBranch.value,phone:nPhone.value.trim()||'—',
+    status:'active',now:'Свободен',photo,rating:clampRating(nRating.value),
+  });
+  closeNew(); render(); toast(`Сотрудник «${name}» добавлен`);
+};
+
+render();
+</script>
+</body>
+</html>

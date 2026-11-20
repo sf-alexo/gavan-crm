@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Клиенты — мокап</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .c-name { font-weight: 600; }
+  .c-sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  tbody tr { cursor: pointer; }
+  .dot-live { display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--ok); margin-left:4px; }
+  .sum .num { font-size: 24px; font-weight: 700; }
+  .sum .lbl { color: var(--muted); font-size: 12px; margin-top: 3px; }
+  .dd-panel { position:absolute; right:0; top:calc(100% + 6px); background:var(--panel); border:1px solid var(--border);
+    border-radius:10px; padding:12px; min-width:210px; box-shadow:0 8px 24px rgba(0,0,0,.12); z-index:40; font-size:14px; }
+  #backdrop .modal { max-width: 1200px; width: 96vw; max-height: 94vh; }
+  #modal .modal { max-width: 640px; }
+</style>
+</head>
+<body>
+<input class="navtoggle" id="navtoggle" type="checkbox">
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">Чистая Гавань <label class="side-close" for="navtoggle" title="Свернуть меню">«</label></div>
+    <nav>
+      <a href="map.html">← Схема процесса</a>
+      <a href="login.html">Вход</a>
+      <a href="dashboard.html">Дашборд</a>
+      <a href="clients.html" class="active">Клиенты</a>
+      <a href="objects.html">Объекты</a>
+      <a href="leads.html">Лиды</a>
+      <a href="deals.html">Договора</a>
+      <a href="orders.html">Заказы</a>
+      <a href="recurring.html">Постоянные</a>
+      <a href="employees.html">Сотрудники</a>
+      <a href="tasks.html">Задачи</a>
+      <a href="history.html">История</a>
+    </nav>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <label class="btn navhide" for="navtoggle" title="Скрыть/показать меню">☰</label>
+      <strong>Гавань — клининг CRM</strong>
+      <div class="topbar-right">
+        <details class="dd">
+          <summary><span class="icon-btn">🔔<span class="n-dot">3</span></span></summary>
+          <div class="dd-menu">
+            <div class="dd-title">Уведомления</div>
+            <a href="order-quality.html">ORD-SEED-003 сдан на проверку</a>
+            <a href="deals.html">Договор «Вектра» выигран · 96 000 ₽</a>
+            <a href="leads.html">Новый лид с сайта</a>
+          </div>
+        </details>
+        <details class="dd">
+          <summary>
+            <span class="avatar">ЕМ</span>
+            <span class="u-meta"><b>Елена Менеджерова</b><i>Менеджер</i></span>
+            <span style="color:var(--muted)">▾</span>
+          </summary>
+          <div class="dd-menu">
+            <a href="#">Профиль</a>
+            <a href="#">Сменить пароль</a>
+            <a href="login.html">Выйти</a>
+          </div>
+        </details>
+      </div>
+    </div>
+    <div class="content">
+
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap">
+        <div>
+          <h2 style="margin-bottom:2px">Клиенты</h2>
+          <p style="color:var(--muted); margin:0 0 16px; font-size:14px">Клиентская база и история взаимодействия</p>
+        </div>
+        <span class="btn primary" id="btnNewClient">+ Новый клиент</span>
+      </div>
+
+      <div class="grid" style="grid-template-columns:repeat(4,1fr); margin-bottom:16px">
+        <div class="card sum"><div class="num" id="sumTotal">0</div><div class="lbl">Всего клиентов</div></div>
+        <div class="card sum"><div class="num" id="sumActive">0</div><div class="lbl">Активных</div></div>
+        <div class="card sum"><div class="num" id="sumBiz">0</div><div class="lbl">Бизнес-клиентов</div></div>
+        <div class="card sum"><div class="num" id="sumDeals">0</div><div class="lbl">Есть открытые договора</div></div>
+      </div>
+
+      <div class="toolbar">
+        <input class="input" id="q" style="max-width:340px" placeholder="Поиск по имени, компании, телефону или email">
+        <select class="input" id="fType" style="max-width:150px">
+          <option value="">Тип: все</option><option value="INDIVIDUAL">Частные</option><option value="BUSINESS">Бизнес</option>
+        </select>
+        <select class="input" id="fStatus" style="max-width:160px">
+          <option value="">Статус: все</option><option value="NEW">Новый</option><option value="ACTIVE">Активный</option>
+          <option value="PAUSED">На паузе</option><option value="ARCHIVED">Архив</option>
+        </select>
+        <details class="dd">
+          <summary class="btn">Фильтры ▾</summary>
+          <div class="dd-panel">
+            <label style="display:flex; gap:8px; align-items:center"><input type="checkbox" id="fDeal"> Есть открытый договор</label>
+          </div>
+        </details>
+        <span class="btn" id="btnReset">Сбросить</span>
+      </div>
+
+      <div class="card table-scroll">
+        <table class="table" id="tbl">
+          <thead><tr><th>Клиент</th><th>Тип</th><th>Контакт</th><th>Объекты</th><th>Договора</th><th>Заказы</th><th>Последний контакт</th><th>Статус</th></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+        <div id="empty" class="empty" style="display:none">
+          <b>Клиенты не найдены</b>
+          <p style="color:var(--muted)">Попробуйте изменить параметры поиска или сбросить фильтры.</p>
+          <span class="btn" id="btnReset2">Сбросить фильтры</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="backdrop" style="display:none">
+  <div class="modal" id="drawer" role="dialog" aria-modal="true"></div>
+</div>
+
+<div class="modal-backdrop" id="modal" style="display:none">
+  <div class="modal">
+    <h3>Новый клиент</h3>
+    <div class="seg">
+      <label class="on" id="segInd"><input type="radio" name="ctype" value="INDIVIDUAL" checked>Частный</label>
+      <label id="segBiz"><input type="radio" name="ctype" value="BUSINESS">Бизнес</label>
+    </div>
+    <label class="field" id="fCompany" style="display:none"><span>Название компании *</span><input class="input" id="inCompany"></label>
+    <label class="field"><span id="lblName">Имя *</span><input class="input" id="inName"></label>
+    <label class="field"><span>Телефон *</span><input class="input" id="inPhone" placeholder="+7 …"></label>
+    <label class="field"><span>Email</span><input class="input" id="inEmail" type="email"></label>
+    <label class="field"><span>Комментарий</span><textarea class="input" id="inComment" rows="2"></textarea></label>
+    <div class="actions">
+      <span class="btn" id="btnCancelModal">Отмена</span>
+      <span class="btn primary" id="btnCreate">Создать клиента</span>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+const STATUS = { NEW:['Новый','blue'], ACTIVE:['Активный','green'], PAUSED:['На паузе','amber'], ARCHIVED:['Архив','gray'] };
+const TYPE = { INDIVIDUAL:['Частный','gray'], BUSINESS:['Бизнес','blue'] };
+const OSTATUS = { 'Запланирован':'blue','Подтверждён':'blue','В работе':'amber','На проверке':'purple','Выполнен':'green','Отменён':'gray' };
+
+const CLIENTS = [
+ {id:'c1',name:'ООО «Вектор»',type:'BUSINESS',contact:'Сергей Иванов',phone:'+7 701 123-45-67',email:'sergey@vector.kz',objects:3,deals:2,openDeal:true,orders:8,last:'Сегодня, 10:30',status:'ACTIVE',
+  detail:{
+   objects:[
+    {name:'Складской комплекс «Вектор»',type:'Склад',addr:'Алматы, ул. Промышленная, 14',area:'4 800 м²',schedule:'Ежедневно',status:'Активен'},
+    {name:'Офис «Вектор»',type:'Офис',addr:'Алматы, пр. Абая, 88',area:'850 м²',schedule:'3 раза в неделю',status:'Активен'},
+    {name:'Шоурум «Вектор»',type:'Торговое помещение',addr:'Алматы, ул. Жибек Жолы, 50',area:'320 м²',schedule:'2 раза в неделю',status:'Активен'}],
+   deals:[
+    {name:'Уборка складского комплекса',stage:'Планирование',next:'Назначить бригаду',last:'сегодня'},
+    {name:'Регулярная уборка офиса',stage:'Выполнение',next:'Контроль приёмки',last:'вчера'}],
+   orders:[
+    {num:'#1052',service:'Регулярная уборка',obj:'Складской комплекс «Вектор»',date:'06.10.2026',status:'В работе'},
+    {num:'#1051',service:'Регулярная уборка',obj:'Офис «Вектор»',date:'05.10.2026',status:'Выполнен'},
+    {num:'#1048',service:'Регулярная уборка',obj:'Складской комплекс «Вектор»',date:'02.10.2026',status:'Выполнен'},
+    {num:'#1044',service:'Генеральная уборка',obj:'Шоурум «Вектор»',date:'25.09.2026',status:'Выполнен'}],
+   history:[
+    ['Сегодня, 10:30','Создан заказ #1052'],
+    ['Сегодня, 09:42','Отправлено коммерческое предложение'],
+    ['Вчера, 16:20','Клиент подтвердил дату выезда'],
+    ['01.10.2026','Добавлен объект «Складской комплекс»'],
+    ['28.09.2026','Создан договор «Регулярная уборка»'],
+    ['25.09.2026','Добавлен новый клиент']] }},
+ {id:'c2',name:'ТОО «Альфа Сервис»',type:'BUSINESS',contact:'Мария Ким',phone:'+7 702 555-01-20',email:'m.kim@alpha.kz',objects:2,deals:1,openDeal:false,orders:5,last:'Вчера, 16:20',status:'ACTIVE'},
+ {id:'c3',name:'БЦ «Орбита»',type:'BUSINESS',contact:'Дмитрий Соколов',phone:'+7 717 200-33-14',email:'office@orbita.kz',objects:1,deals:1,openDeal:true,orders:12,last:'03.10',status:'ACTIVE'},
+ {id:'c4',name:'Анна Петрова',type:'INDIVIDUAL',contact:'',phone:'+7 777 901-45-78',email:'anna.p@example.com',objects:1,deals:1,openDeal:false,orders:4,last:'Сегодня, 09:15',status:'ACTIVE'},
+ {id:'c5',name:'Алексей Смирнов',type:'INDIVIDUAL',contact:'',phone:'+7 705 333-22-11',email:'a.smirnov@example.com',objects:2,deals:0,openDeal:false,orders:7,last:'30.09',status:'ACTIVE'},
+ {id:'c6',name:'ИП «Северный ветер»',type:'BUSINESS',contact:'Ольга Руднева',phone:'+7 701 444-88-02',email:'olga@sveter.kz',objects:4,deals:2,openDeal:true,orders:15,last:'02.10',status:'ACTIVE'},
+ {id:'c7',name:'Кофейня «Бариста»',type:'BUSINESS',contact:'Тимур Алиев',phone:'+7 777 654-10-09',email:'timur@barista.kz',objects:1,deals:1,openDeal:true,orders:0,last:'Сегодня, 08:40',status:'NEW'},
+ {id:'c8',name:'Гульнара Ахметова',type:'INDIVIDUAL',contact:'',phone:'+7 701 210-77-65',email:'',objects:1,deals:0,openDeal:false,orders:0,last:'04.10',status:'NEW'},
+ {id:'c9',name:'ЖК «Солнечный» (ТСЖ)',type:'BUSINESS',contact:'Павел Орлов',phone:'+7 727 350-12-40',email:'tsj@sunny.kz',objects:2,deals:1,openDeal:false,orders:9,last:'25.09',status:'PAUSED'},
+ {id:'c10',name:'Ресторан «Лагуна»',type:'BUSINESS',contact:'Инна Фролова',phone:'+7 701 987-30-11',email:'info@laguna.kz',objects:1,deals:0,openDeal:false,orders:6,last:'12.09',status:'PAUSED'},
+ {id:'c11',name:'Виктор Мельник',type:'INDIVIDUAL',contact:'',phone:'+7 705 111-90-34',email:'v.melnik@example.com',objects:1,deals:0,openDeal:false,orders:3,last:'15.08',status:'ARCHIVED'},
+ {id:'c12',name:'ООО «Вектра»',type:'BUSINESS',contact:'Игорь Власов',phone:'+7 701 820-55-43',email:'i.vlasov@vekta.kz',objects:2,deals:1,openDeal:true,orders:6,last:'Сегодня, 12:15',status:'ACTIVE'},
+];
+
+const OBJ_TYPES = ['Офис','Склад','Квартира','Торговое помещение'];
+const SERVICES = ['Регулярная уборка','Генеральная уборка','Мытьё окон','Химчистка'];
+const O_ST = ['Выполнен','На проверке','В работе','Подтверждён','Запланирован'];
+function detail(c){
+  if (c.detail) return c.detail;
+  return {
+    objects: Array.from({length:c.objects},(_,i)=>({name:`Объект ${i+1} · ${c.name}`,type:OBJ_TYPES[i%4],addr:'Алматы',area:'—',schedule:'—',status:'Активен'})),
+    deals: Array.from({length:c.deals},(_,i)=>({name:`${SERVICES[i%4]} · ${c.name}`,stage:['Планирование','Выполнение','Закрытие','Постпродажа'][i%4],next:['Назначить бригаду','Контроль на объекте','Проверить оплату','Запросить отзыв'][i%4],last:c.last})),
+    orders: Array.from({length:c.orders},(_,i)=>({num:'#'+(1100-i),service:SERVICES[i%4],obj:`Объект 1 · ${c.name}`,date:`0${(i%9)+1}.09.2026`,status:O_ST[i%5]})),
+    history: [[c.last,'Обновлены данные клиента'],['','Клиент добавлен в базу']],
+  };
+}
+const badge = (t,cls)=>`<span class="badge ${cls}">${t}</span>`;
+const esc = s=>String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const now=()=>{const d=new Date();return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;};
+/* События из раздела «Лиды» (leads.html) → история клиента */
+function clientHist(c,d){
+  let ev=[];
+  try{
+    ev=JSON.parse(localStorage.getItem('gavan_client_events')||'[]')
+      .filter(e=>e.name===c.name).map(e=>[e.at,e.action]).reverse();
+  }catch(e){}
+  return [...ev, ...d.history];
+}
+
+const tbody = document.getElementById('tbody');
+const empty = document.getElementById('empty');
+const tbl = document.getElementById('tbl');
+const q = document.getElementById('q'), fType = document.getElementById('fType'),
+      fStatus = document.getElementById('fStatus'), fDeal = document.getElementById('fDeal');
+
+function filtered(){
+  const s = q.value.trim().toLowerCase();
+  return CLIENTS.filter(c =>
+    (!s || [c.name,c.contact,c.phone,c.email].join(' ').toLowerCase().includes(s)) &&
+    (!fType.value || c.type===fType.value) &&
+    (!fStatus.value || c.status===fStatus.value) &&
+    (!fDeal.checked || c.openDeal));
+}
+function summary(){
+  document.getElementById('sumTotal').textContent = CLIENTS.length;
+  document.getElementById('sumActive').textContent = CLIENTS.filter(c=>c.status==='ACTIVE').length;
+  document.getElementById('sumBiz').textContent = CLIENTS.filter(c=>c.type==='BUSINESS').length;
+  document.getElementById('sumDeals').textContent = CLIENTS.filter(c=>c.openDeal).length;
+}
+function render(){
+  const rows = filtered();
+  tbl.style.display = rows.length ? '' : 'none';
+  empty.style.display = rows.length ? 'none' : '';
+  tbody.innerHTML = rows.map(c=>`<tr data-id="${c.id}">
+    <td><div class="c-name">${esc(c.name)}</div>${c.contact?`<div class="c-sub">${esc(c.contact)}</div>`:''}</td>
+    <td>${badge(...TYPE[c.type])}</td>
+    <td>${esc(c.phone)}${c.email?`<div class="c-sub">${esc(c.email)}</div>`:''}</td>
+    <td>${c.objects}</td>
+    <td>${c.deals}${c.openDeal?'<span class="dot-live" title="Есть открытый договор"></span>':''}</td>
+    <td>${c.orders}</td>
+    <td>${esc(c.last)}</td>
+    <td>${badge(...STATUS[c.status])}</td></tr>`).join('');
+}
+function skeleton(){
+  tbody.innerHTML = Array.from({length:6},()=>'<tr>'+'<td><div class="skl"></div></td>'.repeat(8)+'</tr>').join('');
+}
+function resetFilters(){
+  q.value=''; fType.value=''; fStatus.value=''; fDeal.checked=false;
+  document.querySelectorAll('details.dd').forEach(d=>d.removeAttribute('open'));
+  render();
+}
+[q,fType,fStatus,fDeal].forEach(el=>{
+  el.addEventListener('input',render); el.addEventListener('change',render);
+});
+document.getElementById('btnReset').onclick = resetFilters;
+document.getElementById('btnReset2').onclick = resetFilters;
+
+/* Detail modal */
+const drawer = document.getElementById('drawer'), backdrop = document.getElementById('backdrop');
+let curTab = 'overview';
+tbody.addEventListener('click',e=>{
+  const tr = e.target.closest('tr[data-id]'); if(!tr) return;
+  openDrawer(CLIENTS.find(c=>c.id===tr.dataset.id));
+});
+function closeDrawer(){ backdrop.style.display='none'; }
+backdrop.onclick = e=>{ if(e.target===backdrop) closeDrawer(); };
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeDrawer(); closeModal(); }});
+
+function openDrawer(c){
+  curTab='overview';
+  const d = detail(c);
+  drawer.innerHTML = `
+   <div class="card">
+    <div class="drawer-head">
+      <div>
+        <div style="font-size:18px;font-weight:700">${esc(c.name)}</div>
+        <div style="margin:6px 0 10px">${badge(...TYPE[c.type])} ${badge(...STATUS[c.status])}</div>
+        ${c.contact?`<div class="kv"><b>Контактное лицо:</b> ${esc(c.contact)}</div>`:''}
+        <div class="kv"><b>Телефон:</b> ${esc(c.phone)}</div>
+        ${c.email?`<div class="kv"><b>Email:</b> <a href="#">${esc(c.email)}</a></div>`:''}
+      </div>
+      <div style="display:flex;gap:4px">
+        <button class="btn sm" title="Действия" onclick="toast('Дополнительные действия — в разработке')">⋯</button>
+        <button class="drawer-close" onclick="closeDrawer()">✕</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+      <a class="btn sm" href="deals.html">+ Договор</a>
+      <a class="btn sm" href="order-assign.html">+ Заказ</a>
+      <button class="btn sm" onclick="toast('Форма объекта — в разработке')">+ Объект</button>
+      <button class="btn sm" onclick="toast('Редактирование — в разработке')">Редактировать</button>
+    </div>
+   </div>
+   <div class="dt-tabs" id="dtabs">
+     ${[['overview','Обзор'],['objects','Объекты'],['deals','Договора'],['orders','Заказы'],['history','История']]
+       .map(([k,t])=>`<button data-t="${k}" class="${k===curTab?'active':''}">${t} ${k!=='overview'?`<span class="c-sub">${d[k==='objects'?'objects':k==='deals'?'deals':k==='orders'?'orders':'history'].length}</span>`:''}</button>`).join('')}
+   </div>
+   <div id="dpane"></div>`;
+  backdrop.style.display='flex';
+  document.getElementById('dtabs').onclick = e=>{
+    const b = e.target.closest('button[data-t]'); if(!b) return;
+    curTab = b.dataset.t;
+    document.querySelectorAll('#dtabs button').forEach(x=>x.classList.toggle('active',x===b));
+    renderTab(c);
+  };
+  renderTab(c);
+}
+function renderTab(c){
+  const d = detail(c), p = document.getElementById('dpane');
+  if (curTab==='overview'){
+    const deal = d.deals[0], ord = d.orders.find(o=>['Запланирован','Подтверждён','В работе','На проверке'].includes(o.status));
+    p.innerHTML = `
+      <div class="card" style="margin-bottom:12px"><b>Активный договор</b>
+        ${deal?`<div class="mini-card" style="margin-top:8px"><b>${esc(deal.name)}</b>
+          <div class="sub">Этап: ${badge(deal.stage,'amber')} · Следующее действие: ${esc(deal.next)}</div></div>`
+        :'<div class="c-sub" style="margin-top:8px">Нет активных договоров</div>'}
+      </div>
+      <div class="card" style="margin-bottom:12px"><b>Ближайший заказ</b>
+        ${ord?`<div class="mini-card" style="margin-top:8px"><b>${esc(ord.service)}</b>
+          <div class="sub">Объект: ${esc(ord.obj)} · Дата: ${esc(ord.date)} · ${badge(ord.status,OSTATUS[ord.status])}</div></div>`
+        :'<div class="c-sub" style="margin-top:8px">Нет запланированных заказов</div>'}
+      </div>
+      <div class="card"><b>Последняя активность</b>
+        ${clientHist(c,d).slice(0,5).map(([w,a])=>`<div class="hist-item"><span class="when">${esc(w)}</span><span>${esc(a)}</span></div>`).join('')}
+      </div>`;
+  } else if (curTab==='objects'){
+    p.innerHTML = `<div class="card">${d.objects.length?'':'<span class="c-sub">Нет объектов</span>'}
+      ${d.objects.map(o=>`<div class="mini-card"><b>${esc(o.name)}</b>
+        <div class="sub">Тип: ${esc(o.type)} · ${esc(o.addr)} · ${esc(o.area)} · График: ${esc(o.schedule)} · ${badge(o.status,'green')}</div></div>`).join('')}
+      <button class="btn sm" onclick="toast('Форма объекта — в разработке')">+ Добавить объект</button></div>`;
+  } else if (curTab==='deals'){
+    p.innerHTML = `<div class="card">${d.deals.length?'':'<span class="c-sub">Нет договоров</span>'}
+      ${d.deals.map(x=>`<a class="mini-card" href="deals.html" style="display:block"><b>${esc(x.name)}</b>
+        <div class="sub">${badge(x.stage,'amber')} · Следующее действие: ${esc(x.next)} · Контакт: ${esc(x.last)}</div></a>`).join('')}
+      <a class="btn sm" href="deals.html">+ Договор</a></div>`;
+  } else if (curTab==='orders'){
+    p.innerHTML = `<div class="card">${d.orders.length?`<table class="table"><thead><tr><th>№</th><th>Услуга</th><th>Объект</th><th>Дата</th><th>Статус</th></tr></thead>
+      <tbody>${d.orders.map(o=>`<tr style="cursor:default"><td><b>${o.num}</b></td><td>${esc(o.service)}</td><td>${esc(o.obj)}</td><td>${o.date}</td><td>${badge(o.status,OSTATUS[o.status])}</td></tr>`).join('')}</tbody></table>`
+      :'<span class="c-sub">Нет заказов</span>'}</div>`;
+  } else {
+    p.innerHTML = `<div class="card">
+      ${clientHist(c,d).map(([w,a])=>`<div class="hist-item"><span class="when">${esc(w)}</span><span>${esc(a)}</span></div>`).join('')||'<span class="c-sub">Пусто</span>'}
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <input class="input" id="hText" placeholder="Добавить событие: звонок, письмо, встреча..." style="flex:1">
+        <span class="btn sm" id="btnHist">Добавить</span>
+      </div></div>`;
+    document.getElementById('btnHist').onclick=()=>{
+      const inp=document.getElementById('hText'), t=inp.value.trim(); if(!t) return;
+      try{
+        const ev=JSON.parse(localStorage.getItem('gavan_client_events')||'[]');
+        ev.push({name:c.name,at:now(),action:t});
+        localStorage.setItem('gavan_client_events',JSON.stringify(ev));
+      }catch(e){}
+      renderTab(c);
+    };
+  }
+}
+
+/* Modal «Новый клиент» */
+const modal = document.getElementById('modal');
+const segInd = document.getElementById('segInd'), segBiz = document.getElementById('segBiz');
+function openModal(){ modal.style.display='flex'; }
+function closeModal(){ modal.style.display='none'; }
+document.getElementById('btnNewClient').onclick = openModal;
+document.getElementById('btnCancelModal').onclick = closeModal;
+modal.addEventListener('click',e=>{ if(e.target===modal) closeModal(); });
+function syncType(){
+  const biz = document.querySelector('input[name=ctype]:checked').value==='BUSINESS';
+  segInd.classList.toggle('on',!biz); segBiz.classList.toggle('on',biz);
+  document.getElementById('fCompany').style.display = biz?'':'none';
+  document.getElementById('lblName').textContent = biz?'Контактное лицо':'Имя *';
+}
+[segInd,segBiz].forEach(l=>l.querySelector('input').addEventListener('change',syncType));
+document.getElementById('btnCreate').onclick = ()=>{
+  const biz = document.querySelector('input[name=ctype]:checked').value==='BUSINESS';
+  const company = document.getElementById('inCompany').value.trim();
+  const name = document.getElementById('inName').value.trim();
+  const phone = document.getElementById('inPhone').value.trim();
+  const email = document.getElementById('inEmail').value.trim();
+  if ((biz&&!company) || !name || !phone){ toast('Заполните обязательные поля',true); return; }
+  CLIENTS.unshift({id:'c'+Date.now(), name:biz?company:name, type:biz?'BUSINESS':'INDIVIDUAL',
+    contact:biz?name:'', phone, email, objects:0, deals:0, openDeal:false, orders:0,
+    last:'только что', status:'NEW'});
+  ['inCompany','inName','inPhone','inEmail','inComment'].forEach(id=>document.getElementById(id).value='');
+  closeModal(); summary(); render();
+  toast(biz?'Бизнес-клиент создан':'Клиент создан');
+};
+function toast(msg,err){
+  const t = document.createElement('div');
+  t.className='toast'; if(err) t.style.background='var(--danger)';
+  t.textContent=msg; document.getElementById('toasts').appendChild(t);
+  setTimeout(()=>t.remove(),2600);
+}
+
+/* init: skeleton → render */
+summary(); skeleton();
+setTimeout(render, 400);
+</script>
+</body>
+</html>

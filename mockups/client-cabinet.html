@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Кабинет клиента — мокап</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .badge.IN_PROGRESS { background:#fff3d6; color:#a06c00; }
+  .badge.QUALITY_CHECK { background:#efe4fd; color:#6a3fb8; }
+  .badge.COMPLETED { background:#dff5e4; color:#1c7d3a; }
+  .badge.PLANNED { background:#e3ecfd; color:#2559c7; }
+</style>
+</head>
+<body>
+<div class="site-topbar">
+  <div class="brand">Чистая Гавань</div>
+  <nav>
+    <a href="#">Услуги</a>
+    <a href="#">Заказать уборку</a>
+    <a href="client-cabinet.html" class="active">Личный кабинет</a>
+  </nav>
+  <span style="font-size:14px; color:var(--muted)">ООО «Ромашка»</span>
+  <span class="btn sm">Выйти</span>
+</div>
+<div class="page">
+  <h1>Личный кабинет</h1>
+
+  <div class="grid cols-3" style="margin-bottom:16px">
+    <div class="card stat"><div class="num" style="color:var(--wprimary)">14</div><div class="label">Уборок выполнено</div></div>
+    <div class="card stat"><div class="num" style="color:var(--wprimary)">3</div><div class="label">Объекта</div></div>
+    <div class="card stat"><div class="num" style="color:var(--wprimary)">1</div><div class="label">Заказ в работе</div></div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px; border-color:#93c5fd">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px">
+      <div>
+        <b>ORD-SEED-001</b> · Генеральная уборка офиса<br>
+        <span style="color:var(--muted); font-size:13px">БЦ «Меркурий», оф. 402 · сегодня, 09:00</span>
+      </div>
+      <span class="badge IN_PROGRESS">В работе</span>
+    </div>
+    <div class="timeline" style="margin-top:16px">
+      <div class="timeline-step done"><div class="dot"></div><div class="label">Запланирован</div><div class="at">09:00</div></div>
+      <div class="timeline-step done"><div class="dot"></div><div class="label">Подтверждён</div><div class="at">09:02</div></div>
+      <div class="timeline-step done"><div class="dot"></div><div class="label">В работе</div><div class="at">09:04</div></div>
+      <div class="timeline-step"><div class="dot"></div><div class="label">На проверке</div></div>
+      <div class="timeline-step"><div class="dot"></div><div class="label">Выполнен</div></div>
+    </div>
+  </div>
+
+  <div class="grid" style="grid-template-columns:2fr 1fr">
+    <div class="card">
+      <h3 style="margin-top:0">История уборок</h3>
+      <table class="table">
+        <thead><tr><th>Дата</th><th>Заказ</th><th>Объект</th><th>Статус</th><th>Фото</th></tr></thead>
+        <tbody>
+          <tr><td>06.10</td><td>ORD-SEED-003 · склад</td><td>Склад, Северный р-н</td><td><span class="badge QUALITY_CHECK">На проверке</span></td><td>—</td></tr>
+          <tr><td>29.09</td><td>ORD-SEED-021 · офис</td><td>БЦ «Меркурий», оф. 402</td><td><span class="badge COMPLETED">Выполнен</span></td><td><a href="#">6 фото</a></td></tr>
+          <tr><td>22.09</td><td>ORD-SEED-017 · офис</td><td>БЦ «Меркурий», оф. 118</td><td><span class="badge COMPLETED">Выполнен</span></td><td><a href="#">4 фото</a></td></tr>
+          <tr><td>15.09</td><td>ORD-SEED-011 · офис</td><td>БЦ «Меркурий», оф. 402</td><td><span class="badge COMPLETED">Выполнен</span></td><td><a href="#">5 фото</a></td></tr>
+        </tbody>
+      </table>
+      <div class="pagination"><span class="btn sm">←</span> 1 / 4 <span class="btn sm">→</span></div>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Документы</h3>
+      <ul style="list-style:none; padding:0; margin:0; font-size:14px">
+        <li style="padding:8px 0; border-bottom:1px solid var(--border)"><a href="#">Акт № А-041 от 29.09</a></li>
+        <li style="padding:8px 0; border-bottom:1px solid var(--border)"><a href="#">Счёт № С-118 от 01.10</a></li>
+        <li style="padding:8px 0"><a href="#">Договор № Д-07</a></li>
+      </ul>
+      <a class="btn primary" href="#" style="width:100%; text-align:center; margin-top:10px">Заказать уборку</a>
+      <p style="color:var(--muted); font-size:12px; margin-top:14px">
+        Клиент видит только свои заказы и вложения с пометкой «видно клиенту» —
+        без цен исполнителей, внутренних заметок и истории CRM.
+      </p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

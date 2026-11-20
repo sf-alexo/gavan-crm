@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Постоянные заказы — мокап</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .c-sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .raci { color: var(--muted); font-size: 12px; margin-top: 6px; }
+  .sum { cursor: pointer; }
+  .sum.on { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+  .attn-card .num { font-size: 28px; font-weight: 700; line-height: 1.1; }
+  .attn-card .t { font-weight: 600; margin-top: 4px; }
+  .attn-card .s { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .attn-card.danger { border-color: #fca5a5; background: #fef2f2; }
+  .attn-card.warn { border-color: #fde68a; background: #fffbeb; }
+  .chips { display:flex; flex-wrap:wrap; gap:4px; margin-top:6px; }
+  .chip {
+    font-size: 10px; padding: 2px 6px; border-radius: 999px;
+    background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe;
+  }
+  .chip.warn { background:#fff7ed; color:#9a3412; border-color:#fed7aa; }
+  .chip.ok { background:#dcfce7; color:#166534; border-color:#86efac; }
+  .chip.bad { background:#fee2e2; color:#991b1b; border-color:#fecaca; }
+  .qual-mistakes {
+    margin-top: 14px; padding: 12px 14px; border-radius: 10px;
+    background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; font-size: 13px; line-height: 1.45;
+  }
+  .qual-mistakes b, .qual-metrics b { display:block; margin-bottom:6px; font-size:12px; text-transform:uppercase; letter-spacing:.02em; }
+  .qual-mistakes ul, .qual-metrics ul { margin:0; padding-left:18px; }
+  .qual-mistakes li, .qual-metrics li { margin:4px 0; }
+  .qual-metrics {
+    margin-top: 10px; padding: 12px 14px; border-radius: 10px;
+    background: #eff6ff; border: 1px solid #bfdbfe; color: #1e3a8a; font-size: 13px; line-height: 1.45;
+  }
+  .qual-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .qual-grid .full { grid-column:1 / -1; }
+  .qual-block { border:1px solid var(--border); border-radius:10px; padding:12px; background:#fafbfc; margin-top:12px; }
+  .qual-block h4 { margin:0 0 10px; font-size:13px; font-weight:700; }
+  #backdrop .modal { max-width: 1200px; width: 96vw; max-height: 94vh; }
+  .stage-flow { display:flex; flex-wrap:wrap; gap:6px; margin:10px 0 0; }
+  .stage-flow span {
+    font-size:11px; padding:4px 8px; border-radius:6px; background:#f1f5f9; color:#334155; border:1px solid var(--border);
+  }
+  .visit-row {
+    display:flex; gap:10px; align-items:flex-start; padding:10px; border:1px solid var(--border);
+    border-radius:8px; background:#fff; margin-top:8px; font-size:13px;
+  }
+  .visit-row .t { width:52px; font-weight:700; flex-shrink:0; }
+  .tabs span { cursor:pointer; }
+  .tab-pane { display:none; }
+  .tab-pane.on { display:block; }
+  .check-pill { display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border:1px solid var(--border); border-radius:999px; background:#fff; font-size:12px; }
+  .act-row { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+  .kv { font-size:13px; margin-top:4px; }
+  .mini-card { border:1px solid var(--border); border-radius:8px; padding:8px 10px; margin-top:6px; background:#fff; font-size:13px; }
+  .mini-card .sub { color:var(--muted); font-size:12px; margin-top:2px; }
+  .hist-item { display:flex; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); font-size:13px; }
+  .hist-item .when { color:var(--muted); font-size:11px; width:110px; flex-shrink:0; }
+  .table tr { cursor:pointer; }
+  .geo-ok { color:#166534; }
+  .geo-bad { color:#991b1b; }
+  .model-note {
+    margin:0 0 16px; padding:12px 14px; border-radius:10px; font-size:13px; line-height:1.45;
+    background:#f8fafc; border:1px solid var(--border); color:var(--text);
+  }
+</style>
+</head>
+<body>
+<input class="navtoggle" id="navtoggle" type="checkbox">
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">Чистая Гавань <label class="side-close" for="navtoggle" title="Свернуть меню">«</label></div>
+    <nav>
+      <a href="map.html">← Схема процесса</a>
+      <a href="login.html">Вход</a>
+      <a href="dashboard.html">Дашборд</a>
+      <a href="clients.html">Клиенты</a>
+      <a href="objects.html">Объекты</a>
+      <a href="leads.html">Лиды</a>
+      <a href="deals.html">Договора</a>
+      <a href="orders.html">Заказы</a>
+      <a href="recurring.html" class="active">Постоянные</a>
+      <a href="employees.html">Сотрудники</a>
+      <a href="tasks.html">Задачи</a>
+      <a href="history.html">История</a>
+    </nav>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <label class="btn navhide" for="navtoggle" title="Скрыть/показать меню">☰</label>
+      <strong>Гавань — клининг CRM</strong>
+      <div class="topbar-right">
+        <details class="dd">
+          <summary><span class="icon-btn">🔔<span class="n-dot">3</span></span></summary>
+          <div class="dd-menu">
+            <div class="dd-title">Уведомления</div>
+            <a href="recurring.html">RC-03 · нет геолокации на старте</a>
+            <a href="recurring.html">RC-01 · заявка на расходники</a>
+            <a href="deals.html">Договор #299 · абонемент</a>
+          </div>
+        </details>
+        <details class="dd">
+          <summary>
+            <span class="avatar">ЕМ</span>
+            <span class="u-meta"><b>Елена Менеджерова</b><i>Менеджер</i></span>
+            <span style="color:var(--muted)">▾</span>
+          </summary>
+          <div class="dd-menu">
+            <a href="#">Профиль</a>
+            <a href="login.html">Выйти</a>
+          </div>
+        </details>
+      </div>
+    </div>
+    <div class="content">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:8px">
+        <div>
+          <h2 style="margin:0">Постоянные заказы</h2>
+          <p style="color:var(--muted); margin:6px 0 0; font-size:14px">Договор → график → ежедневные визиты (гео) → проверки → отчёты</p>
+        </div>
+        <span class="btn primary" id="btnNew">+ Договор</span>
+      </div>
+
+      <div class="model-note">
+        <b>Модель:</b> это не колонки разового договора.
+        Корень — <b>договор</b> (абонемент). Этап 1 — разовое согласование графика.
+        Этапы 2–11 — повторяющийся операционный цикл по дням/неделям.
+        2ГИС ГеоПоток — источник геоотметок и времени на объекте (mock).
+      </div>
+
+      <div class="grid" style="grid-template-columns:repeat(5,1fr); margin-bottom:16px" id="sum">
+        <div class="card attn-card sum" data-s="active"><div class="num" id="sActive">0</div><div class="t">Активных</div><div class="s">Обслуживаются</div></div>
+        <div class="card attn-card sum" data-s="schedule"><div class="num" id="sSched">0</div><div class="t">Без графика</div><div class="s">Этап 1 · бригадир</div></div>
+        <div class="card attn-card sum warn" data-s="today"><div class="num" id="sToday">0</div><div class="t">Визиты сегодня</div><div class="s">Старт / в работе / закрыты</div></div>
+        <div class="card attn-card sum danger" data-s="geo"><div class="num" id="sGeo">0</div><div class="t">Без гео</div><div class="s">Риск фиктивного выхода</div></div>
+        <div class="card attn-card sum warn" data-s="supply"><div class="num" id="sSupply">0</div><div class="t">Заявки</div><div class="s">Расходники / инструмент</div></div>
+      </div>
+
+      <div class="card" style="margin-bottom:12px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input class="input" id="q" placeholder="Поиск: клиент, объект, договор…" style="flex:1;min-width:200px">
+          <select class="input" id="fStatus" style="max-width:200px">
+            <option value="">Все статусы</option>
+            <option value="schedule">Согласование графика</option>
+            <option value="active">Активен</option>
+            <option value="paused">Пауза</option>
+            <option value="archive">Архив</option>
+          </select>
+          <select class="input" id="fBrig" style="max-width:200px">
+            <option value="">Все бригадиры</option>
+          </select>
+          <span class="btn" id="btnReset">Сбросить</span>
+        </div>
+      </div>
+
+      <div class="card table-scroll">
+        <table class="table" id="tbl">
+          <thead>
+            <tr>
+              <th>Договор</th>
+              <th>Клиент / объекты</th>
+              <th>График</th>
+              <th>Сегодня</th>
+              <th>Бригадир</th>
+              <th>Статус</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div id="empty" class="c-sub" style="padding:16px;display:none">Нет договоров</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="backdrop" style="display:none">
+  <div class="modal" id="drawer" role="dialog" aria-modal="true"></div>
+</div>
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+const STATUSES = {
+  schedule:['Согласование графика','amber'],
+  active:['Активен','green'],
+  paused:['Пауза','gray'],
+  archive:['Архив','purple'],
+};
+const VISIT_ST = {
+  planned:['По графику','blue'],
+  started:['На объекте','amber'],
+  done:['Завершён','green'],
+  missed:['Срыв','red'],
+};
+const BRIGADIERS = ['Ольга Бригадир','Никита Старший'];
+const H=(at,who,text)=>({at,who,text});
+const money=n=>n?n.toLocaleString('ru-RU')+' ₽':'—';
+const badge=(t,cls)=>`<span class="badge ${cls}">${t}</span>`;
+const esc=s=>String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const now=()=>{const d=new Date();const p=n=>String(n).padStart(2,'0');return `${p(d.getDate())}.${p(d.getMonth()+1)}.${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`;};
+const toast=(t,err)=>{
+  const el=document.createElement('div'); el.className='toast'; if(err) el.style.background='#991b1b';
+  el.textContent=t; toasts.appendChild(el); setTimeout(()=>el.remove(),2600);
+};
+
+const contracts = [
+ {
+  id:'RC-01', title:'Ежедневная уборка БЦ «Орбита»', client:'БЦ «Орбита»', objects:['БЦ Орбита · этажи 3–5'],
+  status:'active', brigadier:'Ольга Бригадир', amount:390000, fromDeal:297,
+  schedule:{approved:true, days:'Пн–Пт', window:'06:30–09:30', cleaners:['Дарья Чистая','Олег Иванов'], zones:'Офисы, санузлы, кухни, холлы',
+    agreedCleaners:true, agreedClient:true, fixedAt:'01.10.2026', notes:'Ночной доступ с охраны, код 4412'},
+  today:[
+    {obj:'Этажи 3–5', plan:'06:30', start:'06:28', end:'', status:'started', geoIn:true, geoOut:false,
+      reportBefore:true, reportAfter:false, dwellMin:95, planMin:180, roomOver:false,
+      checklist:{floors:true,bath:true,surfaces:true,kitchen:false,trash:true}, supplyUsed:'Мешки 30л ×4', lack:'',
+      photosBefore:2, photosAfter:0}
+  ],
+  qc:{lastAt:'28.10.2026', nextAt:'04.11.2026', result:'ok', note:'Замечаний нет', deviations:0},
+  tools:{lastAt:'27.10.2026', ok:true, issue:'', ticket:''},
+  supplies:{lastAt:'03.11.2026', ok:false, lack:'Бумага ТБ, мыло', ticket:'SUP-184 · пополнить к 05.11'},
+  dayReport:{closed:false, closedAt:'', tickets:['SUP-184']},
+  clientNotify:{morningSent:true, mapVisible:true, accountOk:true, lastQcPing:'28.10.2026'},
+  metrics:{branch:'Центр', planHours:15, factHours:14.2, visitsWeek:5, geoOkPct:96},
+  history:[
+    H('01.10.2026 10:00','Система','Договор из договора #297'),
+    H('01.10.2026 12:00','Ольга Бригадир','График утверждён с клинерами и заказчиком'),
+    H('03.11.2026 06:28','Дарья Чистая','Старт · геозона OK · отчёт «до»'),
+    H('03.11.2026 08:10','Дарья Чистая','Заявка SUP-184 · бумага/мыло'),
+  ]
+ },
+ {
+  id:'RC-02', title:'Уборка офисов «Меридиан»', client:'ООО «Меридиан»', objects:['Офис Меридиан · 4 этаж'],
+  status:'schedule', brigadier:'Никита Старший', amount:140000, fromDeal:294,
+  schedule:{approved:false, days:'Пн, Ср, Пт', window:'18:00–21:00', cleaners:['Ирина Пол'], zones:'Кабинеты, переговорные, кухня',
+    agreedCleaners:true, agreedClient:false, fixedAt:'', notes:'Клиент ещё не подтвердил вечернее окно'},
+  today:[],
+  qc:{lastAt:'', nextAt:'после старта', result:'', note:'', deviations:0},
+  tools:{lastAt:'', ok:true, issue:'', ticket:''},
+  supplies:{lastAt:'', ok:true, lack:'', ticket:''},
+  dayReport:{closed:false, closedAt:'', tickets:[]},
+  clientNotify:{morningSent:false, mapVisible:false, accountOk:true, lastQcPing:''},
+  metrics:{branch:'Центр', planHours:0, factHours:0, visitsWeek:0, geoOkPct:0},
+  history:[
+    H('03.10.2026 11:00','Система','Договор из договора #294'),
+    H('04.10.2026 16:00','Никита Старший','Черновик графика · ждём заказчика'),
+  ]
+ },
+ {
+  id:'RC-03', title:'Утренняя уборка кофейни', client:'ИП Северный ветер', objects:['Кофейня · зал + кухня'],
+  status:'active', brigadier:'Никита Старший', amount:75000, fromDeal:291,
+  schedule:{approved:true, days:'Ежедневно', window:'05:30–07:30', cleaners:['Олег Иванов'], zones:'Зал, бар, санузел, кухня',
+    agreedCleaners:true, agreedClient:true, fixedAt:'06.10.2026', notes:'До открытия · ключ у охраны ТЦ'},
+  today:[
+    {obj:'Кофейня', plan:'05:30', start:'05:41', end:'', status:'started', geoIn:false, geoOut:false,
+      reportBefore:false, reportAfter:false, dwellMin:40, planMin:90, roomOver:true,
+      roomNote:'Санузел 22 мин при норме 12 — без аргументации',
+      checklist:{floors:true,bath:false,surfaces:true,kitchen:true,trash:false}, supplyUsed:'', lack:'Перчатки',
+      photosBefore:0, photosAfter:0}
+  ],
+  qc:{lastAt:'20.10.2026', nextAt:'03.11.2026', result:'warn', note:'Пыль на витрине', deviations:1},
+  tools:{lastAt:'01.11.2026', ok:false, issue:'Пароочиститель течёт', ticket:'TOOL-55 · в ремонт'},
+  supplies:{lastAt:'02.11.2026', ok:false, lack:'Перчатки M', ticket:''},
+  dayReport:{closed:false, closedAt:'', tickets:['TOOL-55']},
+  clientNotify:{morningSent:false, mapVisible:true, accountOk:true, lastQcPing:'20.10.2026'},
+  metrics:{branch:'Север', planHours:10.5, factHours:9.1, visitsWeek:7, geoOkPct:71},
+  history:[
+    H('05.10.2026 09:00','Система','Договор из договора #291'),
+    H('06.10.2026 11:00','Никита Старший','График утверждён'),
+    H('03.11.2026 05:41','Олег Иванов','Старт без гео · опоздание +11 мин'),
+  ]
+ },
+ {
+  id:'RC-04', title:'Обслуживание склада «Вектра»', client:'ТОО «Новая Линия»', objects:['Склад Вектра'],
+  status:'paused', brigadier:'Ольга Бригадир', amount:96000, fromDeal:289,
+  schedule:{approved:true, days:'Вт, Чт', window:'10:00–14:00', cleaners:['Дарья Чистая','Ирина Пол'], zones:'Проходы, санузлы, офис склада',
+    agreedCleaners:true, agreedClient:true, fixedAt:'08.10.2026', notes:'Пауза до 15.11 — ремонт ворот'},
+  today:[],
+  qc:{lastAt:'25.10.2026', nextAt:'после возобновления', result:'ok', note:'', deviations:0},
+  tools:{lastAt:'25.10.2026', ok:true, issue:'', ticket:''},
+  supplies:{lastAt:'25.10.2026', ok:true, lack:'', ticket:''},
+  dayReport:{closed:true, closedAt:'25.10.2026', tickets:[]},
+  clientNotify:{morningSent:false, mapVisible:false, accountOk:true, lastQcPing:'25.10.2026'},
+  metrics:{branch:'Восток', planHours:0, factHours:0, visitsWeek:0, geoOkPct:100},
+  history:[
+    H('04.10.2026 10:00','Система','Договор из договора #289'),
+    H('28.10.2026 14:00','Менеджер','Пауза · ремонт ворот до 15.11'),
+  ]
+ },
+ {
+  id:'RC-05', title:'Абонемент · квартира Анны Петровой', client:'Анна Петрова', objects:['Квартира · ул. Ленина 12'],
+  status:'archive', brigadier:'Ольга Бригадир', amount:18000, fromDeal:299,
+  schedule:{approved:true, days:'1× / мес', window:'по согласованию', cleaners:['Дарья Чистая'], zones:'Вся квартира',
+    agreedCleaners:true, agreedClient:true, fixedAt:'02.10.2026', notes:'Переведён в разовые по просьбе клиента'},
+  today:[],
+  qc:{lastAt:'02.10.2026', nextAt:'—', result:'ok', note:'', deviations:0},
+  tools:{lastAt:'', ok:true, issue:'', ticket:''},
+  supplies:{lastAt:'', ok:true, lack:'', ticket:''},
+  dayReport:{closed:true, closedAt:'02.10.2026', tickets:[]},
+  clientNotify:{morningSent:true, mapVisible:false, accountOk:true, lastQcPing:'02.10.2026'},
+  metrics:{branch:'Центр', planHours:3, factHours:2.8, visitsWeek:0, geoOkPct:100},
+  history:[H('02.10.2026 10:00','Клиентский сервис','Абонемент из договора #299 → архив (разовый режим)')]
+ },
+];
+
+const fBrig=document.getElementById('fBrig');
+BRIGADIERS.forEach(b=>{const o=document.createElement('option');o.value=b;o.textContent=b;fBrig.appendChild(o);});
+
+let sumMode='', cur=null, tab='overview';
+const q=document.getElementById('q'), fStatus=document.getElementById('fStatus');
+const tbody=document.querySelector('#tbl tbody'), empty=document.getElementById('empty');
+const drawer=document.getElementById('drawer'), backdrop=document.getElementById('backdrop');
+
+function filtered(){
+  const s=q.value.trim().toLowerCase();
+  return contracts.filter(c=>{
+    const hay=`${c.id} ${c.title} ${c.client} ${c.objects.join(' ')}`.toLowerCase();
+    if(s && !hay.includes(s)) return false;
+    if(fStatus.value && c.status!==fStatus.value) return false;
+    if(fBrig.value && c.brigadier!==fBrig.value) return false;
+    if(sumMode==='active' && c.status!=='active') return false;
+    if(sumMode==='schedule' && c.status!=='schedule') return false;
+    if(sumMode==='today' && !c.today.length) return false;
+    if(sumMode==='geo' && !c.today.some(v=>v.status!=='planned' && !v.geoIn)) return false;
+    if(sumMode==='supply' && !(c.supplies.ticket || c.tools.ticket || c.today.some(v=>v.lack))) return false;
+    return true;
+  });
+}
+
+function summary(){
+  sActive.textContent=contracts.filter(c=>c.status==='active').length;
+  sSched.textContent=contracts.filter(c=>c.status==='schedule').length;
+  sToday.textContent=contracts.reduce((n,c)=>n+c.today.length,0);
+  sGeo.textContent=contracts.reduce((n,c)=>n+c.today.filter(v=>v.status!=='planned'&&!v.geoIn).length,0);
+  sSupply.textContent=contracts.filter(c=>c.supplies.ticket||c.tools.ticket||c.today.some(v=>v.lack)).length;
+  document.querySelectorAll('#sum .sum').forEach(el=>el.classList.toggle('on',el.dataset.s===sumMode));
+}
+
+function todayChips(c){
+  if(!c.today.length) return '<span class="c-sub">нет визитов</span>';
+  return c.today.map(v=>{
+    const chips=[];
+    chips.push(`<span class="chip">${VISIT_ST[v.status][0]}</span>`);
+    if(v.status!=='planned') chips.push(v.geoIn?'<span class="chip ok">гео ✓</span>':'<span class="chip bad">нет гео</span>');
+    if(v.roomOver) chips.push('<span class="chip warn">пересидел зону</span>');
+    if(v.lack) chips.push('<span class="chip warn">нехватка</span>');
+    return `<div><b>${esc(v.plan)}</b> ${esc(v.obj)}<div class="chips">${chips.join('')}</div></div>`;
+  }).join('');
+}
+
+function render(){
+  summary();
+  const rows=filtered();
+  empty.style.display=rows.length?'none':'';
+  tbody.innerHTML=rows.map(c=>`<tr data-id="${c.id}">
+    <td><b>${esc(c.id)}</b><div class="c-sub">${esc(c.title)}</div></td>
+    <td>${esc(c.client)}<div class="c-sub">${esc(c.objects[0]||'')}</div></td>
+    <td>${c.schedule.approved?badge('Утверждён','green'):badge('Черновик','amber')}
+      <div class="c-sub">${esc(c.schedule.days)} · ${esc(c.schedule.window)}</div></td>
+    <td>${todayChips(c)}</td>
+    <td>${esc(c.brigadier)}</td>
+    <td>${badge(...STATUSES[c.status])}</td>
+  </tr>`).join('');
+}
+
+document.getElementById('sum').addEventListener('click',e=>{
+  const el=e.target.closest('.sum'); if(!el) return;
+  sumMode=sumMode===el.dataset.s?'':el.dataset.s;
+  if(sumMode==='schedule') fStatus.value='schedule';
+  else if(sumMode==='active') fStatus.value='active';
+  else if(!['today','geo','supply'].includes(sumMode)) fStatus.value='';
+  render();
+});
+[q,fStatus,fBrig].forEach(el=>{el.addEventListener('input',render);el.addEventListener('change',render);});
+btnReset.onclick=()=>{q.value='';fStatus.value='';fBrig.value='';sumMode='';render();};
+tbody.addEventListener('click',e=>{
+  const tr=e.target.closest('tr'); if(!tr) return;
+  openDrawer(contracts.find(c=>c.id===tr.dataset.id));
+});
+
+function closeDrawer(){backdrop.style.display='none';cur=null;}
+backdrop.onclick=e=>{if(e.target===backdrop)closeDrawer();};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer();});
+
+const TABS=[
+  ['overview','Обзор'],
+  ['schedule','1. График'],
+  ['visits','2–3. Визиты'],
+  ['qc','4. Проверки'],
+  ['stock','5–6–8. Склад'],
+  ['day','7. Отчёт дня'],
+  ['client','9. Заказчик'],
+  ['analytics','10–11. Отчёты'],
+];
+
+function openDrawer(c, keepTab){
+  cur=c; if(!keepTab) tab='overview';
+  const sch=c.schedule;
+  drawer.innerHTML=`
+  <div class="card">
+    <div class="drawer-head">
+      <div>
+        <div style="font-size:18px;font-weight:700">${esc(c.id)} ${badge(...STATUSES[c.status])}</div>
+        <div style="margin-top:4px;font-weight:600">${esc(c.title)}</div>
+        <div class="c-sub">${esc(c.client)} · ${money(c.amount)}/мес</div>
+        <div class="raci">Бригадир: ${esc(c.brigadier)}${c.fromDeal?` · из договора #${c.fromDeal}`:''}</div>
+      </div>
+      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+    <div class="stage-flow">
+      <span>График</span><span>→</span><span>Старт+гео+фото</span><span>→</span><span>Финиш+гео+фото</span><span>→</span>
+      <span>QC</span><span>→</span><span>Инструмент</span><span>→</span><span>Расходники</span><span>→</span>
+      <span>Отчёт дня</span><span>→</span><span>Контроль</span><span>→</span><span>Заказчик</span><span>→</span><span>Филиал/клинеры</span>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="tabs" id="tabs">${TABS.map(([k,t])=>`<span data-t="${k}" class="${tab===k?'active':''}">${t}</span>`).join('')}</div>
+
+    <div class="tab-pane ${tab==='overview'?'on':''}" data-p="overview">
+      <div class="kv"><b>Объекты:</b> ${c.objects.map(esc).join(', ')}</div>
+      <div class="kv"><b>График:</b> ${sch.approved?'утверждён':'не утверждён'} · ${esc(sch.days)} · ${esc(sch.window)}</div>
+      <div class="kv"><b>Сегодня:</b> ${c.today.length?c.today.map(v=>`${v.obj} (${VISIT_ST[v.status][0]})`).join(', '):'—'}</div>
+      <div class="kv"><b>Открытые заявки:</b> ${[c.supplies.ticket,c.tools.ticket].filter(Boolean).map(esc).join(' · ')||'нет'}</div>
+      <div class="act-row">
+        <span class="btn sm" data-goto="schedule">К графику</span>
+        <span class="btn sm primary" data-goto="visits">Визиты сегодня</span>
+      </div>
+    </div>
+
+    <div class="tab-pane ${tab==='schedule'?'on':''}" data-p="schedule">
+      <b>Этап 1. Согласование графика</b>
+      <div class="c-sub" style="margin-top:4px">Цель: утвердить график выхода клинеров до начала обслуживания. Отвечает: бригадир.</div>
+      <div class="qual-block">
+        <h4>Параметры</h4>
+        <div class="qual-grid">
+          <label class="field"><span>Дни</span><input class="input" id="schDays" value="${esc(sch.days)}"></label>
+          <label class="field"><span>Окно</span><input class="input" id="schWin" value="${esc(sch.window)}"></label>
+          <label class="field full"><span>Состав бригады</span><input class="input" id="schTeam" value="${esc(sch.cleaners.join(', '))}"></label>
+          <label class="field full"><span>Зоны</span><input class="input" id="schZones" value="${esc(sch.zones)}"></label>
+          <label class="field full"><span>Заметки</span><textarea class="input" id="schNotes" rows="2">${esc(sch.notes)}</textarea></label>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
+          <label class="check-pill"><input type="checkbox" id="schOkClean" ${sch.agreedCleaners?'checked':''}> Согласовано с клинерами</label>
+          <label class="check-pill"><input type="checkbox" id="schOkClient" ${sch.agreedClient?'checked':''}> Согласовано с заказчиком</label>
+          <label class="check-pill"><input type="checkbox" id="schFixed" ${sch.approved?'checked':''}> Зафиксирован в системе</label>
+        </div>
+      </div>
+      <div class="act-row">
+        <span class="btn sm" id="btnSaveSch">Сохранить</span>
+        <span class="btn sm primary" id="btnApproveSch">Утвердить график</span>
+      </div>
+      <div class="qual-mistakes"><b>Типичные ошибки</b><ul>
+        <li>график не согласован с клинерами → неявка;</li>
+        <li>не согласован с заказчиком → срыв доступа;</li>
+        <li>график не зафиксирован → работа «по памяти».</li>
+      </ul></div>
+      <div class="qual-metrics"><b>Метрики</b><ul>
+        <li>% объектов с утверждённым графиком до старта;</li>
+        <li>% срывов из-за графика.</li>
+      </ul></div>
+    </div>
+
+    <div class="tab-pane ${tab==='visits'?'on':''}" data-p="visits">
+      <b>Этапы 2–3. Выход и завершение (гео + отчёты)</b>
+      <div class="c-sub" style="margin-top:4px">2ГИС ГеоПоток: въезд/выезд из геозоны, время на объекте, история перемещений. ГОСТ: пересидение зоны без аргументации — отклонение.</div>
+      ${c.today.length?c.today.map((v,i)=>`
+        <div class="visit-row">
+          <div class="t">${esc(v.plan)}</div>
+          <div style="flex:1">
+            <div><b>${esc(v.obj)}</b> ${badge(...VISIT_ST[v.status])}</div>
+            <div class="kv">Старт: ${esc(v.start||'—')} ${v.geoIn?'<span class="geo-ok">· гео ✓</span>':'<span class="geo-bad">· нет гео</span>'}
+              · отчёт «до»: ${v.reportBefore?`✓ (${v.photosBefore} фото)`:'✗'}</div>
+            <div class="kv">Финиш: ${esc(v.end||'—')} ${v.geoOut?'<span class="geo-ok">· гео ✓</span>':'<span class="geo-bad">· нет выезда</span>'}
+              · отчёт «после»: ${v.reportAfter?`✓ (${v.photosAfter} фото)`:'✗'}</div>
+            <div class="kv">Время на объекте: <b>${v.dwellMin||0}</b> / план ${v.planMin} мин
+              ${v.roomOver?`<span class="chip warn">пересидел зону</span>`:''}</div>
+            ${v.roomNote?`<div class="c-sub">${esc(v.roomNote)}</div>`:''}
+            <div class="chips" style="margin-top:6px">
+              ${v.checklist.floors?'<span class="chip ok">полы</span>':''}
+              ${v.checklist.bath?'<span class="chip ok">санузлы</span>':'<span class="chip warn">санузлы</span>'}
+              ${v.checklist.surfaces?'<span class="chip ok">поверхности</span>':''}
+              ${v.checklist.kitchen?'<span class="chip ok">кухня</span>':''}
+              ${v.checklist.trash?'<span class="chip ok">мусор</span>':'<span class="chip warn">мусор</span>'}
+            </div>
+            <div class="act-row">
+              <span class="btn sm" data-vstart="${i}">Отметить старт + гео</span>
+              <span class="btn sm" data-vend="${i}">Завершить + гео</span>
+            </div>
+          </div>
+        </div>`).join('')
+      :'<div class="c-sub" style="margin-top:10px">На сегодня визитов нет (график / пауза / архив).</div>'}
+      <div class="qual-mistakes"><b>Типичные ошибки</b><ul>
+        <li>геолокация отключена → отметка не привязана к объекту;</li>
+        <li>отметка до фактического прибытия;</li>
+        <li>отчёт «до/после» не снят; пересидение зоны без аргументации.</li>
+      </ul></div>
+      <div class="qual-metrics"><b>Метрики</b><ul>
+        <li>% выходов с гео и отчётом «до»;</li>
+        <li>отклонение прибытия от графика;</li>
+        <li>% визитов с временем на объекте и отчётом «после»;</li>
+        <li>среднее время на объекте vs план.</li>
+      </ul></div>
+    </div>
+
+    <div class="tab-pane ${tab==='qc'?'on':''}" data-p="qc">
+      <b>Этап 4. Проверка объектов бригадиром</b>
+      <div class="c-sub" style="margin-top:4px">Регулярная проверка качества на каждом объекте.</div>
+      <div class="qual-block">
+        <div class="kv"><b>Последняя:</b> ${esc(c.qc.lastAt||'—')} · результат: ${c.qc.result?badge(c.qc.result==='ok'?'OK':'Замечания',c.qc.result==='ok'?'green':'amber'):'—'}</div>
+        <div class="kv"><b>Следующая:</b> ${esc(c.qc.nextAt||'—')}</div>
+        <div class="kv"><b>Отклонения:</b> ${c.qc.deviations}</div>
+        <label class="field" style="margin-top:8px"><span>Комментарий</span>
+          <textarea class="input" id="qcNote" rows="2">${esc(c.qc.note||'')}</textarea></label>
+        <div class="act-row">
+          <span class="btn sm primary" id="btnQcOk">Проверка OK + пинг заказчику</span>
+          <span class="btn sm" id="btnQcWarn">Есть отклонения</span>
+        </div>
+      </div>
+      <div class="qual-mistakes"><b>Типичные ошибки</b><ul>
+        <li>проверка не проведена → отклонения копятся;</li>
+        <li>результат не зафиксирован → нечего предъявить.</li>
+      </ul></div>
+      <div class="qual-metrics"><b>Метрики</b><ul>
+        <li>% объектов, проверенных за неделю;</li>
+        <li>% объектов с отклонениями.</li>
+      </ul></div>
+    </div>
+
+    <div class="tab-pane ${tab==='stock'?'on':''}" data-p="stock">
+      <b>Этапы 5–6 и 8. Инструмент, расходники, сводный контроль</b>
+      <div class="qual-block">
+        <h4>Инструмент</h4>
+        <div class="kv"><b>Проверка:</b> ${esc(c.tools.lastAt||'—')} · ${c.tools.ok?badge('Исправен','green'):badge('Неисправен','red')}</div>
+        <div class="kv"><b>Проблема:</b> ${esc(c.tools.issue||'—')}</div>
+        <div class="kv"><b>Заявка:</b> ${esc(c.tools.ticket||'—')}</div>
+        <div class="act-row"><span class="btn sm" id="btnToolOk">Чек-ап OK</span><span class="btn sm" id="btnToolBad">Изъять + заявка на ремонт</span></div>
+      </div>
+      <div class="qual-block">
+        <h4>Расходники</h4>
+        <div class="kv"><b>Проверка:</b> ${esc(c.supplies.lastAt||'—')} · ${c.supplies.ok?badge('Достаточно','green'):badge('Нехватка','amber')}</div>
+        <div class="kv"><b>Не хватает:</b> ${esc(c.supplies.lack||'—')}</div>
+        <div class="kv"><b>Заявка:</b> ${esc(c.supplies.ticket||'—')}</div>
+        <div class="act-row"><span class="btn sm" id="btnSupOk">Проверка OK</span><span class="btn sm" id="btnSupBad">Заявка на пополнение</span></div>
+      </div>
+      <div class="qual-block">
+        <h4>Сводный контроль бригадира (этап 8)</h4>
+        <div class="c-sub">Сводит проверки 5–6 и заявки из отчётов дня (этап 7).</div>
+        <div class="kv"><b>Открыто:</b> ${[c.tools.ticket,c.supplies.ticket,...c.dayReport.tickets].filter((v,i,a)=>v&&a.indexOf(v)===i).map(esc).join(' · ')||'нет'}</div>
+        <div class="act-row"><span class="btn sm primary" id="btnStockCtrl">Зафиксировать контроль</span></div>
+      </div>
+      <div class="qual-mistakes"><b>Типичные ошибки</b><ul>
+        <li>проверка не по графику; неисправный инструмент в работе;</li>
+        <li>нехватка выявлена в момент уборки; заявки не сводятся.</li>
+      </ul></div>
+      <div class="qual-metrics"><b>Метрики</b><ul>
+        <li>% проверок по графику; % изъятого неисправного инструмента;</li>
+        <li>% объектов с нехваткой; % закрытых заявок.</li>
+      </ul></div>
+    </div>
+
+    <div class="tab-pane ${tab==='day'?'on':''}" data-p="day">
+      <b>Этап 7. Отчёт о рабочем дне по чек-листу</b>
+      <div class="c-sub" style="margin-top:4px">Клинер закрывает отчёт по каждому объекту: зоны, расходники, флаги нехватки, фото. Система не даёт закрыть без обязательных полей.</div>
+      ${c.today.map((v,i)=>`
+        <div class="qual-block">
+          <h4>${esc(v.obj)} · ${esc(v.plan)}</h4>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <label class="check-pill"><input type="checkbox" data-cl="${i}" data-k="floors" ${v.checklist.floors?'checked':''}> Полы</label>
+            <label class="check-pill"><input type="checkbox" data-cl="${i}" data-k="bath" ${v.checklist.bath?'checked':''}> Санузлы</label>
+            <label class="check-pill"><input type="checkbox" data-cl="${i}" data-k="surfaces" ${v.checklist.surfaces?'checked':''}> Поверхности</label>
+            <label class="check-pill"><input type="checkbox" data-cl="${i}" data-k="kitchen" ${v.checklist.kitchen?'checked':''}> Кухня</label>
+            <label class="check-pill"><input type="checkbox" data-cl="${i}" data-k="trash" ${v.checklist.trash?'checked':''}> Мусор</label>
+          </div>
+          <label class="field" style="margin-top:8px"><span>Что поменяно из расходников</span>
+            <input class="input" data-used="${i}" value="${esc(v.supplyUsed||'')}"></label>
+          <label class="field"><span>Чего не хватает</span>
+            <input class="input" data-lack="${i}" value="${esc(v.lack||'')}" placeholder="если пусто — заявка не нужна"></label>
+        </div>`).join('')||'<div class="c-sub">Нет объектов за сегодня</div>'}
+      <div class="kv" style="margin-top:10px"><b>Статус отчёта дня:</b> ${c.dayReport.closed?badge('Закрыт','green'):badge('Открыт','amber')} ${esc(c.dayReport.closedAt||'')}</div>
+      <div class="act-row">
+        <span class="btn sm" id="btnSaveDay">Сохранить чек-лист</span>
+        <span class="btn sm primary" id="btnCloseDay">Закрыть отчёт дня</span>
+      </div>
+      <div class="qual-mistakes"><b>Типичные ошибки</b><ul>
+        <li>отчёт не закрыт из-за незаполненных полей;</li>
+        <li>заявка не подана при нехватке; фото не приложены;</li>
+        <li>отчёт закрыт на следующий день.</li>
+      </ul></div>
+      <div class="qual-metrics"><b>Метрики</b><ul>
+        <li>% дней с закрытым отчётом по объекту;</li>
+        <li>% отчётов с заявками при нехватке;</li>
+        <li>время до закрытия отчёта; % закрытых в день работы.</li>
+      </ul></div>
+    </div>
+
+    <div class="tab-pane ${tab==='client'?'on':''}" data-p="client">
+      <b>Этап 9. Оповещение заказчика и доступ к отчётам</b>
+      <div class="c-sub" style="margin-top:4px">Утренний старт, карта сотрудников, пинг после QC, аккаунт заказчика.</div>
+      <div class="qual-block">
+        <div class="kv"><b>Утренний отчёт о начале:</b> ${c.clientNotify.morningSent?badge('Отправлен','green'):badge('Не отправлен','amber')}</div>
+        <div class="kv"><b>Карта сотрудников:</b> ${c.clientNotify.mapVisible?badge('Видна','green'):badge('Выкл','gray')}</div>
+        <div class="kv"><b>Аккаунт заказчика:</b> ${c.clientNotify.accountOk?badge('Активен','green'):badge('Нет','red')}</div>
+        <div class="kv"><b>Последний пинг QC:</b> ${esc(c.clientNotify.lastQcPing||'—')}</div>
+        <div class="act-row">
+          <span class="btn sm" id="btnMorning">Отправить утренний отчёт</span>
+          <span class="btn sm" id="btnMap">Показать карту заказчику</span>
+          <a class="btn sm primary" href="client-cabinet.html">Кабинет заказчика →</a>
+        </div>
+      </div>
+      <div class="qual-mistakes"><b>Типичные ошибки</b><ul>
+        <li>проверка есть, но не отмечена → оповещение не ушло;</li>
+        <li>оповещение без фактической проверки;</li>
+        <li>у заказчика нет аккаунта → не видит отчёты и карту.</li>
+      </ul></div>
+      <div class="qual-metrics"><b>Метрики</b><ul>
+        <li>% проверок с оповещением; соответствие оповещений факту;</li>
+        <li>% заказчиков с активным аккаунтом; % утренних отчётов вовремя.</li>
+      </ul></div>
+    </div>
+
+    <div class="tab-pane ${tab==='analytics'?'on':''}" data-p="analytics">
+      <b>Этапы 10–11. Отчётность по филиалам и метрики клинеров</b>
+      <div class="c-sub" style="margin-top:4px">Данные из геозон 2ГИС ГеоПоток · выгрузка .xls (mock).</div>
+      <div class="qual-block">
+        <h4>Филиал · ${esc(c.metrics.branch)}</h4>
+        <div class="kv"><b>План / факт часов (неделя):</b> ${c.metrics.planHours} / ${c.metrics.factHours}</div>
+        <div class="kv"><b>Визитов за неделю:</b> ${c.metrics.visitsWeek}</div>
+        <div class="kv"><b>% визитов с гео:</b> ${c.metrics.geoOkPct}%</div>
+        <div class="act-row"><span class="btn sm" id="btnXls">Выгрузить .xls</span></div>
+      </div>
+      <div class="qual-block">
+        <h4>Клинеры по договору</h4>
+        ${sch.cleaners.map(name=>`<div class="mini-card"><b>${esc(name)}</b>
+          <div class="sub">В работе · устройство online · история перемещений (mock ГеоПоток)</div>
+          <div class="sub">Часы факт/план · время на объектах · время в пути · отклонения</div>
+        </div>`).join('')||'<span class="c-sub">Состав не задан</span>'}
+      </div>
+      <div class="qual-mistakes"><b>Типичные ошибки</b><ul>
+        <li>геозоны настроены неточно; смартфон без гео → дыры в метриках;</li>
+        <li>отчёты не сверяются с фактом и не используются для решений.</li>
+      </ul></div>
+      <div class="qual-metrics"><b>Метрики</b><ul>
+        <li>% филиалов с корректными геозонами; факт/план по времени;</li>
+        <li>часы клинера; % отклонений от графика; эффективность.</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <label class="field" style="margin-bottom:0"><span>Статус договора</span>
+      <select class="input" id="cStatus">
+        ${Object.entries(STATUSES).map(([k,[t]])=>`<option value="${k}" ${c.status===k?'selected':''}>${t}</option>`).join('')}
+      </select></label>
+  </div>
+
+  <div class="card" style="margin-top:12px"><b>История</b>
+    <div>${c.history.slice().reverse().map(h=>`<div class="hist-item"><span class="when">${h.at}</span><span style="flex:1"><b>${esc(h.text)}</b><div class="c-sub">${esc(h.who)}</div></span></div>`).join('')}</div>
+  </div>`;
+
+  backdrop.style.display='flex';
+  bindDrawer(c);
+}
+
+function bindDrawer(c){
+  document.getElementById('tabs').onclick=e=>{
+    const s=e.target.closest('[data-t]'); if(!s) return;
+    tab=s.dataset.t; openDrawer(c,true);
+  };
+  drawer.querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>{tab=b.dataset.goto;openDrawer(c,true);});
+  document.getElementById('cStatus').onchange=e=>{
+    c.status=e.target.value;
+    c.history.push(H(now(),'Менеджер',`Статус → ${STATUSES[c.status][0]}`));
+    toast(`Статус: ${STATUSES[c.status][0]}`); render(); openDrawer(c,true);
+  };
+
+  document.getElementById('btnSaveSch')?.addEventListener('click',()=>{
+    const s=c.schedule;
+    s.days=schDays.value.trim(); s.window=schWin.value.trim();
+    s.cleaners=schTeam.value.split(',').map(x=>x.trim()).filter(Boolean);
+    s.zones=schZones.value.trim(); s.notes=schNotes.value.trim();
+    s.agreedCleaners=schOkClean.checked; s.agreedClient=schOkClient.checked; s.approved=schFixed.checked;
+    c.history.push(H(now(),c.brigadier,'График сохранён'));
+    toast('График сохранён'); render(); openDrawer(c,true);
+  });
+  document.getElementById('btnApproveSch')?.addEventListener('click',()=>{
+    if(!schOkClean.checked||!schOkClient.checked){ toast('Нужно согласование с клинерами и заказчиком',true); return; }
+    c.schedule.approved=true; c.schedule.fixedAt=now().slice(0,10);
+    c.schedule.agreedCleaners=true; c.schedule.agreedClient=true;
+    if(c.status==='schedule') c.status='active';
+    c.history.push(H(now(),c.brigadier,'График утверждён · договор активен'));
+    toast('График утверждён'); render(); openDrawer(c,true);
+  });
+
+  drawer.querySelectorAll('[data-vstart]').forEach(b=>b.onclick=()=>{
+    const v=c.today[+b.dataset.vstart];
+    v.status='started'; v.start=now().slice(11); v.geoIn=true; v.reportBefore=true; v.photosBefore=Math.max(1,v.photosBefore||0);
+    c.clientNotify.morningSent=true;
+    c.history.push(H(now(),c.schedule.cleaners[0]||'Клинер',`Старт ${v.obj} · гео ✓ · отчёт «до»`));
+    toast('Старт зафиксирован + гео'); render(); openDrawer(c,true);
+  });
+  drawer.querySelectorAll('[data-vend]').forEach(b=>b.onclick=()=>{
+    const v=c.today[+b.dataset.vend];
+    if(!v.geoIn){ toast('Сначала старт с геолокацией',true); return; }
+    v.status='done'; v.end=now().slice(11); v.geoOut=true; v.reportAfter=true; v.photosAfter=Math.max(1,v.photosAfter||0);
+    v.dwellMin=v.dwellMin||v.planMin;
+    c.history.push(H(now(),c.schedule.cleaners[0]||'Клинер',`Финиш ${v.obj} · гео ✓ · ${v.dwellMin} мин`));
+    toast('Завершение зафиксировано'); render(); openDrawer(c,true);
+  });
+
+  document.getElementById('btnQcOk')?.addEventListener('click',()=>{
+    c.qc.lastAt=now().slice(0,10); c.qc.nextAt='через неделю'; c.qc.result='ok'; c.qc.deviations=0;
+    c.qc.note=qcNote.value.trim()||'Замечаний нет';
+    c.clientNotify.lastQcPing=c.qc.lastAt;
+    c.history.push(H(now(),c.brigadier,'QC OK · пинг заказчику'));
+    toast('Проверка OK, заказчик уведомлён'); render(); openDrawer(c,true);
+  });
+  document.getElementById('btnQcWarn')?.addEventListener('click',()=>{
+    c.qc.lastAt=now().slice(0,10); c.qc.result='warn'; c.qc.deviations=(c.qc.deviations||0)+1;
+    c.qc.note=qcNote.value.trim()||'Есть отклонения';
+    c.history.push(H(now(),c.brigadier,'QC · отклонения · корректирующие действия'));
+    toast('Отклонения зафиксированы'); render(); openDrawer(c,true);
+  });
+
+  document.getElementById('btnToolOk')?.addEventListener('click',()=>{
+    c.tools.lastAt=now().slice(0,10); c.tools.ok=true; c.tools.issue=''; 
+    c.history.push(H(now(),c.brigadier,'Чек-ап инструмента OK')); toast('Инструмент OK'); render(); openDrawer(c,true);
+  });
+  document.getElementById('btnToolBad')?.addEventListener('click',()=>{
+    c.tools.lastAt=now().slice(0,10); c.tools.ok=false; c.tools.issue=c.tools.issue||'Неисправность';
+    c.tools.ticket=c.tools.ticket||`TOOL-${Math.floor(Math.random()*90+10)} · в ремонт`;
+    c.history.push(H(now(),c.brigadier,`Инструмент изъят · ${c.tools.ticket}`));
+    toast('Заявка на ремонт'); render(); openDrawer(c,true);
+  });
+  document.getElementById('btnSupOk')?.addEventListener('click',()=>{
+    c.supplies.lastAt=now().slice(0,10); c.supplies.ok=true; c.supplies.lack='';
+    c.history.push(H(now(),c.brigadier,'Расходники OK')); toast('Расходники OK'); render(); openDrawer(c,true);
+  });
+  document.getElementById('btnSupBad')?.addEventListener('click',()=>{
+    c.supplies.lastAt=now().slice(0,10); c.supplies.ok=false;
+    c.supplies.lack=c.supplies.lack||'Требуется пополнение';
+    c.supplies.ticket=c.supplies.ticket||`SUP-${Math.floor(Math.random()*90+10)} · пополнить`;
+    c.dayReport.tickets.push(c.supplies.ticket);
+    c.history.push(H(now(),c.brigadier,`Заявка расходников · ${c.supplies.ticket}`));
+    toast('Заявка на пополнение'); render(); openDrawer(c,true);
+  });
+  document.getElementById('btnStockCtrl')?.addEventListener('click',()=>{
+    c.history.push(H(now(),c.brigadier,'Сводный контроль расходников и инструмента'));
+    toast('Контроль зафиксирован'); openDrawer(c,true);
+  });
+
+  document.getElementById('btnSaveDay')?.addEventListener('click',()=>{
+    c.today.forEach((v,i)=>{
+      drawer.querySelectorAll(`[data-cl="${i}"]`).forEach(cb=>{v.checklist[cb.dataset.k]=cb.checked;});
+      const u=drawer.querySelector(`[data-used="${i}"]`); if(u) v.supplyUsed=u.value.trim();
+      const l=drawer.querySelector(`[data-lack="${i}"]`); if(l) v.lack=l.value.trim();
+    });
+    toast('Чек-лист сохранён'); render(); openDrawer(c,true);
+  });
+  document.getElementById('btnCloseDay')?.addEventListener('click',()=>{
+    if(!c.today.length){ toast('Нет визитов за день',true); return; }
+    const incomplete=c.today.find(v=>!v.checklist.floors||!v.checklist.bath||!v.checklist.trash||v.status!=='done');
+    if(incomplete){ toast('Закройте визиты и обязательные пункты чек-листа',true); return; }
+    c.today.forEach(v=>{ if(v.lack){ const t=`SUP-${Math.floor(Math.random()*90+10)}`; c.dayReport.tickets.push(t); c.supplies.ticket=c.supplies.ticket||t; c.supplies.lack=v.lack; c.supplies.ok=false; }});
+    c.dayReport.closed=true; c.dayReport.closedAt=now();
+    c.history.push(H(now(),c.schedule.cleaners[0]||'Клинер','Отчёт дня закрыт'));
+    toast('Отчёт дня закрыт'); render(); openDrawer(c,true);
+  });
+
+  document.getElementById('btnMorning')?.addEventListener('click',()=>{
+    c.clientNotify.morningSent=true;
+    c.history.push(H(now(),'Система','Утренний отчёт о начале работ → заказчик'));
+    toast('Утренний отчёт отправлен'); openDrawer(c,true);
+  });
+  document.getElementById('btnMap')?.addEventListener('click',()=>{
+    c.clientNotify.mapVisible=true;
+    toast('Карта сотрудников доступна заказчику'); openDrawer(c,true);
+  });
+  document.getElementById('btnXls')?.addEventListener('click',()=>toast('Выгрузка .xls (mock)'));
+}
+
+document.getElementById('btnNew').onclick=()=>{
+  const id=`RC-${String(contracts.length+1).padStart(2,'0')}`;
+  const c={
+    id, title:'Новый постоянный договор', client:'— выберите клиента —', objects:['—'],
+    status:'schedule', brigadier:BRIGADIERS[0], amount:0, fromDeal:null,
+    schedule:{approved:false, days:'Пн–Пт', window:'09:00–12:00', cleaners:[], zones:'', agreedCleaners:false, agreedClient:false, fixedAt:'', notes:''},
+    today:[], qc:{lastAt:'', nextAt:'', result:'', note:'', deviations:0},
+    tools:{lastAt:'', ok:true, issue:'', ticket:''}, supplies:{lastAt:'', ok:true, lack:'', ticket:''},
+    dayReport:{closed:false, closedAt:'', tickets:[]},
+    clientNotify:{morningSent:false, mapVisible:false, accountOk:false, lastQcPing:''},
+    metrics:{branch:'Центр', planHours:0, factHours:0, visitsWeek:0, geoOkPct:0},
+    history:[H(now(),'Менеджер','Договор создан · нужен график')],
+  };
+  contracts.unshift(c); render(); openDrawer(c); toast(`Создан ${id}`);
+};
+
+render();
+</script>
+</body>
+</html>

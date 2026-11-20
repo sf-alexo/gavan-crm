@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чистая Гавань — мокапы бизнес-процессов</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="page" style="max-width:1180px">
+  <h1>«Чистая Гавань» — разовый заказ</h1>
+  <p style="color:var(--muted); max-width:760px">
+    Лиды и договора раздельно. Этапы по RACI: новый → квалификация → расчёт КП →
+    технолог → замер → подтверждение заказа → планирование → выполнение → закрытие → постпродажа.
+  </p>
+
+  <div class="card" style="margin-bottom:24px; overflow:auto">
+    <h3 style="margin-top:0">RACI</h3>
+    <table class="table" style="margin:0; min-width:520px">
+      <thead><tr><th>Этап</th><th>Где</th><th>Отвечает</th><th>Участвует</th></tr></thead>
+      <tbody>
+        <tr><td>Новый</td><td><a href="leads.html">Лиды</a></td><td>Диспетчер</td><td>—</td></tr>
+        <tr><td>Квалификация</td><td><a href="leads.html">Лиды</a></td><td>Менеджер продаж</td><td>—</td></tr>
+        <tr><td>Расчёт стоимости и КП</td><td><a href="leads.html">Лиды</a></td><td>Менеджер продаж</td><td>—</td></tr>
+        <tr><td>Согласование с технологом</td><td><a href="leads.html">Лиды</a></td><td>Технолог / бригадир</td><td>Менеджер продаж</td></tr>
+        <tr><td>Выезд на замер</td><td><a href="leads.html">Лиды</a></td><td>Технолог / бригадир</td><td>Менеджер продаж</td></tr>
+        <tr><td>Согласование и подтверждение заказа</td><td><a href="leads.html">Лиды</a></td><td>Менеджер продаж</td><td>—</td></tr>
+        <tr><td>Планирование</td><td><a href="deals.html">Договора</a> + <a href="orders.html">заказ</a></td><td>Диспетчер</td><td>Бригадир</td></tr>
+        <tr><td>Выполнение</td><td><a href="deals.html">Договора</a> + <a href="order-work.html">заказ</a></td><td>Бригадир</td><td>Клинеры</td></tr>
+        <tr><td>Закрытие (финансы и документы)</td><td><a href="deals.html">Договора</a></td><td>Менеджер / бухгалтер</td><td>—</td></tr>
+        <tr><td>Постпродажа и отзывы</td><td><a href="deals.html">Договора</a></td><td>Менеджер / клиентский сервис</td><td>—</td></tr>
+        <tr><td>Архив</td><td><a href="deals.html">Договора</a></td><td>—</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Экраны</h2>
+  <div class="flow">
+    <a class="step" href="leads.html">
+      <div class="n">ЛИДЫ</div>
+      <div class="t">Новый → … → Подтверждение</div>
+      <div class="d">До твёрдого «да» клиента</div>
+    </a>
+    <span class="arrow">→</span>
+    <a class="step" href="deals.html">
+      <div class="n">СДЕЛКИ</div>
+      <div class="t">Планирование</div>
+      <div class="d">Диспетчер + бригадир</div>
+    </a>
+    <span class="arrow">→</span>
+    <a class="step" href="deals.html">
+      <div class="n">СДЕЛКИ</div>
+      <div class="t">Выполнение</div>
+      <div class="d">Бригадир + клинеры</div>
+    </a>
+    <span class="arrow">→</span>
+    <a class="step" href="deals.html">
+      <div class="n">СДЕЛКИ</div>
+      <div class="t">Закрытие</div>
+      <div class="d">Счёт · оплата · документы · сверка</div>
+    </a>
+    <span class="arrow">→</span>
+    <a class="step" href="deals.html">
+      <div class="n">СДЕЛКИ</div>
+      <div class="t">Постпродажа</div>
+      <div class="d">Отзыв · негатив · абонемент · LTV</div>
+    </a>
+    <span class="arrow">→</span>
+    <a class="step" href="deals.html">
+      <div class="n">СДЕЛКИ</div>
+      <div class="t">Архив</div>
+      <div class="d">Завершённые карточки</div>
+    </a>
+  </div>
+
+  <div class="grid cols-3" style="margin-top:32px">
+    <a class="card" href="dashboard.html" style="display:block"><b>Дашборд</b><p style="color:var(--muted);font-size:13px;margin:6px 0 0">Очереди по этапам RACI</p></a>
+    <a class="card" href="orders.html" style="display:block"><b>Календарь заказов</b><p style="color:var(--muted);font-size:13px;margin:6px 0 0">Детали планирования и выполнения</p></a>
+    <a class="card" href="client-cabinet.html" style="display:block"><b>Кабинет клиента</b><p style="color:var(--muted);font-size:13px;margin:6px 0 0">Статус и фото</p></a>
+  </div>
+
+  <h1 style="margin-top:48px">Постоянный заказ</h1>
+  <p style="color:var(--muted); max-width:760px">
+    Отдельный контур от разового договора. Корень — договор (абонемент).
+    Этап 1 — согласование графика; этапы 2–11 — повторяющийся цикл (гео, отчёты, QC, склад, заказчик, филиал).
+  </p>
+
+  <div class="card" style="margin-bottom:24px; overflow:auto">
+    <h3 style="margin-top:0">RACI · постоянные</h3>
+    <table class="table" style="margin:0; min-width:520px">
+      <thead><tr><th>Этап</th><th>Где</th><th>Отвечает</th><th>Цикл</th></tr></thead>
+      <tbody>
+        <tr><td>1. Согласование графика</td><td><a href="recurring.html">Постоянные</a></td><td>Бригадир</td><td>разово при старте</td></tr>
+        <tr><td>2–3. Старт / финиш + гео + отчёт</td><td><a href="recurring.html">Постоянные</a> · 2ГИС ГеоПоток</td><td>Клинер / бригадир</td><td>каждый визит</td></tr>
+        <tr><td>4. Проверка объектов</td><td><a href="recurring.html">Постоянные</a></td><td>Бригадир</td><td>по графику QC</td></tr>
+        <tr><td>5–6. Инструмент / расходники</td><td><a href="recurring.html">Постоянные</a></td><td>Бригадир</td><td>регулярно</td></tr>
+        <tr><td>7. Отчёт о рабочем дне</td><td><a href="recurring.html">Постоянные</a></td><td>Клинер</td><td>ежедневно</td></tr>
+        <tr><td>8. Сводный контроль</td><td><a href="recurring.html">Постоянные</a></td><td>Бригадир</td><td>регулярно</td></tr>
+        <tr><td>9. Оповещение заказчика</td><td><a href="recurring.html">Постоянные</a> + кабинет</td><td>Бригадир / система</td><td>по событиям</td></tr>
+        <tr><td>10–11. Филиалы / клинеры</td><td><a href="recurring.html">Постоянные</a></td><td>Опер. менеджер</td><td>день / неделя / месяц</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="flow">
+    <a class="step" href="recurring.html">
+      <div class="n">ДОГОВОР</div>
+      <div class="t">График</div>
+      <div class="d">Этап 1 · бригадир</div>
+    </a>
+    <span class="arrow">→</span>
+    <a class="step" href="recurring.html">
+      <div class="n">ВИЗИТ</div>
+      <div class="t">Старт / финиш</div>
+      <div class="d">Гео · фото · время</div>
+    </a>
+    <span class="arrow">→</span>
+    <a class="step" href="recurring.html">
+      <div class="n">КОНТРОЛЬ</div>
+      <div class="t">QC · склад · день</div>
+      <div class="d">Этапы 4–8</div>
+    </a>
+    <span class="arrow">→</span>
+    <a class="step" href="recurring.html">
+      <div class="n">ПРОЗРАЧНОСТЬ</div>
+      <div class="t">Заказчик · филиал</div>
+      <div class="d">Этапы 9–11</div>
+    </a>
+  </div>
+</div>
+</body>
+</html>

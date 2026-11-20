@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Дашборд — мокап</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<input class="navtoggle" id="navtoggle" type="checkbox">
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">Чистая Гавань <label class="side-close" for="navtoggle" title="Свернуть меню">«</label></div>
+    <nav>
+      <a href="map.html">← Схема процесса</a>
+      <a href="login.html">Вход</a>
+      <a href="dashboard.html" class="active">Дашборд</a>
+      <a href="clients.html">Клиенты</a>
+      <a href="objects.html">Объекты</a>
+      <a href="leads.html">Лиды</a>
+      <a href="deals.html">Договора</a>
+      <a href="orders.html">Заказы</a>
+      <a href="recurring.html">Постоянные</a>
+      <a href="employees.html">Сотрудники</a>
+      <a href="tasks.html">Задачи</a>
+      <a href="history.html">История</a>
+    </nav>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <label class="btn navhide" for="navtoggle" title="Скрыть/показать меню">☰</label>
+      <strong>Гавань — клининг CRM</strong>
+      <div class="topbar-right">
+        <details class="dd">
+          <summary><span class="icon-btn">🔔<span class="n-dot">3</span></span></summary>
+          <div class="dd-menu">
+            <div class="dd-title">Уведомления</div>
+            <a href="order-quality.html">ORD-SEED-003 сдан на проверку</a>
+            <a href="deals.html">Договор «Вектра» выигран · 96 000 ₽</a>
+            <a href="leads.html">Новый лид с сайта</a>
+          </div>
+        </details>
+        <details class="dd">
+          <summary>
+            <span class="avatar">ЕМ</span>
+            <span class="u-meta"><b>Елена Менеджерова</b><i>Менеджер</i></span>
+            <span style="color:var(--muted)">▾</span>
+          </summary>
+          <div class="dd-menu">
+            <a href="#">Профиль</a>
+            <a href="#">Сменить пароль</a>
+            <a href="login.html">Выйти</a>
+          </div>
+        </details>
+      </div>
+    </div>
+    <div class="content">
+      <h2>Доброе утро, Менеджер</h2>
+
+      <div class="grid" style="grid-template-columns:repeat(4,1fr); margin-bottom:16px">
+        <a class="card attn-card danger" href="tasks.html">
+          <div class="num">2</div>
+          <div class="t">Просроченные задачи</div>
+          <div class="s">Требуют внимания</div>
+        </a>
+        <a class="card attn-card" href="leads.html">
+          <div class="num">4</div>
+          <div class="t">Новые лиды</div>
+          <div class="s">Диспетчер · не взяты в работу</div>
+        </a>
+        <a class="card attn-card" href="leads.html">
+          <div class="num">4</div>
+          <div class="t">Квалификация</div>
+          <div class="s">Менеджер продаж</div>
+        </a>
+        <a class="card attn-card" href="leads.html">
+          <div class="num">1</div>
+          <div class="t">Согл. технолог</div>
+          <div class="s">Технолог / бригадир</div>
+        </a>
+        <a class="card attn-card" href="leads.html">
+          <div class="num">1</div>
+          <div class="t">Выезд на замер</div>
+          <div class="s">Технолог / бригадир</div>
+        </a>
+        <a class="card attn-card" href="leads.html">
+          <div class="num">4</div>
+          <div class="t">Подтверждение</div>
+          <div class="s">Менеджер продаж · КП → заказ</div>
+        </a>
+        <a class="card attn-card" href="deals.html">
+          <div class="num">1</div>
+          <div class="t">Планирование</div>
+          <div class="s">Диспетчер + бригадир</div>
+        </a>
+        <a class="card attn-card" href="deals.html">
+          <div class="num">2</div>
+          <div class="t">Выполнение</div>
+          <div class="s">Бригадир + клинеры</div>
+        </a>
+        <a class="card attn-card" href="deals.html">
+          <div class="num">2</div>
+          <div class="t">Закрытие</div>
+          <div class="s">Менеджер / бухгалтер</div>
+        </a>
+      </div>
+
+      <div class="toolbar">
+        <select class="input"><option>Все филиалы</option><option>Центр</option><option>Северный</option></select>
+      </div>
+
+      <div class="grid cols-3" style="margin-bottom:16px">
+        <div class="card stat"><div class="num">6</div><div class="label">Заказов сегодня</div></div>
+        <div class="card stat"><div class="num">3</div><div class="label">В работе сейчас</div></div>
+        <div class="card stat"><div class="num">2</div><div class="label">На проверке качества</div></div>
+        <div class="card stat"><div class="num">142 000 ₽</div><div class="label">Выручка за неделю</div></div>
+        <div class="card stat"><div class="num">4</div><div class="label">Новых лида</div></div>
+        <div class="card stat"><div class="num">7 / 9</div><div class="label">Сотрудников занято</div></div>
+      </div>
+
+      <div class="grid" style="grid-template-columns:2fr 1fr">
+        <div class="card">
+          <h3 style="margin-top:0">Заказы на сегодня</h3>
+          <table class="table">
+            <thead><tr><th>№</th><th>Клиент / объект</th><th>Время</th><th>Исполнитель</th><th>Статус</th></tr></thead>
+            <tbody>
+              <tr><td><a href="order-work.html">ORD-SEED-001</a></td><td>ООО «Ромашка» · БЦ «Меркурий», оф. 402</td><td>09:00</td><td>Бригада А</td><td><span class="badge amber">В работе</span></td></tr>
+              <tr><td><a href="order-assign.html">ORD-SEED-002</a></td><td>ИП Соколов · кв. 87, ул. Ленина 10</td><td>12:00</td><td>Анна Ким</td><td><span class="badge blue">Подтверждён</span></td></tr>
+              <tr><td><a href="order-quality.html">ORD-SEED-003</a></td><td>ООО «Вектра» · склад, Северный р-н</td><td>08:00</td><td>Игорь Савин</td><td><span class="badge purple">На проверке</span></td></tr>
+              <tr><td><a href="#">ORD-SEED-004</a></td><td>ООО «Ромашка» · БЦ «Меркурий», оф. 118</td><td>15:00</td><td>Бригада Б</td><td><span class="badge blue">Запланирован</span></td></tr>
+              <tr><td><a href="#">ORD-SEED-005</a></td><td>Марина Клиентова · коттедж, пос. Лужки</td><td>10:00</td><td>Мария Ли</td><td><span class="badge green">Выполнен</span></td></tr>
+              <tr><td><a href="#">ORD-SEED-006</a></td><td>ООО «Вектра» · офис, наб. Речная 3</td><td>17:00</td><td>—</td><td><span class="badge blue">Запланирован</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0">Лента событий</h3>
+          <table class="table">
+            <tbody>
+              <tr><td><span class="badge blue">Заказ начат</span></td><td>ORD-SEED-001 · Бригада А</td><td>09:04</td></tr>
+              <tr><td><span class="badge amber">CHECKLIST_UPDATED</span></td><td>ORD-SEED-001 · «Санузлы»</td><td>10:21</td></tr>
+              <tr><td><span class="badge purple">Сдан на проверку</span></td><td>ORD-SEED-003 · Игорь Савин</td><td>11:40</td></tr>
+              <tr><td><span class="badge blue">Планирование</span></td><td>Договор #300 · производство</td><td>12:15</td></tr>
+              <tr><td><span class="badge gray">Лид получен</span></td><td>Сайт · «Химчистка мебели»</td><td>13:02</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,30 @@
+# dependencies
+node_modules/
+
+# build
+dist/
+web/dist/
+
+# env / secrets
+.env
+.env.*
+!.env.example
+
+# logs & caches
+*.log
+npm-debug.log*
+.DS_Store
+*.tsbuildinfo
+.cache/
+coverage/
+.turbo/
+
+# tooling / deploy
+.vercel/
+.idea/
+.vscode/
+*.swp
+
+# prisma
+prisma/*.db
+prisma/*.db-journal

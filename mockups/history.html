@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>История — мокап</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<input class="navtoggle" id="navtoggle" type="checkbox">
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">Чистая Гавань <label class="side-close" for="navtoggle" title="Свернуть меню">«</label></div>
+    <nav>
+      <a href="map.html">← Схема процесса</a>
+      <a href="login.html">Вход</a>
+      <a href="dashboard.html">Дашборд</a>
+      <a href="clients.html">Клиенты</a>
+      <a href="objects.html">Объекты</a>
+      <a href="leads.html">Лиды</a>
+      <a href="deals.html">Договора</a>
+      <a href="orders.html">Заказы</a>
+      <a href="recurring.html">Постоянные</a>
+      <a href="employees.html">Сотрудники</a>
+      <a href="tasks.html">Задачи</a>
+      <a href="history.html" class="active">История</a>
+    </nav>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <label class="btn navhide" for="navtoggle" title="Скрыть/показать меню">☰</label>
+      <strong>Гавань — клининг CRM</strong>
+      <div class="topbar-right">
+        <details class="dd">
+          <summary><span class="icon-btn">🔔<span class="n-dot">3</span></span></summary>
+          <div class="dd-menu">
+            <div class="dd-title">Уведомления</div>
+            <a href="order-quality.html">ORD-SEED-003 сдан на проверку</a>
+            <a href="deals.html">Договор «Вектра» выигран · 96 000 ₽</a>
+            <a href="leads.html">Новый лид с сайта</a>
+          </div>
+        </details>
+        <details class="dd">
+          <summary>
+            <span class="avatar">ЕМ</span>
+            <span class="u-meta"><b>Елена Менеджерова</b><i>Менеджер</i></span>
+            <span style="color:var(--muted)">▾</span>
+          </summary>
+          <div class="dd-menu">
+            <a href="#">Профиль</a>
+            <a href="#">Сменить пароль</a>
+            <a href="login.html">Выйти</a>
+          </div>
+        </details>
+      </div>
+    </div>
+    <div class="content">
+      <h2>История</h2>
+      <div class="toolbar">
+        <select class="input" style="max-width:180px"><option>Все сущности</option><option>Заказы</option><option>Договора</option><option>Клиенты</option><option>Лиды</option></select>
+        <input class="input" placeholder="Поиск по номеру / ID…">
+        <input class="input" type="date" value="2026-10-06" style="max-width:160px">
+      </div>
+      <div class="card">
+        <table class="table">
+          <thead><tr><th>Время</th><th>Событие</th><th>Сущность</th><th>Актор</th></tr></thead>
+          <tbody>
+            <tr><td>13:02</td><td><span class="badge gray">Лид получен</span></td><td>Лид · «Химчистка мебели»</td><td>сайт (форма)</td></tr>
+            <tr><td>12:15</td><td><span class="badge green">Договор выигран</span></td><td>Договор · ООО «Вектра» 96 000 ₽</td><td>Елена Менеджерова</td></tr>
+            <tr><td>12:15</td><td><span class="badge gray">Заказ создан</span></td><td>ORD-SEED-006</td><td>Елена Менеджерова</td></tr>
+            <tr><td>11:40</td><td><span class="badge purple">Сдан на проверку</span></td><td>ORD-SEED-003</td><td>Игорь Савин</td></tr>
+            <tr><td>10:21</td><td><span class="badge amber">CHECKLIST_UPDATED</span></td><td>ORD-SEED-001 · «Санузлы»</td><td>Анна Ким</td></tr>
+            <tr><td>09:04</td><td><span class="badge blue">Заказ начат</span></td><td>ORD-SEED-001</td><td>Бригада А</td></tr>
+            <tr><td>08:07</td><td><span class="badge blue">Заказ начат</span></td><td>ORD-SEED-003</td><td>Игорь Савин</td></tr>
+            <tr><td>08:00</td><td><span class="badge green">Оплата получена</span></td><td>Договор · ИП Соколов · 6 800 ₽</td><td>mock-провайдер</td></tr>
+            <tr><td>07:55</td><td><span class="badge gray">NOTIFICATION_SENT</span></td><td>ORD-SEED-001 · клиенту</td><td>mock-провайдер</td></tr>
+            <tr><td>вчера</td><td><span class="badge red">Заказ отменён</span></td><td>ORD-SEED-014 · «перенос на декабрь»</td><td>Елена Менеджерова</td></tr>
+          </tbody>
+        </table>
+        <div class="pagination"><span class="btn sm">←</span> Страница 1 из 12 <span class="btn sm">→</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

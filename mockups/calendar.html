@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Мой календарь — мокап</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .c-sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .seg2 { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .seg2 button { border: none; background: var(--panel); padding: 6px 12px; font-size: 12px; cursor: pointer; color: var(--muted); }
+  .seg2 button.on { background: var(--primary); color: #fff; }
+  .calhead { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+  .calhead .ttl { font-size: 15px; font-weight: 700; min-width: 130px; }
+
+  .wk { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .wk-head { display: flex; border-bottom: 1px solid var(--border); }
+  .wk-head .hh { width: 38px; flex-shrink: 0; }
+  .wk-head .dh { flex: 1; text-align: center; padding: 6px 2px; font-size: 11px; border-left: 1px solid var(--border); }
+  .wk-head .dh.today { color: var(--primary); font-weight: 700; }
+  .wk-body { display: flex; }
+  .wk-hours { width: 38px; flex-shrink: 0; }
+  .wk-hours div { height: 40px; font-size: 9px; color: var(--muted); text-align: right; padding-right: 4px; transform: translateY(-5px); }
+  .wk-days { flex: 1; display: flex; }
+  .wk-day {
+    flex: 1; position: relative; border-left: 1px solid var(--border); min-width: 0;
+    background: repeating-linear-gradient(to bottom, transparent 0, transparent 39px, #eef0f3 39px, #eef0f3 40px);
+  }
+  .wk-day.today { background-color: #f5f8ff; }
+  .evt {
+    position: absolute; left: 1px; right: 1px; border-radius: 5px; padding: 2px 4px;
+    font-size: 10px; line-height: 1.2; overflow: hidden; cursor: pointer;
+    border-left: 3px solid; z-index: 2;
+  }
+  .evt b { display: block; font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .sch-day { margin-bottom: 12px; }
+  .sch-day h4 { margin: 0 0 6px; font-size: 13px; }
+  .sch-row { display: flex; gap: 10px; padding: 8px; border: 1px solid var(--border); border-left-width: 3px; border-radius: 8px; background: var(--panel); margin-bottom: 6px; cursor: pointer; font-size: 12px; }
+  .sch-row .t { width: 40px; font-weight: 700; flex-shrink: 0; }
+  .sch-row:hover { background: #f8fafc; }
+
+  .p-nav { display: flex; border-top: 1px solid var(--border); background: var(--panel); }
+  .p-nav a { flex: 1; text-align: center; padding: 10px 4px; font-size: 11px; color: var(--muted); text-decoration: none; }
+  .p-nav a.on { color: var(--primary); font-weight: 700; }
+  .p-nav a span { display: block; font-size: 16px; margin-bottom: 2px; }
+</style>
+</head>
+<body>
+<div class="phone-wrap">
+  <div class="phone">
+    <div class="p-top"><span>09:01</span><span>Чистая Гавань</span><span>Игорь С.</span></div>
+    <div class="p-body">
+      <div style="display:flex; justify-content:space-between; align-items:baseline">
+        <h3 style="margin:0">Мой календарь</h3>
+        <span class="c-sub">только просмотр</span>
+      </div>
+
+      <div class="calhead" style="margin-top:10px">
+        <span class="btn sm" id="navPrev">←</span>
+        <span class="btn sm" id="navToday">Сегодня</span>
+        <span class="btn sm" id="navNext">→</span>
+        <span class="ttl" id="calTitle"></span>
+      </div>
+      <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap">
+        <select class="input" id="fStatus" style="flex:1; min-width:120px">
+          <option value="">Статус: все</option>
+          <option value="scheduled">Запланирован</option><option value="confirmed">Подтверждён</option>
+          <option value="in_progress">В работе</option><option value="quality_check">На проверке</option>
+          <option value="completed">Выполнен</option><option value="cancelled">Отменён</option>
+        </select>
+        <span class="seg2" id="views">
+          <button data-v="day" class="on">День</button>
+          <button data-v="week">Неделя</button>
+          <button data-v="agenda">Список</button>
+        </span>
+      </div>
+
+      <div id="calWrap"></div>
+    </div>
+    <nav class="p-nav">
+      <a href="order-work.html"><span>✓</span>Заказ</a>
+      <a href="calendar.html" class="on"><span>◷</span>Календарь</a>
+      <a href="login.html"><span>⎋</span>Выйти</a>
+    </nav>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+const STATUS = {
+  scheduled:['Запланирован','#dbeafe','#1e40af'],
+  confirmed:['Подтверждён','#cffafe','#155e75'],
+  in_progress:['В работе','#fef3c7','#92400e'],
+  quality_check:['На проверке','#ede9fe','#5b21b6'],
+  completed:['Выполнен','#dcfce7','#166534'],
+  cancelled:['Отменён','#e5e7eb','#6b7280'],
+};
+const STATUS_BADGE = { scheduled:'blue', confirmed:'blue', in_progress:'amber', quality_check:'purple', completed:'green', cancelled:'gray' };
+const ME = 'Игорь Серов';
+const esc=s=>String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const badge=(t,cls)=>`<span class="badge ${cls}">${t}</span>`;
+const O=(id,client,objectName,service,day,st,en,status,comment='')=>({
+  id,client,objectName,service,status,employeeId:ME,comment,
+  start:`${day}T${st}:00`,end:`${day}T${en}:00`,
+  history:[{at:`${day.slice(8,10)}.${day.slice(5,7)} ${st}`,who:'Система',text:'Заказ создан'}]});
+const orders=[
+ O(501,'ООО «Вектор»','Бизнес-центр «Вектор»','Уборка БЦ','2026-10-05','09:00','13:00','completed'),
+ O(502,'ООО «Ромашка»','БЦ «Меркурий», оф. 402','Генеральная уборка офиса','2026-10-06','09:00','15:00','confirmed'),
+ O(509,'Елена Морозова','Частный дом','Генеральная уборка дома','2026-10-06','15:30','18:30','scheduled','Перед заселением'),
+ O(503,'ООО «Вектор»','Бизнес-центр «Вектор»','Уборка БЦ','2026-10-07','09:00','13:00','scheduled'),
+ O(512,'ИП «Северный ветер»','Офисы «Северный ветер»','Уборка офисов','2026-10-08','09:00','12:00','confirmed'),
+ O(518,'Анна Петрова','Квартира клиента','Генеральная уборка','2026-10-10','10:00','13:00','scheduled'),
+ O(521,'ООО «Вектор»','Бизнес-центр «Вектор»','Уборка БЦ','2026-10-12','09:00','13:00','scheduled'),
+ O(525,'БЦ «Орбита»','Бизнес-центр «Орбита»','Генеральная уборка БЦ','2026-10-15','09:00','15:00','confirmed'),
+ O(526,'ООО «Вектор»','Бизнес-центр «Вектор»','Уборка БЦ','2026-10-19','09:00','13:00','scheduled'),
+ O(527,'ООО «Вектор»','Бизнес-центр «Вектор»','Уборка БЦ','2026-10-21','09:00','13:00','scheduled'),
+ O(531,'ООО «Вектор»','Склад «Вектор»','Уборка склада','2026-11-03','09:00','13:00','scheduled'),
+];
+
+const today=new Date(2026,9,6);
+let view='day', cursor=new Date(today), cur=null;
+const calWrap=document.getElementById('calWrap'), calTitle=document.getElementById('calTitle');
+const fStatus=document.getElementById('fStatus');
+const GRID_START=7, GRID_END=19, ROWH=40;
+const WD=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const sameDay=(a,b)=>a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();
+const mins=t=>{const[h,m]=t.split('T')[1].split(':');return +h*60+ +m;};
+const fmtD=d=>`${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`;
+const range=o=>`${o.start.slice(11,16)}–${o.end.slice(11,16)}`;
+
+function filtered(){ return orders.filter(o=>!fStatus.value||o.status===fStatus.value); }
+const evStyle=o=>{const[,bg,fg]=STATUS[o.status];return `background:${bg};color:${fg};border-color:${fg}`;};
+
+function lanes(dayOrders){
+  const sorted=[...dayOrders].sort((a,b)=>mins(a.start)-mins(b.start));
+  const lanes=[];
+  sorted.forEach(o=>{
+    let i=lanes.findIndex(end=>end<=mins(o.start));
+    if(i<0){lanes.push(mins(o.end));i=lanes.length-1;}else lanes[i]=mins(o.end);
+    o._lane=i;
+  });
+  sorted.forEach(o=>o._lanes=lanes.length);
+  return sorted;
+}
+
+function render(){
+  const f=filtered();
+  if(view==='week'||view==='day'){
+    const start=new Date(cursor);
+    const days=[];
+    if(view==='week'){
+      const dow=(start.getDay()+6)%7; start.setDate(start.getDate()-dow);
+      for(let i=0;i<7;i++){days.push(new Date(start));start.setDate(start.getDate()+1);}
+      calTitle.textContent=`${fmtD(days[0]).slice(0,5)} — ${fmtD(days[6])}`;
+    } else { days.push(new Date(cursor)); calTitle.textContent=fmtD(days[0]).slice(0,5); }
+    let hours=''; for(let h=GRID_START;h<GRID_END;h++) hours+=`<div>${h}:00</div>`;
+    const bodyH=(GRID_END-GRID_START)*ROWH;
+    calWrap.innerHTML=`<div class="wk">
+      <div class="wk-head"><div class="hh"></div>${days.map(d=>`<div class="dh${sameDay(d,today)?' today':''}">${view==='week'?WD[(d.getDay()+6)%7]+' ':''}${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}</div>`).join('')}</div>
+      <div class="wk-body">
+        <div class="wk-hours">${hours}</div>
+        <div class="wk-days">${days.map(d=>{
+          const ds=iso(d);
+          const evs=lanes(f.filter(o=>o.start.slice(0,10)===ds));
+          return `<div class="wk-day${sameDay(d,today)?' today':''}" style="height:${bodyH}px">
+            ${evs.map(o=>{
+              const top=(mins(o.start)-GRID_START*60)/60*ROWH, h=Math.max(16,(mins(o.end)-mins(o.start))/60*ROWH);
+              const w=100/o._lanes;
+              return `<div class="evt" data-id="${o.id}" style="${evStyle(o)};top:${top}px;height:${h}px;left:calc(${o._lane*w}% + 1px);right:auto;width:calc(${w}% - 2px)">
+                <b>${esc(o.client)}</b>${esc(o.objectName)} · ${esc(o.service)} · ${range(o)} · <b>${STATUS[o.status][0]}</b>
+              </div>`;
+            }).join('')}</div>`;}).join('')}
+        </div>
+      </div></div>`;
+  }
+  else { /* agenda */
+    calTitle.textContent='Список';
+    const byDate={};
+    f.forEach(o=>{(byDate[o.start.slice(0,10)]=byDate[o.start.slice(0,10)]||[]).push(o);});
+    const dates=Object.keys(byDate).sort();
+    calWrap.innerHTML=dates.length?dates.map(ds=>{
+      const d=new Date(ds+'T00:00');
+      const lbl=`${['Вс','Пн','Вт','Ср','Чт','Пт','Сб'][d.getDay()]}, ${fmtD(d)}`;
+      return `<div class="sch-day"><h4>${lbl}</h4>
+        ${byDate[ds].sort((a,b)=>mins(a.start)-mins(b.start)).map(o=>`<div class="sch-row" data-id="${o.id}" style="border-left-color:${STATUS[o.status][2]}">
+          <span class="t">${o.start.slice(11,16)}</span>
+          <span style="flex:1;min-width:0">
+            <div><b>Клиент:</b> ${esc(o.client)}</div>
+            <div><b>Объект:</b> ${esc(o.objectName)}</div>
+            <div><b>Услуга:</b> ${esc(o.service)}</div>
+            <div class="c-sub">${range(o)}</div>
+          </span>
+          ${badge(STATUS[o.status][0],STATUS_BADGE[o.status])}
+        </div>`).join('')}</div>`;
+    }).join(''):'<div class="card empty">Нет заказов в выбранном периоде</div>';
+  }
+}
+
+document.getElementById('views').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-v]'); if(!b) return;
+  view=b.dataset.v;
+  document.querySelectorAll('#views button').forEach(x=>x.classList.toggle('on',x===b));
+  render();
+});
+document.getElementById('navPrev').onclick=()=>{shift(-1);};
+document.getElementById('navNext').onclick=()=>{shift(1);};
+document.getElementById('navToday').onclick=()=>{cursor=new Date(today);render();};
+function shift(dir){
+  if(view==='day')cursor.setDate(cursor.getDate()+dir);
+  else cursor.setDate(cursor.getDate()+7*dir);
+  render();
+}
+fStatus.addEventListener('change',render);
+
+calWrap.addEventListener('click',e=>{
+  const ev=e.target.closest('.evt,.sch-row');
+  if(ev) location.href='order-work.html';
+});
+
+render();
+</script>
+</body>
+</html>

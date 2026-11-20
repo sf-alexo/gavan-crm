@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Договора — мокап</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .c-sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .kanban-col { display: flex; flex-direction: column; min-width: 168px; }
+  .kanban { overflow-x: auto; }
+  .kanban-col .cnt { float: right; }
+  .kanban-cards { flex: 1; min-height: 80px; border-radius: 8px; }
+  .kanban-cards.drop-over { outline: 2px dashed var(--primary); outline-offset: 2px; background: #e6efff; }
+  .kanban-card { cursor: grab; }
+  .kanban-card:active { cursor: grabbing; }
+  .kanban-card.dragging { opacity: .5; }
+  .kanban-card .amount { font-weight: 700; margin: 6px 0 2px; }
+  .kanban-card .next { font-size: 12px; margin-top: 6px; padding: 5px 8px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; color: #92400e; }
+  .kanban-card .plan-meta { margin-top: 6px; font-size: 11px; color: var(--muted); line-height: 1.4; }
+  .kanban-card .plan-meta b { color: var(--text); font-weight: 600; }
+  .plan-chips { display:flex; flex-wrap:wrap; gap:4px; margin-top:6px; }
+  .plan-chip {
+    font-size: 10px; padding: 2px 6px; border-radius: 999px;
+    background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe;
+  }
+  .plan-chip.warn { background:#fff7ed; color:#9a3412; border-color:#fed7aa; }
+  .plan-chip.ok { background:#dcfce7; color:#166534; border-color:#86efac; }
+  .plan-check { margin:8px 0 0; padding-left:18px; font-size:13px; line-height:1.45; }
+  .plan-check li { margin:4px 0; }
+  .qual-mistakes {
+    margin-top: 14px; padding: 12px 14px; border-radius: 10px;
+    background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; font-size: 13px; line-height: 1.45;
+  }
+  .qual-mistakes b { display: block; margin-bottom: 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .02em; }
+  .qual-mistakes ul { margin: 0; padding-left: 18px; }
+  .qual-mistakes li { margin: 4px 0; }
+  .qual-metrics {
+    margin-top: 10px; padding: 12px 14px; border-radius: 10px;
+    background: #eff6ff; border: 1px solid #bfdbfe; color: #1e3a8a; font-size: 13px; line-height: 1.45;
+  }
+  .qual-metrics b { display: block; margin-bottom: 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .02em; }
+  .qual-metrics ul { margin: 0; padding-left: 18px; }
+  .qual-metrics li { margin: 4px 0; }
+  .qual-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .qual-grid .full { grid-column: 1 / -1; }
+  .qual-block { border: 1px solid var(--border); border-radius: 10px; padding: 12px; background: #fafbfc; margin-top: 12px; }
+  .qual-block h4 { margin: 0 0 10px; font-size: 13px; font-weight: 700; }
+  .sum { cursor: pointer; }
+  .sum.on { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+  #backdrop .modal { max-width: 1200px; width: 96vw; max-height: 94vh; }
+  #modalNew .modal { max-width: 720px; max-height: 94vh; overflow: auto; }
+  #modalLost .modal, #modalDone .modal { max-width: 560px; }
+  .sum .num { font-size: 24px; font-weight: 700; }
+  .sum .lbl { color: var(--muted); font-size: 12px; margin-top: 3px; }
+  .err { color: var(--danger); font-size: 12px; margin-top: 4px; display: none; }
+  .ord-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .ord-row:last-child { border-bottom: none; }
+  .act-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .photo-ph {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 72px; height: 56px; border-radius: 8px; background: #f3f4f6;
+    border: 1px dashed var(--border); color: var(--muted); font-size: 11px; margin: 4px 4px 0 0;
+  }
+  .raci { font-size: 12px; color: var(--muted); margin-top: 6px; }
+</style>
+</head>
+<body>
+<input class="navtoggle" id="navtoggle" type="checkbox">
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">Чистая Гавань <label class="side-close" for="navtoggle" title="Свернуть меню">«</label></div>
+    <nav>
+      <a href="map.html">← Схема процесса</a>
+      <a href="login.html">Вход</a>
+      <a href="dashboard.html">Дашборд</a>
+      <a href="clients.html">Клиенты</a>
+      <a href="objects.html">Объекты</a>
+      <a href="leads.html">Лиды</a>
+      <a href="deals.html" class="active">Договора</a>
+      <a href="orders.html">Заказы</a>
+      <a href="recurring.html">Постоянные</a>
+      <a href="employees.html">Сотрудники</a>
+      <a href="tasks.html">Задачи</a>
+      <a href="history.html">История</a>
+    </nav>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <label class="btn navhide" for="navtoggle" title="Скрыть/показать меню">☰</label>
+      <strong>Гавань — клининг CRM</strong>
+      <div class="topbar-right">
+        <details class="dd">
+          <summary><span class="icon-btn">🔔<span class="n-dot">3</span></span></summary>
+          <div class="dd-menu">
+            <div class="dd-title">Уведомления</div>
+            <a href="order-quality.html">ORD-SEED-003 сдан на проверку</a>
+            <a href="deals.html">Договор #300 · назначить бригаду</a>
+            <a href="leads.html">Новый лид с сайта</a>
+          </div>
+        </details>
+        <details class="dd">
+          <summary>
+            <span class="avatar">ЕМ</span>
+            <span class="u-meta"><b>Елена Менеджерова</b><i>Менеджер</i></span>
+            <span style="color:var(--muted)">▾</span>
+          </summary>
+          <div class="dd-menu">
+            <a href="#">Профиль</a>
+            <a href="#">Сменить пароль</a>
+            <a href="login.html">Выйти</a>
+          </div>
+        </details>
+      </div>
+    </div>
+    <div class="content">
+
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap">
+        <div>
+          <h2 style="margin-bottom:2px">Договора</h2>
+          <p style="color:var(--muted); margin:0 0 16px; font-size:14px">Планирование → Выполнение → Закрытие → Постпродажа → Архив</p>
+        </div>
+        <span class="btn primary" id="btnNew">+ Новый договор</span>
+      </div>
+
+      <div class="grid" style="grid-template-columns:repeat(4,1fr); margin-bottom:16px" id="sum">
+        <div class="card sum" data-s=""><div class="num" id="sumAll">0</div><div class="lbl">Все договора</div></div>
+        <div class="card sum" data-s="action"><div class="num" id="sumAct">0</div><div class="lbl">Требуют действия</div></div>
+        <div class="card sum" data-s="ops"><div class="num" id="sumWork">0</div><div class="lbl">План. + выполнение</div></div>
+        <div class="card sum" data-s="done"><div class="num" id="sumDone">0</div><div class="lbl">Закр. + пост</div></div>
+      </div>
+
+      <div class="toolbar">
+        <input class="input" id="q" style="max-width:320px" placeholder="Поиск по клиенту, договору или объекту…">
+        <select class="input" id="fStage" style="max-width:200px">
+          <option value="">Стадия: все</option>
+          <option value="planning">Планирование</option>
+          <option value="execution">Выполнение</option>
+          <option value="closing">Закрытие</option>
+          <option value="postsale">Постпродажа</option>
+          <option value="archive">Архив</option>
+          <option value="lost">Потерян</option>
+        </select>
+        <select class="input" id="fManager" style="max-width:170px">
+          <option value="">Все менеджеры</option><option>Алексей Смирнов</option><option>Мария Ким</option>
+        </select>
+        <select class="input" id="fType" style="max-width:140px">
+          <option value="">Тип: все</option><option value="INDIVIDUAL">Частные</option><option value="BUSINESS">Бизнес</option>
+        </select>
+        <span class="btn" id="btnReset">Сбросить</span>
+      </div>
+
+      <div class="kanban" id="board"></div>
+      <div id="empty" class="card empty" style="display:none">
+        <b>Договора не найдены</b>
+        <p style="color:var(--muted)">Попробуйте изменить параметры поиска или фильтров.</p>
+        <span class="btn" id="btnReset2">Сбросить фильтры</span>
+      </div>
+      <div id="lostWrap" style="display:none">
+        <h4 style="color:var(--muted)">Потерянные договора</h4>
+        <div id="lostList"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="backdrop" style="display:none">
+  <div class="modal" id="drawer" role="dialog" aria-modal="true"></div>
+</div>
+
+<div class="modal-backdrop" id="modalLost" style="display:none">
+  <div class="modal">
+    <h3>Потерять договор</h3>
+    <label class="field"><span>Причина *</span>
+      <select class="input" id="lostReason">
+        <option value="">— выберите —</option>
+        <option value="PRICE">Цена</option>
+        <option value="COMPETITOR">Выбрали другую компанию</option>
+        <option value="NEEDS">Изменились потребности</option>
+        <option value="NO_DEAL">Не удалось договориться</option>
+        <option value="OTHER">Другое</option>
+      </select>
+      <div class="err" id="eReason">Укажите причину</div>
+    </label>
+    <div class="actions">
+      <span class="btn" onclick="closeLost()">Отмена</span>
+      <span class="btn danger" id="btnLostSave">Потерять договор</span>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modalDone" style="display:none">
+  <div class="modal">
+    <h3>Работы выполнены → Закрытие?</h3>
+    <p style="color:var(--muted); font-size:14px" id="doneText"></p>
+    <div class="actions">
+      <span class="btn" onclick="closeDone()">Отмена</span>
+      <span class="btn primary" id="btnDoneOk">В закрытие</span>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modalNew" style="display:none">
+  <div class="modal">
+    <h3>Новый договор</h3>
+    <label class="field"><span>Клиент *</span>
+      <select class="input" id="nClient"><option value="">— выберите —</option></select>
+      <div class="err" id="eClient">Выберите клиента</div>
+    </label>
+    <label class="field"><span>Название</span><input class="input" id="nTitle" placeholder="Генеральная уборка квартиры"></label>
+    <label class="field"><span>Услуга</span><input class="input" id="nService" placeholder="Генеральная уборка"></label>
+    <div style="display:flex; gap:10px">
+      <label class="field" style="flex:1"><span>Стоимость, ₽</span><input class="input" id="nAmount" type="number" min="0"></label>
+      <label class="field" style="flex:1"><span>Период</span>
+        <select class="input" id="nPeriod"><option value="">разово</option><option value="/ месяц">/ месяц</option></select></label>
+    </div>
+    <div style="display:flex; gap:10px">
+      <label class="field" style="flex:1"><span>Дата выезда</span><input class="input" id="nStart" type="date"></label>
+      <label class="field" style="flex:1"><span>Периодичность</span><input class="input" id="nFreq" placeholder="разово"></label>
+    </div>
+    <label class="field"><span>Менеджер</span>
+      <select class="input" id="nManager"><option value="">—</option><option>Алексей Смирнов</option><option>Мария Ким</option></select>
+    </label>
+    <label class="field"><span>Состав работ / условия</span><textarea class="input" id="nCond" rows="2"></textarea></label>
+    <label class="field"><span>Объекты</span></label>
+    <div id="nObjects" style="border:1px solid var(--border); border-radius:8px; padding:8px 10px; max-height:120px; overflow:auto; font-size:13px"></div>
+    <div class="actions">
+      <span class="btn" onclick="closeNew()">Отмена</span>
+      <span class="btn primary" id="btnCreate">Создать договор</span>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+const STAGES = {
+  planning:['Планирование','blue'],
+  execution:['Выполнение','green'],
+  closing:['Закрытие','amber'],
+  postsale:['Постпродажа','gray'],
+  archive:['Архив','purple'],
+  lost:['Потерян','red'],
+};
+const COLS = [
+  ['planning','Планирование'],
+  ['execution','Выполнение'],
+  ['closing','Закрытие'],
+  ['postsale','Постпродажа'],
+  ['archive','Архив'],
+];
+const REASONS = { PRICE:'Цена', COMPETITOR:'Выбрали другую компанию', NEEDS:'Изменились потребности', NO_DEAL:'Не удалось договориться', OTHER:'Другое' };
+const O_ST = { 'Запланирован':'blue','Подтверждён':'blue','В работе':'amber','На проверке':'purple','Выполнен':'green','Отменён':'gray' };
+const MANAGERS = ['Алексей Смирнов','Мария Ким'];
+const DISPATCHERS = ['Анна Диспетчерова','Пётр Координатов'];
+const BRIGADIERS = ['Ольга Бригадир','Никита Старший'];
+const RACI = {
+  planning:'Цель: собрать выезд — слот, бригада, доступ, оборудование.',
+  execution:'Отвечает: бригадир · участвует: клинеры',
+  closing:'Цель: получить деньги и корректно закрыть заказ в системе.',
+  postsale:'Цель: превратить разового клиента в повторного и получить социальное доказательство.',
+  archive:'Завершённые договора: отзыв/повтор отработаны, карточка снята с воронки.',
+  lost:'—',
+};
+const PAY_METHODS = {
+  cash:'Наличные',
+  card:'Карта',
+  transfer:'Перевод',
+  link:'Ссылка на оплату',
+};
+const DOC_MODES = { online:'On-Line', offline:'Off-Line' };
+const REVIEW_CHANNELS = { sms:'SMS', messenger:'Мессенджер', call:'Звонок' };
+const defaultClose = (d) => ({
+  invoiceSent:false, invoiceAt:'', invoiceAmount:d?.amount||0,
+  method:'transfer', paidAmount:0, paidAt:'',
+  docsMode:'online', docsClosed:false, docsNote:'',
+  reconciled:false, notes:'',
+});
+const ensureClose = d => {
+  if(!d.close) d.close=defaultClose(d);
+  if(d.close.invoiceAmount==null) d.close.invoiceAmount=d.amount||0;
+  return d.close;
+};
+const defaultPostsale = () => ({
+  askAt:'', channel:'messenger', videoAsk:true,
+  score:null, text:'', videoUrl:'', asked:false, receivedAt:'',
+  negative:false, negativeNote:'', fixed:false, compensation:'',
+  offerSent:false, offerType:'', offerNote:'', offerAccepted:false,
+  remindAt:'', remindDone:false,
+  retarget:false, notes:'',
+});
+const ensurePostsale = d => {
+  if(!d.postsale) d.postsale=defaultPostsale();
+  // sync legacy review object
+  if(d.review){
+    if(d.postsale.score==null && d.review.score!=null) d.postsale.score=d.review.score;
+    if(!d.postsale.text && d.review.text) d.postsale.text=d.review.text;
+    if(d.review.asked) d.postsale.asked=true;
+  }
+  return d.postsale;
+};
+const syncReviewFromPostsale = d => {
+  const p=ensurePostsale(d);
+  d.review={score:p.score, text:p.text||'', asked:!!p.asked};
+};
+const defaultPlan = () => ({
+  slotAt:'', window:'', hours:'', cleaners:'', brigadier:'', team:'',
+  equipment:'', access:'', prepare:'', dispatcher:DISPATCHERS[0],
+  orderCreated:false, slotConfirmed:false, teamAssigned:false, clientReminded:false, notes:'',
+});
+const ensurePlan = d => {
+  if(!d.plan) d.plan=defaultPlan();
+  return d.plan;
+};
+const defaultExec = () => ({
+  arrivedAt:'', startedAt:'', brigadier:BRIGADIERS[0], planHours:'', factHours:'',
+  clientComm:'', notes:'',
+  acceptanceDone:false, actSigned:false, statusLabel:'На объекте',
+});
+const ensureExec = d => {
+  if(!d.exec) d.exec=defaultExec();
+  return d.exec;
+};
+const OPS = ['planning','execution'];
+const DONE = ['closing','postsale','archive'];
+
+const CLIENTS = [
+ {id:'cl1',name:'Анна Петрова',type:'INDIVIDUAL'},
+ {id:'cl2',name:'ООО «Меридиан»',type:'BUSINESS'},
+ {id:'cl4',name:'ТОО «Новая Линия»',type:'BUSINESS'},
+ {id:'cl5',name:'ООО «Вектор»',type:'BUSINESS'},
+ {id:'cl6',name:'ТОО «Альфа Сервис»',type:'BUSINESS'},
+ {id:'cl7',name:'БЦ «Орбита»',type:'BUSINESS'},
+ {id:'cl8',name:'Елена Морозова',type:'INDIVIDUAL'},
+ {id:'cl9',name:'ООО «Стандарт»',type:'BUSINESS'},
+ {id:'cl10',name:'ООО «Горизонт»',type:'BUSINESS'},
+ {id:'cl11',name:'Сергей Волков',type:'INDIVIDUAL'},
+ {id:'cl15',name:'ИП «Северный ветер»',type:'BUSINESS'},
+ {id:'cl16',name:'ЖК «Солнечный» (ТСЖ)',type:'BUSINESS'},
+ {id:'cl17',name:'Кофейня «Бариста»',type:'BUSINESS'},
+ {id:'cl18',name:'Ресторан «Лагуна»',type:'BUSINESS'},
+ {id:'cl19',name:'ООО «Вектра»',type:'BUSINESS'},
+];
+const OBJECTS = [
+ {id:'o1',name:'Квартира клиента',area:'78 м²'},
+ {id:'o2',name:'Офис «Меридиан»',area:'420 м²'},
+ {id:'o4',name:'Складской комплекс',area:'2 100 м²'},
+ {id:'o5',name:'Бизнес-центр «Вектор»',area:'800 м²'},
+ {id:'o6',name:'Склад «Вектор»',area:'4 800 м²'},
+ {id:'o7',name:'Производственный корпус',area:'3 400 м²'},
+ {id:'o8',name:'Склад «Альфа»',area:'900 м²'},
+ {id:'o9',name:'Бизнес-центр «Орбита»',area:'2 600 м²'},
+ {id:'o10',name:'Частный дом',area:'210 м²'},
+ {id:'o11',name:'Офис «Стандарт»',area:'380 м²'},
+ {id:'o13',name:'Производственный корпус «Горизонт»',area:'5 000 м²'},
+ {id:'o14',name:'Частный дом',area:'160 м²'},
+ {id:'o18',name:'Сеть офисов «Северный ветер»',area:'1 100 м²'},
+ {id:'o19',name:'Подъезды ЖК «Солнечный»',area:'2 300 м²'},
+ {id:'o20',name:'Зал кофейни «Бариста»',area:'120 м²'},
+ {id:'o21',name:'Зал ресторана «Лагуна»',area:'340 м²'},
+ {id:'o22',name:'Склад «Вектра»',area:'2 000 м²'},
+];
+const clientById=id=>CLIENTS.find(c=>c.id===id);
+const objById=id=>OBJECTS.find(o=>o.id===id);
+const now=()=>{const d=new Date();return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;};
+const H=(at,who,text)=>({at,who,text});
+const isoD=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const naISO=s=>{if(!s)return'';const t=new Date();
+  if(s==='сегодня')return isoD(t);
+  if(s==='завтра'){t.setDate(t.getDate()+1);return isoD(t);}
+  const m=s.match(/(\d{2})\.(\d{2})\.(\d{4})/);return m?`${m[3]}-${m[2]}-${m[1]}`:'';};
+const fromISO=v=>v?v.split('-').reverse().join('.'):'';
+const naLabel=s=>{if(!s)return'';
+  if(s==='сегодня'||s==='завтра')return s;
+  const iso=naISO(s); if(!iso)return s;
+  const t=new Date(),tmr=new Date(); tmr.setDate(t.getDate()+1);
+  return iso===isoD(t)?'сегодня':iso===isoD(tmr)?'завтра':s;};
+const money=n=>n?n.toLocaleString('ru-RU')+' ₽':'—';
+const TERMINAL = ['archive','lost'];
+
+let ordersSeq = 504;
+const deals = [
+ {id:303,title:'Комплексное обслуживание производства',clientId:'cl6',applicationId:1047,managerId:'Мария Ким',objectIds:['o7','o8'],status:'planning',service:'Послестроительная уборка',amount:480000,amountPeriod:'',frequency:'разово',conditions:'Производственный корпус + склад',nextAction:'Создать заказ и слот',nextActionDate:'завтра',createdAt:'05.10.2026',orders:[],payment:{status:'pending',amount:480000},review:null,tech:null,visit:null,
+  plan:{slotAt:'',window:'день',hours:'16',cleaners:'6',brigadier:'',team:'',equipment:'пароочиститель, промышленный пылесос',access:'Пропуск на КПП, парковка у цеха №2',prepare:'Освободить проходы на складе',dispatcher:'Анна Диспетчерова',orderCreated:false,slotConfirmed:false,teamAssigned:false,clientReminded:false,notes:'Два объекта в один выезд — корпус + склад'},
+  history:[H('05.10.2026 09:00','Система','Договор создан из лида #1047'),H('05.10.2026 18:00','Мария Ким','Заказ подтверждён клиентом → планирование')]},
+ {id:291,title:'Ежедневная уборка кофейни',clientId:'cl17',managerId:'Мария Ким',objectIds:['o20'],status:'planning',service:'Премиум клининг · HoReCa',amount:75000,amountPeriod:'',frequency:'разово',conditions:'Утро, до открытия',nextAction:'Назначить бригаду на утро',nextActionDate:'сегодня',createdAt:'05.10.2026',orders:[],payment:{status:'pending',amount:75000},review:null,tech:null,visit:null,
+  plan:{slotAt:'08.11 06:30',window:'утро до открытия',hours:'2',cleaners:'2',brigadier:'Никита Старший',team:'',equipment:'экстрактор для ковролина',access:'Код двери 4821, ключ от подсобки у бариста',prepare:'Столы сдвинуты, кофемашина закрыта',dispatcher:'Пётр Координатов',orderCreated:false,slotConfirmed:true,teamAssigned:false,clientReminded:false,notes:'Нельзя шуметь до 7:00 — жильцы сверху'},
+  history:[H('05.10.2026 11:00','Система','Договор создан из лида #1050'),H('05.10.2026 16:00','Мария Ким','Клиент подтвердил → планирование'),H('06.10.2026 09:00','Пётр Координатов','Слот 08.11 06:30 согласован')]},
+ {id:300,title:'Регулярная уборка производства',clientId:'cl10',applicationId:1042,managerId:'Алексей Смирнов',objectIds:['o13'],status:'planning',service:'Послестроительная уборка',amount:340000,amountPeriod:'',frequency:'разово',conditions:'Сильное загрязнение, нужен пароочиститель',nextAction:'Подобрать слот и оборудование',nextActionDate:'сегодня',createdAt:'30.09.2026',orders:[],payment:{status:'pending',amount:340000},review:null,
+  tech:{by:'Игорь Технолог',decision:'ok',note:'Черновик сметы: 4 чел × 8 ч'},visit:null,
+  plan:{slotAt:'',window:'день',hours:'8',cleaners:'4',brigadier:'Ольга Бригадир',team:'',equipment:'пароочиститель ×2, стремянки',access:'Спецодежда на объекте, инструктаж ОТ',prepare:'Отключить линии в зоне А',dispatcher:'Анна Диспетчерова',orderCreated:false,slotConfirmed:false,teamAssigned:false,clientReminded:false,notes:'Ждём дату от клиента после ЧП-смены'},
+  history:[H('30.09.2026 10:00','Система','Договор создан из лида #1042'),H('02.10.2026 11:00','Алексей Смирнов','Клиент подтвердил смету → планирование')]},
+ {id:289,title:'Уборка склада «Вектра»',clientId:'cl19',managerId:'Алексей Смирнов',objectIds:['o22'],status:'planning',service:'Генеральная уборка склада',amount:96000,amountPeriod:'',frequency:'разово',conditions:'Высота потолков 8 м',nextAction:'Создать заказ · стремянки',nextActionDate:'завтра',createdAt:'04.10.2026',orders:[],payment:{status:'pending',amount:96000},review:null,
+  tech:{by:null,decision:null,note:''},visit:null,
+  plan:{slotAt:'12.11 09:00',window:'день',hours:'6',cleaners:'3',brigadier:'',team:'',equipment:'стремянки 6 м, пылесос промышленный',access:'Охрана, список ФИО за сутки',prepare:'Зона А свободна от паллет',dispatcher:'Анна Диспетчерова',orderCreated:false,slotConfirmed:true,teamAssigned:false,clientReminded:true,notes:'Высотные работы — только с бригадиром'},
+  history:[H('04.10.2026 16:00','Система','Договор создан из лида #1049'),H('05.10.2026 10:00','Алексей Смирнов','Заказ подтверждён → планирование'),H('06.10.2026 11:00','Анна Диспетчерова','Слот 12.11 · клиенту напомнили')]},
+ {id:296,title:'Уборка дома перед заселением',clientId:'cl8',applicationId:1045,managerId:'Мария Ким',objectIds:['o10'],status:'planning',service:'Генеральная уборка · Коттеджи · от 200 м²',amount:32000,amountPeriod:'',frequency:'разово',nextAction:'Назначить бригаду на выезд',nextActionDate:'сегодня',createdAt:'02.10.2026',orders:[],payment:{status:'pending',amount:32000},review:null,
+  tech:{by:'Игорь Технолог',decision:'ok',note:'Смета после замера'},
+  visit:null,
+  plan:{slotAt:'09.11 11:00',window:'день',hours:'5',cleaners:'3',brigadier:'Ольга Бригадир',team:'Иван Петров, Дарья Чистая',equipment:'экстрактор, стремянка',access:'Ключи у консьержа Коктобе',prepare:'Мебель накрыта плёнкой',dispatcher:'Пётр Координатов',orderCreated:false,slotConfirmed:true,teamAssigned:true,clientReminded:false,notes:'Предоплата есть — создать заказ в календаре'},
+  history:[H('02.10.2026 15:00','Система','Договор создан из лида #1045'),H('04.10.2026 12:00','Мария Ким','Предоплата получена → планирование'),H('05.10.2026 14:00','Пётр Координатов','Слот и бригада готовы')]},
+ {id:297,title:'Ежедневная уборка БЦ «Орбита»',clientId:'cl7',applicationId:1046,managerId:'Алексей Смирнов',objectIds:['o9'],status:'planning',service:'Премиум клининг · БЦ',amount:390000,amountPeriod:'',frequency:'разово',conditions:'Ночная смена',nextAction:'Согласовать слот ночной смены',nextActionDate:'завтра',createdAt:'02.10.2026',orders:[],payment:{status:'pending',amount:390000},review:null,
+  tech:{by:'Ольга Бригадир',decision:'ok',note:'Типовой объект, технолог подтвердил смету'},visit:null,
+  plan:{slotAt:'',window:'ночь 22:00–06:00',hours:'8',cleaners:'5',brigadier:'Никита Старший',team:'',equipment:'поломоечная машина, тележки',access:'Пропуск через ресепшен, ночной охрана',prepare:'Лифты в сервисном режиме после 23:00',dispatcher:'Анна Диспетчерова',orderCreated:false,slotConfirmed:false,teamAssigned:false,clientReminded:false,notes:'Ждём подтверждение окна от УК БЦ'},
+  history:[H('02.10.2026 13:00','Система','Договор создан из лида #1046'),H('04.10.2026 09:00','Ольга Бригадир','Смета согласована'),H('05.10.2026 09:00','Алексей Смирнов','Клиент подтвердил график → планирование')]},
+ {id:294,title:'Уборка офиса «Меридиан»',clientId:'cl2',managerId:'Алексей Смирнов',objectIds:['o2'],status:'planning',service:'Уборка офисов (по графику)',amount:140000,amountPeriod:'',frequency:'разово',nextAction:'Создать заказ на первую смену',nextActionDate:'сегодня',createdAt:'03.10.2026',orders:[],payment:{status:'pending',amount:140000},review:null,
+  tech:{by:'Игорь Технолог',decision:'ok',note:''},visit:null,
+  plan:{slotAt:'07.11 18:00',window:'вечер после офиса',hours:'3',cleaners:'2',brigadier:'Ольга Бригадир',team:'Сергей Петров',equipment:'стандартный набор',access:'Пропуск на ресепшен, парковка во дворе',prepare:'—',dispatcher:'Пётр Координатов',orderCreated:false,slotConfirmed:true,teamAssigned:true,clientReminded:true,notes:'Первая смена пробная — дальше график Вт/Чт'},
+  history:[H('03.10.2026 12:00','Мария Ким','Договор создан вручную'),H('06.10.2026 10:00','Алексей Смирнов','Клиент подтвердил → планирование'),H('06.10.2026 15:00','Пётр Координатов','Слот и состав готовы')]},
+ {id:295,title:'Обслуживание склада',clientId:'cl4',applicationId:1052,managerId:'',objectIds:['o4'],status:'planning',service:'Уборка прилегающих территорий',amount:95000,amountPeriod:'',frequency:'разово',nextAction:'Создать заказ и назначить бригаду',nextActionDate:'сегодня',createdAt:'06.10.2026',orders:[],payment:{status:'pending',amount:95000},review:null,
+  tech:{by:'Ольга Бригадир',decision:'ok',note:'Типовой объект'},visit:null,
+  plan:{slotAt:'',window:'день',hours:'4',cleaners:'3',brigadier:'',team:'',equipment:'воздуходувка, тележки для мусора',access:'Въезд со стороны кольцевой',prepare:'Контейнеры пустые',dispatcher:'Анна Диспетчерова',orderCreated:false,slotConfirmed:false,teamAssigned:false,clientReminded:false,notes:'Менеджер не назначен — срочно закрыть слот'},
+  history:[H('06.10.2026 08:40','Система','Договор создан из лида #1052'),H('06.10.2026 15:00','Клиент','Заказ подтверждён → планирование')]},
+ {id:302,title:'Регулярное обслуживание ООО «Вектор»',clientId:'cl5',applicationId:1048,managerId:'Алексей Смирнов',objectIds:['o5','o6'],status:'execution',service:'Уборка офисов (по графику)',amount:215000,amountPeriod:'',frequency:'разово',conditions:'Офис и склад',nextAction:'Контроль приёмки ORD-504',nextActionDate:'сегодня',createdAt:'25.10.2026',
+  orders:[{num:501,date:'01.11.2026',service:'Уборка БЦ',status:'Выполнен'},{num:502,date:'03.11.2026',service:'Уборка склада',status:'В работе'},{num:504,date:'04.11.2026',service:'Уборка склада',status:'На проверке'},{num:503,date:'05.11.2026',service:'Уборка БЦ',status:'Запланирован'}],
+  payment:{status:'partial',amount:215000},review:null,tech:{by:'Игорь Технолог',decision:'ok',note:''},visit:null,
+  plan:{slotAt:'04.11 09:00',window:'день',hours:'6',cleaners:'3',brigadier:'Ольга Бригадир',team:'Иван Петров, Сергей Петров',equipment:'поломоечная, тележки',access:'Пропуск БЦ Вектор',prepare:'—',dispatcher:'Анна Диспетчерова',orderCreated:true,slotConfirmed:true,teamAssigned:true,clientReminded:true,notes:''},
+  exec:{arrivedAt:'04.11 08:55',startedAt:'04.11 09:10',brigadier:'Ольга Бригадир',planHours:'6',factHours:'5.5',
+    clientComm:'Клиент просил отдельно протереть переговорную №3',notes:'Склад — сильная пыль у рампы',
+    acceptanceDone:false, actSigned:false, statusLabel:'Приёмка'},
+  history:[H('30.10.2026 14:10','Система','Договор создан из лида #1048'),H('01.11.2026 10:30','Алексей Смирнов','Планирование → выполнение, заказ #501'),H('04.11.2026 08:55','Ольга Бригадир','Прибытие на объект · ORD-504')]},
+ {id:301,title:'Регулярная уборка офиса',clientId:'cl9',applicationId:1044,managerId:'Алексей Смирнов',objectIds:['o11'],status:'planning',service:'Уборка офисов (по графику)',amount:120000,amountPeriod:'',frequency:'разово',nextAction:'Назначить бригаду на #498',nextActionDate:'сегодня',createdAt:'01.10.2026',orders:[{num:498,date:'10.10.2026',service:'Уборка офиса',status:'Запланирован'}],
+  payment:{status:'pending',amount:120000},review:null,tech:{by:'Ольга Бригадир',decision:'ok',note:''},visit:null,
+  plan:{slotAt:'10.10 18:30',window:'вечер',hours:'3',cleaners:'2',brigadier:'',team:'',equipment:'стандартный набор',access:'Пропуск у охраны БЦ',prepare:'—',dispatcher:'Анна Диспетчерова',orderCreated:true,slotConfirmed:true,teamAssigned:false,clientReminded:true,notes:'Заказ #498 в календаре — нужен бригадир'},
+  history:[H('01.10.2026 11:00','Система','Договор создан из лида #1044'),H('01.10.2026 12:00','Диспетчер','Заказ #498 создан — планирование')]},
+ {id:293,title:'Сеть офисов «Северный ветер»',clientId:'cl15',managerId:'Мария Ким',objectIds:['o18'],status:'closing',service:'Уборка офисов (по графику)',amount:260000,amountPeriod:'',frequency:'разово',nextAction:'Сверить сумму и закрыть карточку',nextActionDate:'сегодня',createdAt:'20.09.2026',orders:[{num:495,date:'05.10.2026',service:'Уборка офисов',status:'Выполнен'}],
+  payment:{status:'paid',amount:260000},review:null,tech:null,visit:null,
+  close:{invoiceSent:true,invoiceAt:'06.10.2026',invoiceAmount:260000,method:'transfer',paidAmount:260000,paidAt:'07.10.2026',docsMode:'online',docsClosed:true,docsNote:'ЭДО · акт и счёт-фактура',reconciled:false,notes:'Оплата пришла полностью, осталось сверить и закрыть'},
+  history:[H('20.09.2026 10:00','Система','Договор создан из лида #1036'),H('06.10.2026 18:00','Бригадир','Заказ выполнен → закрытие'),H('06.10.2026 19:00','Бухгалтер','Счёт выставлен · On-Line'),H('07.10.2026 11:20','Бухгалтер','Оплата получена · перевод 260 000 ₽')]},
+ {id:292,title:'Уборка подъездов ЖК',clientId:'cl16',managerId:'Мария Ким',objectIds:['o19'],status:'execution',service:'Уборка прилегающих территорий',amount:180000,amountPeriod:'',frequency:'разово',nextAction:'Контроль бригады на объекте',nextActionDate:'сегодня',createdAt:'10.09.2026',orders:[{num:480,date:'04.10.2026',service:'Уборка подъездов',status:'В работе'}],
+  payment:{status:'pending',amount:180000},review:null,tech:null,visit:null,
+  plan:{slotAt:'04.10 08:00',window:'утро',hours:'4',cleaners:'4',brigadier:'Никита Старший',team:'Дарья Чистая, Олег Иванов',equipment:'воздуходувка, тележки',access:'Ключ от хозблока у консьержа',prepare:'—',dispatcher:'Пётр Координатов',orderCreated:true,slotConfirmed:true,teamAssigned:true,clientReminded:true,notes:''},
+  exec:{arrivedAt:'04.10 07:50',startedAt:'04.10 08:05',brigadier:'Никита Старший',planHours:'4',factHours:'',
+    clientComm:'',notes:'Подъезд 3 — следы от ремонта на перилах',
+    acceptanceDone:false, actSigned:false, statusLabel:'В работе'},
+  history:[H('10.09.2026 09:00','Система','Договор создан из лида #1030'),H('04.10.2026 08:00','Никита Старший','Старт уборки · ORD-480')]},
+ {id:299,title:'Генеральная уборка квартиры',clientId:'cl1',applicationId:1043,managerId:'Мария Ким',objectIds:['o1'],status:'postsale',service:'Генеральная уборка · Квартиры · 50–100 м²',amount:18000,amountPeriod:'',frequency:'разово',conditions:'После ремонта',nextAction:'Предложить абонемент со скидкой',nextActionDate:'сегодня',createdAt:'29.09.2026',orders:[{num:490,date:'30.09.2026',service:'Генеральная уборка',status:'Выполнен'}],
+  payment:{status:'paid',amount:18000},review:{score:5,text:'Всё чисто, спасибо!',asked:true},tech:null,visit:null,
+  postsale:{askAt:'01.10.2026',channel:'messenger',videoAsk:true,score:5,text:'Всё чисто, спасибо!',videoUrl:'shorts://anna-petrova-3s',asked:true,receivedAt:'01.10.2026',
+    negative:false,negativeNote:'',fixed:false,compensation:'',
+    offerSent:false,offerType:'абонемент',offerNote:'4 уборки / мес · −15%',offerAccepted:false,
+    remindAt:'01.01.2027',remindDone:false,retarget:true,notes:'Клиент доволен — хороший кандидат в recurring'},
+  history:[H('29.09.2026 12:00','Система','Договор создан из лида #1043'),H('30.09.2026 18:00','Мария Ким','Договор закрыт'),H('01.10.2026 11:00','Клиентский сервис','Запрос отзыва · мессенджер (+ видео 3–4 сек)'),H('01.10.2026 12:00','Клиентский сервис','Получен отзыв 5★ · постпродажа'),H('01.10.2026 12:10','Клиентский сервис','В базу ретаргетинга')]},
+ {id:287,title:'Мойка витрин магазина',clientId:'cl5',managerId:'Мария Ким',objectIds:['o5'],status:'archive',service:'Мойка окон · Витрины',amount:12000,amountPeriod:'',frequency:'разово',createdAt:'10.09.2026',orders:[{num:460,date:'12.09.2026',service:'Мойка витрин',status:'Выполнен'}],
+  payment:{status:'paid',amount:12000},review:{score:4,text:'Нормально, приедем ещё',asked:true},tech:null,visit:null,
+  postsale:{askAt:'14.09.2026',channel:'sms',videoAsk:false,score:4,text:'Нормально, приедем ещё',videoUrl:'',asked:true,receivedAt:'14.09.2026',
+    negative:false,negativeNote:'',fixed:false,compensation:'',
+    offerSent:true,offerType:'повторный заказ',offerNote:'Напоминание через 3 мес',offerAccepted:false,
+    remindAt:'14.12.2026',remindDone:true,retarget:true,notes:'Разовый заказ закрыт, в ретаргете'},
+  history:[H('10.09.2026 09:00','Система','Договор создан'),H('12.09.2026 16:00','Бригадир','Выполнено'),H('13.09.2026 11:00','Бухгалтер','Оплата'),H('14.09.2026 12:00','Клиентский сервис','Отзыв 4★'),H('15.09.2026 09:00','Клиентский сервис','Договор → Архив')]},
+ {id:288,title:'Уборка коттеджа после праздника',clientId:'cl8',managerId:'Алексей Смирнов',objectIds:['o10'],status:'postsale',service:'Генеральная уборка · Коттеджи · от 200 м²',amount:45000,amountPeriod:'',frequency:'разово',nextAction:'Закрыть негатив · компенсация',nextActionDate:'сегодня',createdAt:'18.09.2026',orders:[{num:475,date:'20.09.2026',service:'Генеральная уборка',status:'Выполнен'}],
+  payment:{status:'paid',amount:45000},review:{score:2,text:'Остались разводы на стекле и пыль на карнизах',asked:true},tech:null,visit:null,
+  postsale:{askAt:'22.09.2026',channel:'call',videoAsk:false,score:2,text:'Остались разводы на стекле и пыль на карнизах',videoUrl:'',asked:true,receivedAt:'22.09.2026',
+    negative:true,negativeNote:'Клиент недоволен мойкой окон и карнизами',fixed:false,compensation:'Повторный выезд бесплатно / скидка 20% на следующий заказ',
+    offerSent:false,offerType:'',offerNote:'',offerAccepted:false,
+    remindAt:'',remindDone:false,retarget:false,notes:'Сначала устранить негатив, потом предлагать recurring'},
+  history:[H('18.09.2026 10:00','Система','Договор создан'),H('20.09.2026 19:00','Бригадир','Работы завершены'),H('21.09.2026 12:00','Бухгалтер','Оплата получена → постпродажа'),H('22.09.2026 10:30','Клиентский сервис','Запрос отзыва · звонок'),H('22.09.2026 11:00','Клиентский сервис','Негатив 2★ · разводы на стекле')]},
+ {id:298,title:'Уборка дома и мойка окон',clientId:'cl11',applicationId:1041,managerId:'Мария Ким',objectIds:['o14'],status:'closing',service:'Мойка окон · С двух сторон',amount:24000,amountPeriod:'',frequency:'разово',nextAction:'Выставить счёт и принять оплату',nextActionDate:'сегодня',createdAt:'28.09.2026',orders:[{num:489,date:'29.09.2026',service:'Уборка дома',status:'Выполнен'}],
+  payment:{status:'pending',amount:24000},review:{score:null,text:'',asked:false},tech:null,visit:null,
+  close:{invoiceSent:false,invoiceAt:'',invoiceAmount:24000,method:'card',paidAmount:0,paidAt:'',docsMode:'offline',docsClosed:false,docsNote:'Бумажный акт у клиента, ждём скан',reconciled:false,notes:'Постоплата · клиент просил ссылку на оплату'},
+  history:[H('28.09.2026 10:00','Система','Договор создан из лида #1041'),H('29.09.2026 17:30','Мария Ким','Работы завершены → закрытие')]},
+ {id:290,title:'Уборка после ремонта',clientId:'cl18',managerId:'Алексей Смирнов',objectIds:['o21'],status:'lost',service:'Уборка после ремонта',amount:90000,amountPeriod:'',lostReason:'COMPETITOR',createdAt:'22.09.2026',orders:[],payment:null,review:null,tech:null,visit:null,
+  history:[H('22.09.2026 10:00','Система','Договор создан'),H('28.09.2026 14:00','Алексей Смирнов','Договор потерян. Причина: Выбрали другую компанию')]},
+];
+
+const clientEvent = (deal,text)=>{try{
+  const ev=JSON.parse(localStorage.getItem('gavan_client_events')||'[]');
+  ev.push({name:clientById(deal.clientId).name, at:now(), action:text});
+  localStorage.setItem('gavan_client_events',JSON.stringify(ev));}catch(e){}};
+const esc=s=>String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const badge=(t,cls)=>`<span class="badge ${cls}">${t}</span>`;
+
+const board=document.getElementById('board'), empty=document.getElementById('empty'), lostWrap=document.getElementById('lostWrap'), lostList=document.getElementById('lostList');
+const q=document.getElementById('q'), fStage=document.getElementById('fStage'), fManager=document.getElementById('fManager'), fType=document.getElementById('fType');
+let sumMode='';
+
+function filtered(){
+  const s=q.value.trim().toLowerCase();
+  return deals.filter(d=>{
+    const cl=clientById(d.clientId);
+    const objs=d.objectIds.map(o=>objById(o).name).join(' ');
+    const hay=[d.id,d.title,d.service,cl.name,objs].join(' ').toLowerCase();
+    return (!s||hay.includes(s))
+      &&(!fManager.value||d.managerId===fManager.value)
+      &&(!fType.value||cl.type===fType.value)
+      &&(!fStage.value||d.status===fStage.value)
+      &&(sumMode!=='action'||(d.nextAction&&!TERMINAL.includes(d.status)))
+      &&(sumMode!=='ops'||OPS.includes(d.status))
+      &&(sumMode!=='done'||DONE.includes(d.status));
+  });
+}
+function summary(){
+  sumAll.textContent=deals.length;
+  sumAct.textContent=deals.filter(d=>d.nextAction&&!TERMINAL.includes(d.status)).length;
+  sumWork.textContent=deals.filter(d=>OPS.includes(d.status)).length;
+  sumDone.textContent=deals.filter(d=>DONE.includes(d.status)).length;
+  document.querySelectorAll('#sum .sum').forEach(el=>el.classList.toggle('on',sumMode===el.dataset.s||(sumMode===''&&el.dataset.s==='')));
+}
+const planCardMeta=d=>{
+  if(d.status!=='planning') return '';
+  const p=ensurePlan(d);
+  const chips=[];
+  if(p.slotConfirmed) chips.push('<span class="plan-chip ok">слот ✓</span>');
+  else chips.push('<span class="plan-chip warn">нет слота</span>');
+  if(p.teamAssigned) chips.push('<span class="plan-chip ok">бригада ✓</span>');
+  else chips.push('<span class="plan-chip warn">нет бригады</span>');
+  if(p.orderCreated||d.orders?.length) chips.push('<span class="plan-chip ok">заказ ✓</span>');
+  else chips.push('<span class="plan-chip warn">нет заказа</span>');
+  return `<div class="plan-meta">
+    ${p.slotAt?`<div><b>Слот:</b> ${esc(p.slotAt)}${p.window?` · ${esc(p.window)}`:''}</div>`:`<div><b>Слот:</b> не назначен</div>`}
+    ${p.brigadier||p.team?`<div><b>Бригада:</b> ${esc([p.brigadier,p.cleaners&&`${p.cleaners} чел.`,p.team].filter(Boolean).join(' · '))}</div>`:`<div><b>Бригада:</b> —</div>`}
+    ${p.equipment?`<div><b>Обор.:</b> ${esc(p.equipment)}</div>`:''}
+    ${p.dispatcher?`<div><b>Дисп.:</b> ${esc(p.dispatcher)}</div>`:''}
+  </div>
+  <div class="plan-chips">${chips.join('')}</div>`;
+};
+const execCardMeta=d=>{
+  if(d.status!=='execution') return '';
+  const e=ensureExec(d);
+  const chips=[];
+  if(e.acceptanceDone) chips.push('<span class="plan-chip ok">приёмка ✓</span>');
+  else chips.push('<span class="plan-chip warn">без приёмки</span>');
+  if(e.actSigned) chips.push('<span class="plan-chip ok">акт ✓</span>');
+  else chips.push('<span class="plan-chip warn">акт</span>');
+  return `<div class="plan-meta">
+    <div><b>Статус:</b> ${esc(e.statusLabel||'На объекте')}</div>
+    <div><b>Бригадир:</b> ${esc(e.brigadier||'—')}</div>
+    ${e.arrivedAt?`<div><b>Прибытие:</b> ${esc(e.arrivedAt)}</div>`:''}
+    ${e.planHours||e.factHours?`<div><b>Время:</b> план ${esc(e.planHours||'—')} ч · факт ${esc(e.factHours||'—')} ч</div>`:''}
+  </div>
+  <div class="plan-chips">${chips.join('')}</div>`;
+};
+const closeCardMeta=d=>{
+  if(d.status!=='closing') return '';
+  const c=ensureClose(d);
+  const chips=[];
+  if(c.invoiceSent) chips.push('<span class="plan-chip ok">счёт ✓</span>');
+  else chips.push('<span class="plan-chip warn">нет счёта</span>');
+  if(d.payment?.status==='paid') chips.push('<span class="plan-chip ok">оплачено</span>');
+  else if(d.payment?.status==='partial') chips.push('<span class="plan-chip warn">частично</span>');
+  else chips.push('<span class="plan-chip warn">ждёт оплату</span>');
+  if(c.docsClosed) chips.push('<span class="plan-chip ok">документы ✓</span>');
+  else chips.push(`<span class="plan-chip warn">${DOC_MODES[c.docsMode]||'документы'}</span>`);
+  if(c.reconciled) chips.push('<span class="plan-chip ok">сверка ✓</span>');
+  else chips.push('<span class="plan-chip warn">сверка</span>');
+  return `<div class="plan-meta">
+    <div><b>Оплата:</b> ${payBadge(d.payment)} · ${money(Number(c.paidAmount)||0)} / ${money(d.amount)}</div>
+    <div><b>Способ:</b> ${esc(PAY_METHODS[c.method]||'—')}</div>
+    <div><b>Документы:</b> ${esc(DOC_MODES[c.docsMode]||'—')}${c.docsClosed?' · закрыты':''}</div>
+  </div>
+  <div class="plan-chips">${chips.join('')}</div>`;
+};
+const postsaleCardMeta=d=>{
+  if(d.status!=='postsale') return '';
+  const p=ensurePostsale(d);
+  const chips=[];
+  if(p.asked && p.score) chips.push(`<span class="plan-chip ok">${p.score}★</span>`);
+  else if(p.asked) chips.push('<span class="plan-chip warn">ждём отзыв</span>');
+  else chips.push('<span class="plan-chip warn">нет запроса</span>');
+  if(p.negative && !p.fixed) chips.push('<span class="plan-chip warn">негатив</span>');
+  else if(p.negative && p.fixed) chips.push('<span class="plan-chip ok">негатив закрыт</span>');
+  if(p.offerAccepted) chips.push('<span class="plan-chip ok">абонемент ✓</span>');
+  else if(p.offerSent) chips.push('<span class="plan-chip warn">оффер отправлен</span>');
+  if(p.retarget) chips.push('<span class="plan-chip ok">ретаргет</span>');
+  return `<div class="plan-meta">
+    <div><b>Отзыв:</b> ${p.score?esc(p.score)+' ★':(p.asked?'запрошен':'не запрошен')}${p.videoUrl?' · видео':''}</div>
+    <div><b>Канал:</b> ${esc(REVIEW_CHANNELS[p.channel]||'—')}</div>
+    ${p.remindAt?`<div><b>Напоминание:</b> ${esc(p.remindAt)}${p.remindDone?' ✓':''}</div>`:''}
+  </div>
+  <div class="plan-chips">${chips.join('')}</div>`;
+};
+const archiveCardMeta=d=>{
+  if(d.status!=='archive') return '';
+  const p=ensurePostsale(d);
+  const chips=[];
+  if(p.score) chips.push(`<span class="plan-chip ok">${p.score}★</span>`);
+  if(p.offerAccepted) chips.push('<span class="plan-chip ok">recurring ✓</span>');
+  else if(p.offerSent) chips.push('<span class="plan-chip ok">оффер был</span>');
+  if(p.retarget) chips.push('<span class="plan-chip ok">ретаргет</span>');
+  chips.push('<span class="plan-chip">архив</span>');
+  return `<div class="plan-meta">
+    <div><b>Итог:</b> ${payBadge(d.payment)}${p.score?` · ${esc(p.score)}★`:''}</div>
+    ${p.offerType?`<div><b>Оффер:</b> ${esc(p.offerType)}${p.offerAccepted?' · принят':''}</div>`:''}
+  </div>
+  <div class="plan-chips">${chips.join('')}</div>`;
+};
+const card=d=>{
+  const cl=clientById(d.clientId);
+  const objs=d.objectIds.map(o=>objById(o).name);
+  return `<div class="kanban-card" draggable="true" data-id="${d.id}">
+    <div style="display:flex;justify-content:space-between"><b>#${d.id}</b><span class="c-sub">${d.createdAt}</span></div>
+    <div style="font-weight:600;margin-top:2px">${esc(d.title)}</div>
+    <div class="c-sub">${esc(cl.name)}</div>
+    ${objs.length?`<div class="c-sub">${esc(objs[0])}${objs.length>1?` +${objs.length-1}`:''}</div>`:''}
+    <div class="amount">${money(d.amount)}</div>
+    <div class="c-sub">${d.managerId||'Менеджер не назначен'}</div>
+    ${planCardMeta(d)}
+    ${execCardMeta(d)}
+    ${closeCardMeta(d)}
+    ${postsaleCardMeta(d)}
+    ${archiveCardMeta(d)}
+    ${d.nextAction?`<div class="next">→ ${esc(d.nextAction)}<span style="float:right">${esc(naLabel(d.nextActionDate))}</span></div>`:''}
+    ${d.status==='lost'?`<div class="next" style="background:#fef2f2;border-color:#fca5a5;color:#991b1b">Причина: ${REASONS[d.lostReason]||''}</div>`:''}
+  </div>`;
+};
+function render(){
+  summary();
+  const rows=filtered();
+  const lostFilter=fStage.value==='lost';
+  empty.style.display=rows.length?'none':'';
+  board.style.display=(!rows.length||lostFilter)?'none':'flex';
+  lostWrap.style.display=lostFilter?'':'none';
+  if(!lostFilter){
+    board.innerHTML=COLS.map(([st,title])=>{
+      const items=rows.filter(d=>d.status===st);
+      return `<div class="kanban-col"><h4>${title} <span class="cnt">${items.length}</span></h4>
+        <div class="c-sub" style="margin:-4px 0 8px">${esc(RACI[st]||'')}</div>
+        <div class="kanban-cards" data-s="${st}">${items.map(card).join('')||'<div class="c-sub" style="text-align:center;padding:12px 4px">Нет договоров</div>'}</div></div>`;
+    }).join('');
+  } else {
+    lostList.innerHTML=rows.map(card).join('')||'<div class="card c-sub">Нет потерянных договоров</div>';
+  }
+}
+function resetFilters(){q.value='';fStage.value='';fManager.value='';fType.value='';sumMode='';render();}
+[q,fStage,fManager,fType].forEach(el=>{el.addEventListener('input',render);el.addEventListener('change',render);});
+btnReset.onclick=resetFilters; btnReset2.onclick=resetFilters;
+document.getElementById('sum').addEventListener('click',e=>{
+  const c=e.target.closest('.sum'); if(!c) return;
+  sumMode=sumMode===c.dataset.s?'':c.dataset.s;
+  fStage.value = (sumMode && !['action','ops','done'].includes(sumMode)) ? sumMode : '';
+  render();
+});
+
+/* Drag & drop */
+let dragId=null,suppressUntil=0;
+board.addEventListener('dragstart',e=>{
+  const c=e.target.closest('.kanban-card'); if(!c) return;
+  dragId=+c.dataset.id; suppressUntil=Date.now()+60000; e.dataTransfer.effectAllowed='move';
+  requestAnimationFrame(()=>c.classList.add('dragging'));
+});
+board.addEventListener('dragend',e=>{
+  e.target.closest('.kanban-card')?.classList.remove('dragging');
+  document.querySelectorAll('.kanban-cards.drop-over').forEach(x=>x.classList.remove('drop-over'));
+  suppressUntil=Date.now()+150; dragId=null;
+});
+board.addEventListener('dragover',e=>{
+  const zone=e.target.closest('.kanban-cards'); if(!zone) return;
+  e.preventDefault(); e.dataTransfer.dropEffect='move';
+  document.querySelectorAll('.kanban-cards.drop-over').forEach(x=>{if(x!==zone)x.classList.remove('drop-over');});
+  zone.classList.add('drop-over');
+});
+board.addEventListener('dragleave',e=>{
+  const zone=e.target.closest('.kanban-cards');
+  if(zone&&!zone.contains(e.relatedTarget)) zone.classList.remove('drop-over');
+});
+board.addEventListener('drop',e=>{
+  const zone=e.target.closest('.kanban-cards'); if(!zone||dragId==null) return;
+  e.preventDefault(); zone.classList.remove('drop-over');
+  const d=deals.find(x=>x.id===dragId); dragId=null;
+  const ns=zone.dataset.s; if(!d||ns===d.status) {suppressUntil=Date.now()+150; return;}
+  setStage(d,ns);
+  suppressUntil=Date.now()+150;
+});
+board.addEventListener('click',e=>{
+  if(Date.now()<suppressUntil) return;
+  const c=e.target.closest('.kanban-card'); if(!c) return;
+  openDrawer(deals.find(d=>d.id===+c.dataset.id));
+});
+lostList.addEventListener('click',e=>{
+  const c=e.target.closest('.kanban-card'); if(!c) return;
+  openDrawer(deals.find(d=>d.id===+c.dataset.id));
+});
+
+function setStage(d,ns,who='Елена Менеджерова'){
+  if(ns==='lost'){ openLost(d); return; }
+  if(ns==='closing' && d.status==='execution'){ openDone(d); return; }
+  d.history.push(H(now(),who,`Договор переведён в «${STAGES[ns][0]}»`));
+  clientEvent(d,`Договор #${d.id} переведён в «${STAGES[ns][0]}»`);
+  d.status=ns;
+  if(ns==='planning'){ d.nextAction=d.nextAction||'Назначить бригаду'; d.nextActionDate=d.nextActionDate||'сегодня'; }
+  if(ns==='execution'){ d.nextAction=d.nextAction||'Контроль выполнения'; d.nextActionDate=d.nextActionDate||'сегодня'; }
+  if(ns==='closing'){
+    ensureClose(d);
+    if(!d.payment) d.payment={status:'pending',amount:d.amount};
+    d.nextAction=d.nextAction||'Выставить счёт и принять оплату';
+    d.nextActionDate=d.nextActionDate||'сегодня';
+  }
+  if(ns==='postsale'){
+    ensurePostsale(d);
+    syncReviewFromPostsale(d);
+    d.nextAction=d.nextAction||'Запросить отзыв через 1–2 дня';
+    d.nextActionDate=d.nextActionDate||'сегодня';
+  }
+  if(ns==='archive'){
+    ensurePostsale(d);
+    d.nextAction=''; d.nextActionDate='';
+  }
+  render();
+  if(cur===d) openDrawer(d);
+}
+
+/* Detail modal */
+const drawer=document.getElementById('drawer'), backdrop=document.getElementById('backdrop');
+let cur=null;
+function closeDrawer(){backdrop.style.display='none';cur=null;}
+backdrop.onclick=e=>{if(e.target===backdrop)closeDrawer();};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();closeLost();closeDone();closeNew();}});
+
+function payBadge(p){
+  if(!p) return badge('Не выставлен','gray');
+  if(p.status==='paid') return badge('Оплачено','green');
+  if(p.status==='partial') return badge('Частично','amber');
+  return badge('Ожидает оплаты','amber');
+}
+
+function openDrawer(d){
+  cur=d;
+  const cl=clientById(d.clientId);
+  const active=!TERMINAL.includes(d.status);
+  const canOrder = d.status==='planning' || d.status==='execution';
+  drawer.innerHTML=`
+   <div class="card">
+    <div class="drawer-head">
+      <div>
+        <div style="font-size:18px;font-weight:700">Договор #${d.id} ${badge(...STAGES[d.status])}</div>
+        <div style="margin-top:4px;font-weight:600">${esc(d.title)}</div>
+        <div class="c-sub">${esc(cl.name)}</div>
+        <div class="raci">${esc(RACI[d.status]||'')}</div>
+      </div>
+      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+   </div>
+
+   <div class="card" style="margin-top:12px"><b>Основная информация</b>
+     <div class="kv" style="margin-top:8px"><b>Клиент:</b> <a href="clients.html">${esc(cl.name)}</a></div>
+     ${d.applicationId?`<div class="kv"><b>Источник:</b> создан из <a href="leads.html">лида #${d.applicationId}</a></div>`:''}
+     <div class="kv"><b>Менеджер:</b> ${d.managerId||'—'}</div>
+     <div class="kv"><b>Дата создания:</b> ${d.createdAt}</div>
+     ${d.status==='lost'?`<div class="kv"><b>Причина потери:</b> ${REASONS[d.lostReason]||'—'}</div>`:''}
+   </div>
+
+   ${active?`<div class="card" style="margin-top:12px"><b>Следующее действие</b>
+     <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+       <input class="input" id="naText" value="${esc(d.nextAction||'')}" placeholder="Например: позвонить клиенту" style="flex:1;min-width:180px">
+       <input class="input" type="date" id="naDate" value="${naISO(d.nextActionDate)}" style="width:150px">
+       <span class="btn sm primary" id="btnNaDone">Выполнено</span>
+     </div></div>`:''}
+
+   <div class="card" style="margin-top:12px"><b>КП / смета</b>
+     <div class="kv" style="margin-top:8px"><b>Услуга:</b> ${esc(d.service||'—')}</div>
+     <div class="kv"><b>Состав:</b> ${esc(d.conditions||'—')}</div>
+     <div class="kv"><b>Стоимость:</b> ${money(d.amount)}${d.amountPeriod||''}</div>
+     <div class="kv"><b>Дата выезда:</b> ${d.startDate||'—'}</div>
+   </div>
+
+   <div class="card" style="margin-top:12px">
+     <div style="display:flex;justify-content:space-between;align-items:center"><b>Заказы</b>
+       ${canOrder?'<span class="btn sm primary" id="dNewOrder">+ Новый заказ</span>':''}</div>
+     ${d.status==='planning'&&!d.orders.length?'<div class="c-sub" style="margin-top:6px">Создайте заказ и назначьте бригаду</div>':''}
+     <div style="margin-top:8px">
+       ${d.orders.slice().reverse().map(o=>`<div class="ord-row"><span><b>Заказ #${o.num}</b> · ${esc(o.service)}<div class="c-sub">${o.date} · <a href="orders.html">календарь</a></div></span>${badge(o.status,O_ST[o.status])}</div>`).join('')||'<span class="c-sub">Заказов пока нет</span>'}
+     </div>
+     ${d.status==='execution'?`<div class="act-row">
+       <a class="btn sm" href="order-quality.html">Контроль качества →</a>
+       <span class="btn sm primary" id="btnCloseDeal">Работы выполнены → Закрытие</span>
+     </div>`:''}
+   </div>
+
+   <div class="card" style="margin-top:12px"><b>Объекты</b>
+     ${d.objectIds.map(oid=>{const o=objById(oid);return `<div class="mini-card"><b>${esc(o.name)}</b><div class="sub">${esc(o.area)}</div></div>`;}).join('')||'<span class="c-sub">Нет объектов</span>'}
+   </div>
+
+   ${d.status==='planning'?(()=>{
+     const p=ensurePlan(d);
+     return `<div class="card" style="margin-top:12px"><b>Планирование</b>
+     <div class="c-sub" style="margin-top:4px">Цель: собрать выезд — слот, бригада, доступ и оборудование, чтобы бригада выехала без сюрпризов.</div>
+     <div class="c-sub" style="margin-top:6px">Отвечает: диспетчер · участвует: бригадир. Вход: подтверждённый заказ. Выход: заказ в календаре + назначенная бригада.</div>
+
+     <div class="qual-block">
+       <h4>Слот и ресурсы</h4>
+       <div class="qual-grid">
+         <label class="field"><span>Дата и время выезда</span>
+           <input class="input" id="plSlot" value="${esc(p.slotAt||'')}" placeholder="08.11 06:30"></label>
+         <label class="field"><span>Окно / смена</span>
+           <input class="input" id="plWindow" value="${esc(p.window||'')}" placeholder="утро / день / ночь"></label>
+         <label class="field"><span>Часов</span>
+           <input class="input" id="plHours" value="${esc(p.hours||'')}" placeholder="3"></label>
+         <label class="field"><span>Клинеров</span>
+           <input class="input" id="plCleaners" value="${esc(p.cleaners||'')}" placeholder="2"></label>
+         <label class="field"><span>Диспетчер</span>
+           <select class="input" id="plDisp">${DISPATCHERS.map(x=>`<option ${p.dispatcher===x?'selected':''}>${x}</option>`).join('')}</select></label>
+         <label class="field"><span>Бригадир</span>
+           <select class="input" id="plBrig"><option value="">— не назначен —</option>${BRIGADIERS.map(x=>`<option ${p.brigadier===x?'selected':''}>${x}</option>`).join('')}</select></label>
+         <label class="field full"><span>Состав бригады</span>
+           <input class="input" id="plTeam" value="${esc(p.team||'')}" placeholder="Имена клинеров"></label>
+         <label class="field full"><span>Оборудование / химия</span>
+           <input class="input" id="plEquip" value="${esc(p.equipment||'')}" placeholder="пароочиститель, стремянки…"></label>
+       </div>
+     </div>
+
+     <div class="qual-block">
+       <h4>Доступ и подготовка</h4>
+       <label class="field"><span>Правила доступа</span>
+         <textarea class="input" id="plAccess" rows="2" placeholder="Пропуск, код, парковка, ключи…">${esc(p.access||'')}</textarea></label>
+       <label class="field"><span>Что подготовить на объекте</span>
+         <textarea class="input" id="plPrep" rows="2" placeholder="Освободить зоны, вода, розетки…">${esc(p.prepare||'')}</textarea></label>
+       <label class="field" style="margin-bottom:0"><span>Заметки диспетчера</span>
+         <textarea class="input" id="plNotes" rows="2">${esc(p.notes||'')}</textarea></label>
+     </div>
+
+     <div class="qual-block">
+       <h4>Готовность к выезду</h4>
+       <div style="display:flex;flex-wrap:wrap;gap:10px">
+         <label class="check-pill" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:#fff;font-size:12px"><input type="checkbox" id="plOrder" ${p.orderCreated||d.orders.length?'checked':''}> Заказ в календаре</label>
+         <label class="check-pill" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:#fff;font-size:12px"><input type="checkbox" id="plSlotOk" ${p.slotConfirmed?'checked':''}> Слот подтверждён</label>
+         <label class="check-pill" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:#fff;font-size:12px"><input type="checkbox" id="plTeamOk" ${p.teamAssigned?'checked':''}> Бригада назначена</label>
+         <label class="check-pill" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:#fff;font-size:12px"><input type="checkbox" id="plRemind" ${p.clientReminded?'checked':''}> Клиенту напомнили</label>
+       </div>
+     </div>
+
+     <div class="act-row">
+       <span class="btn sm" id="btnSavePlan">Сохранить планирование</span>
+       <a class="btn sm" href="order-assign.html">Назначить в заказе →</a>
+       <span class="btn sm primary" id="btnToExecution">Бригада готова → Выполнение</span>
+     </div>
+
+     <div class="qual-mistakes">
+       <b>Типичные ошибки</b>
+       <ul>
+         <li>слот без бригады → срыв в день выезда;</li>
+         <li>не передали доступ/ключи → простой на объекте;</li>
+         <li>забыли оборудование из сметы → недоукомплектованный выезд.</li>
+       </ul>
+     </div>
+     <div class="qual-metrics">
+       <b>Метрики</b>
+       <ul>
+         <li>время от подтверждения до слота;</li>
+         <li>% выездов с полной комплектацией;</li>
+         <li>% переносов по вине планирования.</li>
+       </ul>
+     </div>
+   </div>`;
+   })():''}
+
+   ${(d.status==='planning'||d.status==='execution')?`<div class="card" style="margin-top:12px"><b>Оплата (предварительно)</b>
+     <div class="kv" style="margin-top:8px"><b>Статус:</b> ${payBadge(d.payment)}</div>
+     <div class="kv"><b>Сумма заказа:</b> ${money(d.payment?.amount||d.amount)}</div>
+   </div>`:''}
+
+   ${d.status==='closing'?(()=>{
+     const c=ensureClose(d);
+     const paid=Number(c.paidAmount)||0;
+     const inv=Number(c.invoiceAmount??d.amount)||0;
+     const orderAmt=Number(d.amount)||0;
+     const diff=Math.round((paid-orderAmt)*100)/100;
+     const match=c.reconciled || (paid>0 && Math.abs(diff)<0.01 && inv===orderAmt);
+     const reconCls=match?'ok':(paid>0?'warn':'');
+     return `<div class="card" style="margin-top:12px"><b>Закрытие договора</b>
+     <div class="c-sub" style="margin-top:4px">Цель: получить деньги и корректно закрыть заказ в системе.</div>
+     <div class="c-sub" style="margin-top:6px">Отвечает: менеджер / бухгалтер. Выход: оплата получена, документы закрыты, договор «Закрыт успешно».</div>
+
+     <div class="qual-block">
+       <h4>Счёт и оплата</h4>
+       <div class="qual-grid">
+         <label class="field"><span>Сумма заказа</span>
+           <input class="input" value="${money(orderAmt)}" disabled></label>
+         <label class="field"><span>Сумма счёта, ₽</span>
+           <input class="input" id="clInvAmt" type="number" min="0" step="1" value="${inv}"></label>
+         <label class="field"><span>Дата счёта</span>
+           <input class="input" id="clInvAt" value="${esc(c.invoiceAt||'')}" placeholder="06.10.2026"></label>
+         <label class="field"><span>Способ оплаты</span>
+           <select class="input" id="clMethod">${Object.entries(PAY_METHODS).map(([k,v])=>`<option value="${k}" ${c.method===k?'selected':''}>${v}</option>`).join('')}</select></label>
+         <label class="field"><span>Оплачено, ₽</span>
+           <input class="input" id="clPaidAmt" type="number" min="0" step="1" value="${paid}"></label>
+         <label class="field"><span>Дата оплаты</span>
+           <input class="input" id="clPaidAt" value="${esc(c.paidAt||'')}" placeholder="07.10.2026"></label>
+       </div>
+       <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px">
+         <label class="check-pill" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:#fff;font-size:12px"><input type="checkbox" id="clInvSent" ${c.invoiceSent?'checked':''}> Счёт выставлен</label>
+         <label class="check-pill" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:#fff;font-size:12px"><input type="checkbox" id="clPayDone" ${d.payment?.status==='paid'?'checked':''}> Оплата получена</label>
+       </div>
+       <div class="kv" style="margin-top:10px"><b>Статус в CRM:</b> ${payBadge(d.payment)}</div>
+     </div>
+
+     <div class="qual-block">
+       <h4>Закрывающие документы</h4>
+       <div class="c-sub" style="margin-bottom:8px">Два варианта: On-Line (ЭДО / электронный акт) или Off-Line (бумага, скан).</div>
+       <div class="qual-grid">
+         <label class="field"><span>Режим документов</span>
+           <select class="input" id="clDocsMode">${Object.entries(DOC_MODES).map(([k,v])=>`<option value="${k}" ${c.docsMode===k?'selected':''}>${v}</option>`).join('')}</select></label>
+         <label class="field"><span>Комментарий к документам</span>
+           <input class="input" id="clDocsNote" value="${esc(c.docsNote||'')}" placeholder="ЭДО · акт / бумажный акт, ждём скан…"></label>
+       </div>
+       <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px">
+         <label class="check-pill" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:#fff;font-size:12px"><input type="checkbox" id="clDocsOk" ${c.docsClosed?'checked':''}> Документы закрыты</label>
+       </div>
+     </div>
+
+     <div class="qual-block">
+       <h4>Сверка</h4>
+       <div class="kv"><b>Заказ:</b> ${money(orderAmt)} · <b>Счёт:</b> ${money(inv)} · <b>Оплата:</b> ${money(paid)}</div>
+       <div class="kv" style="margin-top:4px"><b>Расхождение:</b> ${diff===0?'нет':(diff>0?'+':'')+money(Math.abs(diff))+(diff!==0?(diff>0?' (переплата)':' (недоплата)'):'')}</div>
+       ${reconCls?`<div class="plan-chips" style="margin-top:8px"><span class="plan-chip ${reconCls}">${match?'суммы сходятся':'есть расхождение'}</span></div>`:''}
+       <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px">
+         <label class="check-pill" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:#fff;font-size:12px"><input type="checkbox" id="clRecon" ${c.reconciled||match?'checked':''}> Сверка пройдена · сумма заказа = сумма оплаты</label>
+       </div>
+       <label class="field" style="margin-top:8px;margin-bottom:0"><span>Заметки бухгалтера / менеджера</span>
+         <textarea class="input" id="clNotes" rows="2">${esc(c.notes||'')}</textarea></label>
+     </div>
+
+     <div class="act-row">
+       <span class="btn sm" id="btnSaveClose">Сохранить закрытие</span>
+       <span class="btn sm" id="btnPay">Зафиксировать оплату</span>
+       <span class="btn sm primary" id="btnToPostsale">Оплачено / Закрыт → Постпродажа</span>
+     </div>
+
+     <div class="qual-mistakes">
+       <b>Типичные ошибки</b>
+       <ul>
+         <li>забыли выставить счёт;</li>
+         <li>расхождение суммы заказа и оплаты;</li>
+         <li>нет чека / закрывающих документов → риски;</li>
+         <li>не закрыли карточку → «мусор» в воронке.</li>
+       </ul>
+     </div>
+     <div class="qual-metrics">
+       <b>Метрики</b>
+       <ul>
+         <li>% оплат в срок;</li>
+         <li>дебиторка (для постоплаты);</li>
+         <li>средний срок «выполнено → оплачено».</li>
+       </ul>
+     </div>
+   </div>`;
+   })():''}
+
+   ${d.status==='postsale'?(()=>{
+     const p=ensurePostsale(d);
+     const scoreBadge=p.score
+       ?(p.score>=4?badge(p.score+' ★','green'):(p.score>=3?badge(p.score+' ★','amber'):badge(p.score+' ★','red')))
+       :badge(p.asked?'Ожидаем отзыв':'Нет отзыва','gray');
+     return `<div class="card" style="margin-top:12px"><b>Постпродажа и отзывы</b>
+     <div class="c-sub" style="margin-top:4px">Цель: превратить разового клиента в повторного и получить социальное доказательство.</div>
+     <div class="c-sub" style="margin-top:6px">Отвечает: менеджер по продажам / клиентский сервис. Выход: отзыв, оценка, повторный заказ или абонемент.</div>
+
+     <div class="qual-block">
+       <h4>Запрос отзыва / оценки</h4>
+       <div class="c-sub" style="margin-bottom:8px">Через 1–2 дня · желательно короткое видео для шортс (3–4 сек).</div>
+       <div class="qual-grid">
+         <label class="field"><span>Дата запроса</span>
+           <input class="input" id="psAskAt" value="${esc(p.askAt||'')}" placeholder="01.10.2026"></label>
+         <label class="field"><span>Канал</span>
+           <select class="input" id="psChannel">${Object.entries(REVIEW_CHANNELS).map(([k,v])=>`<option value="${k}" ${p.channel===k?'selected':''}>${v}</option>`).join('')}</select></label>
+         <label class="field"><span>Оценка (1–5)</span>
+           <select class="input" id="psScore">
+             <option value="">— нет —</option>
+             ${[5,4,3,2,1].map(n=>`<option value="${n}" ${p.score===n?'selected':''}>${n} ★</option>`).join('')}
+           </select></label>
+         <label class="field"><span>Дата получения</span>
+           <input class="input" id="psRecvAt" value="${esc(p.receivedAt||'')}" placeholder="01.10.2026"></label>
+         <label class="field full"><span>Текст отзыва</span>
+           <textarea class="input" id="psText" rows="2" placeholder="Что написал клиент…">${esc(p.text||'')}</textarea></label>
+         <label class="field full"><span>Видео / шортс (ссылка или id)</span>
+           <input class="input" id="psVideo" value="${esc(p.videoUrl||'')}" placeholder="shorts://… или URL 3–4 сек"></label>
+       </div>
+       <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px">
+         <label class="check-pill" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:#fff;font-size:12px"><input type="checkbox" id="psAsked" ${p.asked?'checked':''}> Отзыв запрошен</label>
+         <label class="check-pill" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:#fff;font-size:12px"><input type="checkbox" id="psVideoAsk" ${p.videoAsk?'checked':''}> Просили видео 3–4 сек</label>
+       </div>
+       <div class="kv" style="margin-top:10px"><b>Статус:</b> ${scoreBadge}</div>
+     </div>
+
+     <div class="qual-block">
+       <h4>Обработка негатива</h4>
+       <div class="c-sub" style="margin-bottom:8px">Выяснение → устранение → компенсация при необходимости.</div>
+       <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px">
+         <label class="check-pill" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:#fff;font-size:12px"><input type="checkbox" id="psNeg" ${p.negative?'checked':''}> Есть негатив</label>
+         <label class="check-pill" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:#fff;font-size:12px"><input type="checkbox" id="psFixed" ${p.fixed?'checked':''}> Негатив закрыт</label>
+       </div>
+       <label class="field"><span>Суть претензии</span>
+         <textarea class="input" id="psNegNote" rows="2" placeholder="Что не устроило…">${esc(p.negativeNote||'')}</textarea></label>
+       <label class="field" style="margin-bottom:0"><span>Устранение / компенсация</span>
+         <input class="input" id="psComp" value="${esc(p.compensation||'')}" placeholder="Повторный выезд, скидка, возврат…"></label>
+     </div>
+
+     <div class="qual-block">
+       <h4>Повтор и абонемент</h4>
+       <div class="c-sub" style="margin-bottom:8px">Конверсия «разовый → постоянный» · напоминание через 1–3 месяца.</div>
+       <div class="qual-grid">
+         <label class="field"><span>Тип оффера</span>
+           <select class="input" id="psOfferType">
+             <option value="" ${!p.offerType?'selected':''}>— не выбран —</option>
+             <option value="абонемент" ${p.offerType==='абонемент'?'selected':''}>Абонемент</option>
+             <option value="постоянная уборка" ${p.offerType==='постоянная уборка'?'selected':''}>Постоянная уборка</option>
+             <option value="повторный заказ" ${p.offerType==='повторный заказ'?'selected':''}>Повторный заказ</option>
+           </select></label>
+         <label class="field"><span>Напоминание о следующем визите</span>
+           <input class="input" id="psRemind" value="${esc(p.remindAt||'')}" placeholder="через 1–3 мес · 01.01.2027"></label>
+         <label class="field full"><span>Условия оффера</span>
+           <input class="input" id="psOfferNote" value="${esc(p.offerNote||'')}" placeholder="4 уборки / мес · −15%"></label>
+       </div>
+       <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px">
+         <label class="check-pill" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:#fff;font-size:12px"><input type="checkbox" id="psOfferSent" ${p.offerSent?'checked':''}> Оффер отправлен</label>
+         <label class="check-pill" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:#fff;font-size:12px"><input type="checkbox" id="psOfferOk" ${p.offerAccepted?'checked':''}> Принят (recurring)</label>
+         <label class="check-pill" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:#fff;font-size:12px"><input type="checkbox" id="psRemindOk" ${p.remindDone?'checked':''}> Напоминание отправлено</label>
+         <label class="check-pill" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:#fff;font-size:12px"><input type="checkbox" id="psRetarget" ${p.retarget?'checked':''}> В базе ретаргетинга</label>
+       </div>
+       <label class="field" style="margin-top:8px;margin-bottom:0"><span>Заметки сервиса</span>
+         <textarea class="input" id="psNotes" rows="2">${esc(p.notes||'')}</textarea></label>
+     </div>
+
+     <div class="act-row">
+       <span class="btn sm" id="btnSavePostsale">Сохранить</span>
+       <span class="btn sm" id="btnAskReview">Запросить отзыв</span>
+       <span class="btn sm" id="btnOffer">Предложить абонемент</span>
+       <span class="btn sm primary" id="btnRepeat">Повторный заказ</span>
+       <span class="btn sm" id="btnToArchive">В архив</span>
+     </div>
+
+     <div class="qual-mistakes">
+       <b>Типичные ошибки</b>
+       <ul>
+         <li>не запросили отзыв;</li>
+         <li>негатив остался без ответа → репутационные потери;</li>
+         <li>не предложили повтор → потеря LTV.</li>
+       </ul>
+     </div>
+     <div class="qual-metrics">
+       <b>Метрики</b>
+       <ul>
+         <li>% отзывов;</li>
+         <li>средняя оценка;</li>
+         <li>% повторных заказов;</li>
+         <li>конверсия «разовый → постоянный».</li>
+       </ul>
+     </div>
+   </div>`;
+   })():''}
+
+   ${d.status==='archive'?(()=>{
+     const p=ensurePostsale(d);
+     return `<div class="card" style="margin-top:12px"><b>Архив</b>
+     <div class="c-sub" style="margin-top:4px">Договор завершён и снят с активной воронки. История и итоги сохранены.</div>
+     <div class="kv" style="margin-top:8px"><b>Оплата:</b> ${payBadge(d.payment)} · ${money(d.payment?.amount||d.amount)}</div>
+     <div class="kv"><b>Отзыв:</b> ${p.score?badge(p.score+' ★',p.score>=4?'green':(p.score>=3?'amber':'red')):badge('Нет','gray')} ${esc(p.text||'')}</div>
+     <div class="kv"><b>Оффер:</b> ${esc(p.offerType||'—')}${p.offerAccepted?' · принят':(p.offerSent?' · отправлен':'')}</div>
+     <div class="kv"><b>Ретаргетинг:</b> ${p.retarget?'в базе':'—'}</div>
+     <div class="act-row">
+       <span class="btn sm" id="btnFromArchive">Вернуть в постпродажу</span>
+       <span class="btn sm primary" id="btnRepeat">Повторный заказ</span>
+     </div>
+   </div>`;
+   })():''}
+
+   <div class="card" style="margin-top:12px">
+     <label class="field" style="margin-bottom:0"><span>Стадия</span>
+       <select class="input" id="dStage">
+         ${Object.entries(STAGES).map(([k,[t]])=>`<option value="${k}" ${d.status===k?'selected':''}>${t}</option>`).join('')}
+       </select></label>
+   </div>
+
+   <div class="card" style="margin-top:12px"><b>Заметки</b>
+     <div id="dHist">${d.history.slice().reverse().map((h,i)=>`<div class="hist-item"><span class="when">${h.at}</span><span style="flex:1"><b>${esc(h.text)}</b><div class="c-sub">${esc(h.who)}</div></span><span class="h-del" data-i="${d.history.length-1-i}" title="Удалить" style="cursor:pointer;color:var(--muted);padding:0 4px">✕</span></div>`).join('')}</div>
+     <div style="display:flex;gap:8px;margin-top:10px">
+       <input class="input" id="hText" placeholder="Например: отправить КП…" style="flex:1">
+       <span class="btn sm" id="btnHist">Добавить</span>
+     </div>
+   </div>`;
+  backdrop.style.display='flex';
+
+  document.getElementById('dStage').onchange=e=>{
+    const ns=e.target.value; if(ns===d.status) return;
+    if(ns==='lost'||(ns==='closing'&&d.status==='execution')){ e.target.value=d.status; setStage(d,ns); return; }
+    setStage(d,ns);
+  };
+  document.getElementById('btnHist').onclick=()=>{
+    const inp=document.getElementById('hText'), t=inp.value.trim(); if(!t) return;
+    const h=H(now(),'Елена Менеджерова',t); h.note=true; d.history.push(h);
+    clientEvent(d,`По договору #${d.id}: ${t}`);
+    if(active){ d.nextAction=t; d.nextActionDate='сегодня'; }
+    render(); openDrawer(d);
+  };
+  document.getElementById('dHist').onclick=e=>{
+    const b=e.target.closest('.h-del'); if(!b) return;
+    d.history.splice(+b.dataset.i,1);
+    render(); openDrawer(d);
+  };
+  document.getElementById('naText')?.addEventListener('change',e=>{d.nextAction=e.target.value.trim();render();});
+  document.getElementById('naDate')?.addEventListener('change',e=>{d.nextActionDate=fromISO(e.target.value);render();});
+  document.getElementById('btnNaDone')?.addEventListener('click',()=>{
+    if(!d.nextAction) return;
+    d.history.push(H(now(),'Елена Менеджерова',`Выполнено: ${d.nextAction}`));
+    d.nextAction=''; d.nextActionDate='';
+    render(); openDrawer(d); toast('Действие выполнено');
+  });
+
+  const createOrderFromDeal=()=>{
+    const num=ordersSeq++;
+    d.orders.push({num,date:now().slice(0,10),service:d.service||'Уборка',status:'Запланирован'});
+    d.history.push(H(now(),'Елена Менеджерова',`Создан заказ #${num} · планирование (диспетчер)`));
+    clientEvent(d,`Создан заказ #${num} по договору #${d.id}`);
+    const p=ensurePlan(d); p.orderCreated=true;
+    d.nextAction='Назначить бригаду'; d.nextActionDate='сегодня';
+    if(!d.payment) d.payment={status:'pending',amount:d.amount};
+    toast(`Заказ #${num} создан`);
+    render(); openDrawer(d);
+  };
+  document.getElementById('dNewOrder')?.addEventListener('click',createOrderFromDeal);
+  const readPlanForm=()=>{
+    const p=ensurePlan(d);
+    p.slotAt=document.getElementById('plSlot')?.value.trim()||'';
+    p.window=document.getElementById('plWindow')?.value.trim()||'';
+    p.hours=document.getElementById('plHours')?.value.trim()||'';
+    p.cleaners=document.getElementById('plCleaners')?.value.trim()||'';
+    p.dispatcher=document.getElementById('plDisp')?.value||p.dispatcher;
+    p.brigadier=document.getElementById('plBrig')?.value||'';
+    p.team=document.getElementById('plTeam')?.value.trim()||'';
+    p.equipment=document.getElementById('plEquip')?.value.trim()||'';
+    p.access=document.getElementById('plAccess')?.value.trim()||'';
+    p.prepare=document.getElementById('plPrep')?.value.trim()||'';
+    p.notes=document.getElementById('plNotes')?.value.trim()||'';
+    p.orderCreated=!!document.getElementById('plOrder')?.checked || !!d.orders.length;
+    p.slotConfirmed=!!document.getElementById('plSlotOk')?.checked;
+    p.teamAssigned=!!document.getElementById('plTeamOk')?.checked;
+    p.clientReminded=!!document.getElementById('plRemind')?.checked;
+    if(p.brigadier && !p.teamAssigned) p.teamAssigned=true;
+    return p;
+  };
+  document.getElementById('btnSavePlan')?.addEventListener('click',()=>{
+    const p=readPlanForm();
+    d.history.push(H(now(),p.dispatcher||'Диспетчер',`Планирование: ${p.slotAt||'без слота'} · ${p.brigadier||'без бригадира'} · ${p.cleaners||'?'} чел.`));
+    if(p.slotAt && !d.startDate) d.startDate=p.slotAt;
+    d.nextAction=p.teamAssigned?(p.orderCreated?'Готово к выезду':'Создать заказ'):'Назначить бригаду';
+    d.nextActionDate='сегодня';
+    toast('Планирование сохранено');
+    render(); openDrawer(d);
+  });
+  document.getElementById('btnToExecution')?.addEventListener('click',()=>{
+    const p=readPlanForm();
+    if(!p.slotConfirmed || !p.slotAt){ toast('Подтвердите слот выезда',true); return; }
+    if(!p.teamAssigned || !p.brigadier){ toast('Назначьте бригадира и отметьте бригаду',true); return; }
+    if(!p.orderCreated && !d.orders.length){ toast('Сначала создайте заказ',true); return; }
+    p.orderCreated=true; p.teamAssigned=true; p.slotConfirmed=true;
+    const ex=ensureExec(d);
+    ex.brigadier=p.brigadier||ex.brigadier;
+    ex.planHours=p.hours||ex.planHours;
+    ex.statusLabel='Прибытие';
+    d.nextAction='Контроль выполнения на объекте'; d.nextActionDate='сегодня';
+    setStage(d,'execution','Диспетчер');
+  });
+  document.getElementById('btnCloseDeal')?.addEventListener('click',()=>{
+    const e=ensureExec(d);
+    e.statusLabel='Выполнено';
+    e.acceptanceDone=true;
+    e.actSigned=true;
+    d.history.push(H(now(),e.brigadier||'Бригадир','Работы выполнены → закрытие'));
+    openDone(d);
+  });
+  const readCloseForm=()=>{
+    const c=ensureClose(d);
+    c.invoiceAmount=Number(document.getElementById('clInvAmt')?.value)||d.amount||0;
+    c.invoiceAt=document.getElementById('clInvAt')?.value.trim()||'';
+    c.method=document.getElementById('clMethod')?.value||c.method;
+    c.paidAmount=Number(document.getElementById('clPaidAmt')?.value)||0;
+    c.paidAt=document.getElementById('clPaidAt')?.value.trim()||'';
+    c.invoiceSent=!!document.getElementById('clInvSent')?.checked;
+    c.docsMode=document.getElementById('clDocsMode')?.value||c.docsMode;
+    c.docsNote=document.getElementById('clDocsNote')?.value.trim()||'';
+    c.docsClosed=!!document.getElementById('clDocsOk')?.checked;
+    c.reconciled=!!document.getElementById('clRecon')?.checked;
+    c.notes=document.getElementById('clNotes')?.value.trim()||'';
+    const payDone=!!document.getElementById('clPayDone')?.checked;
+    if(payDone || c.paidAmount>0){
+      const full=c.paidAmount>=(d.amount||0);
+      d.payment={status:full?'paid':(c.paidAmount>0?'partial':'pending'),amount:c.paidAmount||d.amount};
+      if(payDone && full) d.payment.status='paid';
+      if(payDone && !c.paidAmount){ c.paidAmount=d.amount; d.payment={status:'paid',amount:d.amount}; }
+    } else if(d.payment){
+      d.payment.status='pending';
+      d.payment.amount=c.invoiceAmount||d.amount;
+    } else {
+      d.payment={status:'pending',amount:c.invoiceAmount||d.amount};
+    }
+    if(c.invoiceSent && !c.invoiceAt) c.invoiceAt=now().slice(0,10);
+    if((payDone||d.payment?.status==='paid') && !c.paidAt) c.paidAt=now().slice(0,10);
+    return c;
+  };
+  document.getElementById('btnSaveClose')?.addEventListener('click',()=>{
+    const c=readCloseForm();
+    const bits=[
+      c.invoiceSent?'счёт ✓':'нет счёта',
+      PAY_METHODS[c.method]||'',
+      d.payment?.status==='paid'?'оплачено':(d.payment?.status==='partial'?`частично ${money(c.paidAmount)}`:'ждёт оплату'),
+      DOC_MODES[c.docsMode]+(c.docsClosed?' ✓':''),
+      c.reconciled?'сверка ✓':'без сверки',
+    ];
+    d.history.push(H(now(),'Бухгалтер',`Закрытие: ${bits.join(' · ')}`));
+    if(!c.invoiceSent) d.nextAction='Выставить счёт';
+    else if(d.payment?.status!=='paid') d.nextAction='Принять оплату';
+    else if(!c.docsClosed) d.nextAction='Закрыть документы';
+    else if(!c.reconciled) d.nextAction='Сверить сумму и закрыть карточку';
+    else d.nextAction='Перевести в постпродажу';
+    d.nextActionDate='сегодня';
+    toast('Закрытие сохранено');
+    render(); openDrawer(d);
+  });
+  document.getElementById('btnPay')?.addEventListener('click',()=>{
+    const c=readCloseForm();
+    if(!c.invoiceSent){ toast('Сначала выставьте счёт',true); return; }
+    if(!c.paidAmount) c.paidAmount=c.invoiceAmount||d.amount;
+    c.paidAt=c.paidAt||now().slice(0,10);
+    d.payment={status:c.paidAmount>=(d.amount||0)?'paid':'partial',amount:c.paidAmount};
+    if(document.getElementById('clPayDone')) document.getElementById('clPayDone').checked=d.payment.status==='paid';
+    d.history.push(H(now(),'Бухгалтер',`Оплата зафиксирована · ${PAY_METHODS[c.method]||''} · ${money(c.paidAmount)}`));
+    d.nextAction=c.docsClosed?(c.reconciled?'Перевести в постпродажу':'Сверить сумму и закрыть карточку'):'Закрыть документы';
+    d.nextActionDate='сегодня';
+    toast(d.payment.status==='paid'?'Оплата получена':'Частичная оплата зафиксирована');
+    render(); openDrawer(d);
+  });
+  document.getElementById('btnToPostsale')?.addEventListener('click',()=>{
+    const c=readCloseForm();
+    if(!c.invoiceSent){ toast('Выставьте счёт перед закрытием',true); return; }
+    if(d.payment?.status!=='paid'){ toast('Зафиксируйте полную оплату',true); return; }
+    if(!c.docsClosed){ toast('Закройте документы (On-Line или Off-Line)',true); return; }
+    if(Math.abs((c.paidAmount||0)-(d.amount||0))>=0.01 && !c.reconciled){
+      toast('Есть расхождение сумм — отметьте сверку или исправьте оплату',true); return;
+    }
+    c.reconciled=true;
+    c.paidAmount=c.paidAmount||d.amount;
+    d.payment={status:'paid',amount:c.paidAmount};
+    d.nextAction='Запросить отзыв через 1–2 дня'; d.nextActionDate='сегодня';
+    ensurePostsale(d);
+    syncReviewFromPostsale(d);
+    d.history.push(H(now(),'Бухгалтер',`Договор закрыт успешно · ${PAY_METHODS[c.method]} · ${DOC_MODES[c.docsMode]} · ${money(c.paidAmount)}`));
+    setStage(d,'postsale','Клиентский сервис');
+  });
+  const readPostsaleForm=()=>{
+    const p=ensurePostsale(d);
+    p.askAt=document.getElementById('psAskAt')?.value.trim()||'';
+    p.channel=document.getElementById('psChannel')?.value||p.channel;
+    const sc=document.getElementById('psScore')?.value;
+    p.score=sc?+sc:null;
+    p.receivedAt=document.getElementById('psRecvAt')?.value.trim()||'';
+    p.text=document.getElementById('psText')?.value.trim()||'';
+    p.videoUrl=document.getElementById('psVideo')?.value.trim()||'';
+    p.asked=!!document.getElementById('psAsked')?.checked;
+    p.videoAsk=!!document.getElementById('psVideoAsk')?.checked;
+    p.negative=!!document.getElementById('psNeg')?.checked;
+    p.fixed=!!document.getElementById('psFixed')?.checked;
+    p.negativeNote=document.getElementById('psNegNote')?.value.trim()||'';
+    p.compensation=document.getElementById('psComp')?.value.trim()||'';
+    p.offerType=document.getElementById('psOfferType')?.value||'';
+    p.remindAt=document.getElementById('psRemind')?.value.trim()||'';
+    p.offerNote=document.getElementById('psOfferNote')?.value.trim()||'';
+    p.offerSent=!!document.getElementById('psOfferSent')?.checked;
+    p.offerAccepted=!!document.getElementById('psOfferOk')?.checked;
+    p.remindDone=!!document.getElementById('psRemindOk')?.checked;
+    p.retarget=!!document.getElementById('psRetarget')?.checked;
+    p.notes=document.getElementById('psNotes')?.value.trim()||'';
+    if(p.score!=null && p.score<=2) p.negative=true;
+    if(p.score!=null && !p.receivedAt) p.receivedAt=now().slice(0,10);
+    if(p.asked && !p.askAt) p.askAt=now().slice(0,10);
+    syncReviewFromPostsale(d);
+    return p;
+  };
+  const postsaleNextAction=p=>{
+    if(p.negative && !p.fixed) return 'Закрыть негатив · компенсация';
+    if(!p.asked) return 'Запросить отзыв через 1–2 дня';
+    if(p.asked && !p.score) return 'Дождаться отзыва';
+    if(!p.offerSent && !p.offerAccepted) return 'Предложить абонемент со скидкой';
+    if(p.offerSent && !p.offerAccepted) return 'Дожать оффер / повторный заказ';
+    if(p.remindAt && !p.remindDone) return `Напомнить о уборке · ${p.remindAt}`;
+    if(!p.retarget) return 'Добавить в базу ретаргетинга';
+    return 'Постпродажа завершена';
+  };
+  document.getElementById('btnSavePostsale')?.addEventListener('click',()=>{
+    const p=readPostsaleForm();
+    d.nextAction=postsaleNextAction(p); d.nextActionDate='сегодня';
+    d.history.push(H(now(),'Клиентский сервис',`Постпродажа: ${p.score?p.score+'★':'без оценки'} · ${REVIEW_CHANNELS[p.channel]}${p.offerSent?' · оффер':''}${p.retarget?' · ретаргет':''}`));
+    toast('Постпродажа сохранена');
+    render(); openDrawer(d);
+  });
+  document.getElementById('btnAskReview')?.addEventListener('click',()=>{
+    const p=readPostsaleForm();
+    p.asked=true; p.askAt=p.askAt||now().slice(0,10);
+    p.videoAsk=true;
+    if(!p.score){
+      p.score=5; p.text=p.text||'Отличная уборка, рекомендую';
+      p.receivedAt=now().slice(0,10);
+      if(p.videoAsk && !p.videoUrl) p.videoUrl='shorts://demo-3s';
+    }
+    syncReviewFromPostsale(d);
+    d.history.push(H(now(),'Клиентский сервис',`Запрос отзыва · ${REVIEW_CHANNELS[p.channel]}${p.videoAsk?' (+ видео 3–4 сек)':''}`));
+    if(p.score) d.history.push(H(now(),'Клиентский сервис',`Получен отзыв ${p.score}★`));
+    d.nextAction=postsaleNextAction(p); d.nextActionDate='сегодня';
+    toast(p.score?`Отзыв ${p.score}★ зафиксирован`:'Отзыв запрошен');
+    render(); openDrawer(d);
+  });
+  document.getElementById('btnOffer')?.addEventListener('click',()=>{
+    const p=readPostsaleForm();
+    if(p.negative && !p.fixed){ toast('Сначала закройте негатив',true); return; }
+    p.offerType=p.offerType||'абонемент';
+    p.offerNote=p.offerNote||'4 уборки / мес · −15%';
+    p.offerSent=true;
+    if(!p.remindAt) p.remindAt='через 2 мес';
+    p.retarget=true;
+    syncReviewFromPostsale(d);
+    d.history.push(H(now(),'Менеджер продаж',`Оффер: ${p.offerType} · ${p.offerNote}`));
+    d.nextAction=postsaleNextAction(p); d.nextActionDate='сегодня';
+    toast('Абонемент / постоянная уборка предложены');
+    render(); openDrawer(d);
+  });
+  document.getElementById('btnToArchive')?.addEventListener('click',()=>{
+    const p=readPostsaleForm();
+    if(p.negative && !p.fixed){ toast('Сначала закройте негатив',true); return; }
+    if(!p.asked){ toast('Запросите отзыв перед архивацией',true); return; }
+    d.nextAction=''; d.nextActionDate='';
+    d.history.push(H(now(),'Клиентский сервис','Договор → Архив'));
+    setStage(d,'archive','Клиентский сервис');
+    toast(`Договор #${d.id} в архиве`);
+  });
+  document.getElementById('btnFromArchive')?.addEventListener('click',()=>{
+    d.nextAction='Проверить постпродажу'; d.nextActionDate='сегодня';
+    setStage(d,'postsale','Клиентский сервис');
+  });
+  document.getElementById('btnRepeat')?.addEventListener('click',()=>{
+    const p=d.status==='postsale'?readPostsaleForm():ensurePostsale(d);
+    if(p){ p.offerType=p.offerType||'повторный заказ'; p.offerSent=true; p.offerAccepted=true; p.retarget=true; syncReviewFromPostsale(d); }
+    const id=Math.max(...deals.map(x=>x.id))+1;
+    const nd={
+      id, title:`Повтор · ${d.title}`, clientId:d.clientId, managerId:d.managerId,
+      objectIds:[...d.objectIds], status:'planning', service:d.service, amount:d.amount,
+      amountPeriod:'', frequency:p?.offerType==='абонемент'||p?.offerType==='постоянная уборка'?'регулярно':'разово',
+      conditions:d.conditions||'', createdAt:now().slice(0,10),
+      orders:[], payment:{status:'pending',amount:d.amount}, review:null, tech:null, visit:null,
+      plan:defaultPlan(), postsale:null,
+      nextAction:'Создать заказ и назначить бригаду', nextActionDate:'сегодня',
+      history:[H(now(),'Клиентский сервис',`Повторный договор из #${d.id} → планирование`)],
+    };
+    d.history.push(H(now(),'Клиентский сервис',`Создан повтор #${id}`));
+    if(d.status!=='archive'){ d.nextAction='Повторный заказ создан'; d.nextActionDate='сегодня'; }
+    deals.unshift(nd);
+    toast(`Создана повторный договор #${id}`);
+    render(); openDrawer(nd);
+  });
+}
+
+/* Lost / Done */
+const modalLost=document.getElementById('modalLost'), modalDone=document.getElementById('modalDone');
+let lostTarget=null, doneTarget=null;
+function openLost(d){lostTarget=d;lostReason.value='';eReason.style.display='none';modalLost.style.display='flex';}
+function closeLost(){modalLost.style.display='none';lostTarget=null;}
+modalLost.addEventListener('click',e=>{if(e.target===modalLost)closeLost();});
+btnLostSave.onclick=()=>{
+  const r=lostReason.value; if(!r){eReason.style.display='block';return;}
+  const d=lostTarget;
+  d.status='lost'; d.lostReason=r;
+  d.history.push(H(now(),'Елена Менеджерова',`Договор потерян. Причина: ${REASONS[r]}`));
+  closeLost(); render(); if(cur===d)openDrawer(d);
+};
+function openDone(d){doneTarget=d;document.getElementById('doneText').textContent=`Договор #${d.id} · ${clientById(d.clientId).name} · ${money(d.amount)}. Дальше: счёт, оплата, документы (On-Line / Off-Line) и сверка.`;modalDone.style.display='flex';}
+function closeDone(){modalDone.style.display='none';doneTarget=null;}
+modalDone.addEventListener('click',e=>{if(e.target===modalDone)closeDone();});
+btnDoneOk.onclick=()=>{
+  const d=doneTarget;
+  d.status='closing';
+  ensureClose(d);
+  if(!d.payment) d.payment={status:'pending',amount:d.amount};
+  d.nextAction='Выставить счёт и принять оплату'; d.nextActionDate='сегодня';
+  d.history.push(H(now(),'Елена Менеджерова','Работы завершены → закрытие'));
+  closeDone(); render(); if(cur===d)openDrawer(d);
+  toast(`Договор #${d.id} на закрытии`);
+};
+
+/* New deal */
+const modalNew=document.getElementById('modalNew');
+function openNew(pref){
+  document.getElementById('nClient').innerHTML='<option value="">— выберите —</option>'+CLIENTS.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  document.getElementById('nObjects').innerHTML=OBJECTS.map(o=>`<label style="display:flex;gap:8px;padding:3px 0"><input type="checkbox" value="${o.id}"> ${esc(o.name)} <span class="c-sub">${esc(o.area)}</span></label>`).join('');
+  ['nClient','nTitle','nService','nAmount','nStart','nFreq','nManager','nCond'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('nPeriod').value='';
+  document.getElementById('eClient').style.display='none';
+  if(pref&&pref.clientId) document.getElementById('nClient').value=pref.clientId;
+  if(pref&&pref.title) document.getElementById('nTitle').value=pref.title;
+  modalNew.style.display='flex';
+}
+function closeNew(){modalNew.style.display='none';}
+document.getElementById('btnNew').onclick=()=>openNew();
+modalNew.addEventListener('click',e=>{if(e.target===modalNew)closeNew();});
+document.getElementById('btnCreate').onclick=()=>{
+  const cid=document.getElementById('nClient').value;
+  if(!cid){document.getElementById('eClient').style.display='block';return;}
+  const id=Math.max(...deals.map(d=>d.id))+1;
+  const cl=clientById(cid);
+  const d={id, title:document.getElementById('nTitle').value.trim()||`Договор · ${cl.name}`,
+    clientId:cid, applicationId:window._fromApp||undefined,
+    managerId:document.getElementById('nManager').value,
+    objectIds:[...document.querySelectorAll('#nObjects input:checked')].map(i=>i.value),
+    status:'planning', service:document.getElementById('nService').value.trim(),
+    amount:+document.getElementById('nAmount').value||0,
+    amountPeriod:document.getElementById('nPeriod').value,
+    startDate:document.getElementById('nStart').value, frequency:document.getElementById('nFreq').value.trim()||'разово',
+    conditions:document.getElementById('nCond').value.trim(), createdAt:now().slice(0,10), orders:[],
+    payment:{status:'pending',amount:+document.getElementById('nAmount').value||0}, review:null, tech:null, visit:null,
+    plan:defaultPlan(),
+    nextAction:'Создать заказ и назначить бригаду', nextActionDate:'сегодня',
+    history:[H(now(),'Елена Менеджерова', window._fromApp?`Договор создан из лида #${window._fromApp} → планирование`:'Договор создан вручную → планирование')]};
+  deals.unshift(d);
+  clientEvent(d,`Создан договор #${id}${window._fromApp?` из лида #${window._fromApp}`:''}`);
+  window._fromApp=null;
+  closeNew(); render(); toast(`Договор #${id} создан`);
+};
+
+function toast(msg,err){
+  const t=document.createElement('div'); t.className='toast';
+  if(err)t.style.background='var(--danger)';
+  t.textContent=msg; document.getElementById('toasts').appendChild(t);
+  setTimeout(()=>t.remove(),2600);
+}
+
+const fromApp=new URLSearchParams(location.search).get('from');
+if(fromApp){
+  const appMap={'1048':'cl5','1049':'cl1','1050':'cl2','1051':'cl3','1052':'cl4','1047':'cl6','1046':'cl7','1045':'cl8','1044':'cl9','1043':'cl1','1042':'cl10','1041':'cl11'};
+  if(!deals.some(d=>d.applicationId===+fromApp)){
+    window._fromApp=+fromApp;
+    openNew({clientId:appMap[fromApp],title:`Договор из лида #${fromApp}`});
+    toast(`Создаём договор из лида #${fromApp}`);
+  }
+}
+render();
+</script>
+</body>
+</html>

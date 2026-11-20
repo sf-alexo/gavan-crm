@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Заказ — контроль качества · мокап</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<input class="navtoggle" id="navtoggle" type="checkbox">
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">Чистая Гавань <label class="side-close" for="navtoggle" title="Свернуть меню">«</label></div>
+    <nav>
+      <a href="map.html">← Схема процесса</a>
+      <a href="login.html">Вход</a>
+      <a href="scan.html">QR-скан</a>
+      <a href="order-assign.html">Заказ: назначение</a>
+      <a href="order-work.html">Заказ: уборка</a>
+      <a href="order-quality.html" class="active">Заказ: проверка</a>
+      <a href="calendar.html">Мой календарь</a>
+    </nav>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <label class="btn navhide" for="navtoggle" title="Скрыть/показать меню">☰</label>
+      <strong>Гавань — клининг CRM</strong>
+      <div class="topbar-right">
+        <details class="dd">
+          <summary><span class="icon-btn">🔔<span class="n-dot">3</span></span></summary>
+          <div class="dd-menu">
+            <div class="dd-title">Уведомления</div>
+            <a href="order-quality.html">ORD-SEED-003 сдан на проверку</a>
+            <a href="deals.html">Договор «Вектра» выигран · 96 000 ₽</a>
+            <a href="leads.html">Новый лид с сайта</a>
+          </div>
+        </details>
+        <details class="dd">
+          <summary>
+            <span class="avatar">ИС</span>
+            <span class="u-meta"><b>Игорь Серов</b><i>Сотрудник</i></span>
+            <span style="color:var(--muted)">▾</span>
+          </summary>
+          <div class="dd-menu">
+            <a href="#">Профиль</a>
+            <a href="#">Сменить пароль</a>
+            <a href="login.html">Выйти</a>
+          </div>
+        </details>
+      </div>
+    </div>
+    <div class="content">
+      <h2>ORD-SEED-003 <span class="badge purple">На проверке</span> <span class="badge gray">Приёмка / акт</span></h2>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="timeline">
+          <div class="timeline-step done"><div class="dot"></div><div class="label">Запланирован</div><div class="at">03.10 10:02</div></div>
+          <div class="timeline-step done"><div class="dot"></div><div class="label">Подтверждён</div><div class="at">06.10 08:00</div></div>
+          <div class="timeline-step done"><div class="dot"></div><div class="label">В работе</div><div class="at">06.10 08:07</div></div>
+          <div class="timeline-step done"><div class="dot"></div><div class="label">На проверке</div><div class="at">06.10 11:40</div></div>
+          <div class="timeline-step"><div class="dot"></div><div class="label">Выполнен</div></div>
+        </div>
+      </div>
+
+      <div class="grid" style="grid-template-columns:2fr 1fr">
+        <div>
+          <div class="card" style="margin-bottom:16px">
+            <div class="grid cols-3">
+              <div><b>Клиент:</b> ООО «Вектра»</div>
+              <div><b>Объект:</b> склад, Северный р-н</div>
+              <div><b>Услуга:</b> Уборка склада</div>
+              <div><b>Запланировано:</b> 06.10.2026 08:00</div>
+              <div><b>Исполнитель:</b> Игорь Савин</div>
+              <div><b>Цена:</b> 96 000 ₽ RUB</div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom:16px">
+            <h3 style="margin-top:0">Чек-лист</h3>
+            <div style="display:flex; gap:8px; align-items:center; padding:6px 0"><span class="badge green">Выполнен</span><span>Полы очищены от пыли и упаковки</span></div>
+            <div style="display:flex; gap:8px; align-items:center; padding:6px 0"><span class="badge green">Выполнен</span><span>Стеллажи протёрты до 1,8 м</span></div>
+            <div style="display:flex; gap:8px; align-items:center; padding:6px 0"><span class="badge green">Выполнен</span><span>Зона погрузки убрана</span></div>
+            <div style="display:flex; gap:8px; align-items:center; padding:6px 0"><span class="badge green">Выполнен</span><span>Отходы вывезены в контейнер</span></div>
+            <p style="color:var(--ok); font-size:13px; margin:10px 0 0">Все пункты выполнены — заказ готов к завершению после отметки качества.</p>
+          </div>
+
+          <div class="card">
+            <h3 style="margin-top:0">История заказа</h3>
+            <table class="table">
+              <thead><tr><th>Действие</th><th>Кто</th><th>Когда</th></tr></thead>
+              <tbody>
+                <tr><td><span class="badge gray">Заказ создан</span></td><td>Игорь Серов</td><td>03.10 10:02</td></tr>
+                <tr><td><span class="badge blue">Заказ назначен</span></td><td>Игорь Серов</td><td>03.10 10:15</td></tr>
+                <tr><td><span class="badge blue">Заказ начат</span></td><td>Игорь Савин</td><td>06.10 08:07</td></tr>
+                <tr><td><span class="badge amber">Уборка начата</span></td><td>Игорь Савин</td><td>06.10 08:12</td></tr>
+                <tr><td><span class="badge purple">Сдан на проверку</span></td><td>Игорь Савин</td><td>06.10 11:40</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-top:0">Действия — контроль качества</h3>
+          <label class="field"><span>Комментарий QA</span>
+            <textarea class="input" rows="2" placeholder="Обязателен при отклонении"></textarea>
+          </label>
+          <div style="display:flex; gap:8px">
+            <span class="btn primary" style="flex:1">Принять (акт)</span>
+            <span class="btn danger" style="flex:1">Отклонить</span>
+          </div>
+          <span class="btn primary" style="width:100%; margin-top:10px">Завершить → Выполнен</span>
+          <p style="color:var(--muted); font-size:12px">
+            «Отклонить» вернёт заказ в работу (требуется комментарий).
+            «Завершить» доступно только после «Принять» и при всех выполненных.
+            Выполненный заказ виден клиенту — см. <a href="client-cabinet.html">кабинет клиента</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

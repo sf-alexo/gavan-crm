@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Заказ — назначение · мокап</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<input class="navtoggle" id="navtoggle" type="checkbox">
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">Чистая Гавань <label class="side-close" for="navtoggle" title="Свернуть меню">«</label></div>
+    <nav>
+      <a href="map.html">← Схема процесса</a>
+      <a href="login.html">Вход</a>
+      <a href="scan.html">QR-скан</a>
+      <a href="order-assign.html" class="active">Заказ: назначение</a>
+      <a href="order-work.html">Заказ: уборка</a>
+      <a href="order-quality.html">Заказ: проверка</a>
+      <a href="calendar.html">Мой календарь</a>
+    </nav>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <label class="btn navhide" for="navtoggle" title="Скрыть/показать меню">☰</label>
+      <strong>Гавань — клининг CRM</strong>
+      <div class="topbar-right">
+        <details class="dd">
+          <summary><span class="icon-btn">🔔<span class="n-dot">3</span></span></summary>
+          <div class="dd-menu">
+            <div class="dd-title">Уведомления</div>
+            <a href="order-quality.html">ORD-SEED-003 сдан на проверку</a>
+            <a href="deals.html">Договор «Вектра» выигран · 96 000 ₽</a>
+            <a href="leads.html">Новый лид с сайта</a>
+          </div>
+        </details>
+        <details class="dd">
+          <summary>
+            <span class="avatar">ИС</span>
+            <span class="u-meta"><b>Игорь Серов</b><i>Сотрудник</i></span>
+            <span style="color:var(--muted)">▾</span>
+          </summary>
+          <div class="dd-menu">
+            <a href="#">Профиль</a>
+            <a href="#">Сменить пароль</a>
+            <a href="login.html">Выйти</a>
+          </div>
+        </details>
+      </div>
+    </div>
+    <div class="content">
+      <h2>ORD-SEED-002 <span class="badge blue">Подтверждён</span> <span class="badge gray">Планирование · диспетчер + бригадир</span></h2>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="timeline">
+          <div class="timeline-step done"><div class="dot"></div><div class="label">Запланирован</div><div class="at">05.10 16:12</div></div>
+          <div class="timeline-step done"><div class="dot"></div><div class="label">Подтверждён</div><div class="at">06.10 12:00</div></div>
+          <div class="timeline-step"><div class="dot"></div><div class="label">В работе</div></div>
+          <div class="timeline-step"><div class="dot"></div><div class="label">На проверке</div></div>
+          <div class="timeline-step"><div class="dot"></div><div class="label">Выполнен</div></div>
+        </div>
+      </div>
+
+      <div class="grid" style="grid-template-columns:2fr 1fr">
+        <div>
+          <div class="card" style="margin-bottom:16px">
+            <div class="grid cols-3">
+              <div><b>Клиент:</b> ИП Соколов</div>
+              <div><b>Объект:</b> кв. 87, ул. Ленина 10</div>
+              <div><b>Услуга:</b> Мытьё окон</div>
+              <div><b>Запланировано:</b> 06.10.2026 12:00</div>
+              <div><b>Исполнитель:</b> Анна Ким</div>
+              <div><b>Цена:</b> 6 800 ₽ RUB</div>
+            </div>
+            <p style="margin-bottom:0">Окна выходят во двор, нужен стремянка — есть у сотрудника.</p>
+          </div>
+
+          <div class="card">
+            <h3 style="margin-top:0">Чек-лист</h3>
+            <div style="display:flex; gap:8px; align-items:center; padding:6px 0"><span class="badge gray">Ожидает</span><span>Окна вымыты с двух сторон</span></div>
+            <div style="display:flex; gap:8px; align-items:center; padding:6px 0"><span class="badge gray">Ожидает</span><span>Рамы и подоконники протёрты</span></div>
+            <div style="display:flex; gap:8px; align-items:center; padding:6px 0"><span class="badge gray">Ожидает</span><span>Мусор вынесен, инвентарь собран</span></div>
+            <p style="color:var(--muted); font-size:12px">Отметки появятся после начала работ — см. <a href="order-work.html">этап «Уборка»</a>.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-top:0">Действия</h3>
+          <label class="field"><span>Назначить</span>
+            <select class="input"><option>Сотрудник</option><option>Бригада</option></select>
+          </label>
+          <label class="field"><span>Сотрудник *</span>
+            <select class="input"><option>Анна Ким</option><option>Игорь Савин</option><option>Мария Ли</option></select>
+          </label>
+          <span class="btn primary" style="width:100%">Переназначить</span>
+          <span class="btn primary" style="width:100%; margin-top:8px">Начать работу</span>
+          <span class="btn danger" style="width:100%; margin-top:8px">Отменить заказ</span>
+          <p style="color:var(--muted); font-size:12px; margin-top:14px">
+            Исполнитель — либо сотрудник, либо бригада (XOR). Кнопка «Начать работу»
+            доступна и исполнителю после QR-скана — см. <a href="scan.html">мокап «QR-скан»</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>План проверки мокапов CRM — Чистая Гавань</title>
+<style>
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 11pt;
+    line-height: 1.45;
+    color: #202124;
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 24px 64px;
+  }
+  h1 { font-size: 20pt; margin: 0 0 12px; }
+  h2 { font-size: 14pt; margin: 28px 0 10px; border-bottom: 1px solid #dadce0; padding-bottom: 4px; }
+  h3 { font-size: 12pt; margin: 18px 0 8px; }
+  p { margin: 0 0 10px; }
+  ul, ol { margin: 0 0 12px; padding-left: 22px; }
+  li { margin: 4px 0; }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 8px 0 16px;
+    font-size: 10.5pt;
+  }
+  th, td {
+    border: 1px solid #dadce0;
+    padding: 8px 10px;
+    vertical-align: top;
+    text-align: left;
+  }
+  th { background: #f1f3f4; font-weight: 700; }
+  .meta { color: #5f6368; margin-bottom: 20px; }
+  .note {
+    background: #f8f9fa;
+    border-left: 4px solid #1a73e8;
+    padding: 10px 14px;
+    margin: 12px 0 20px;
+  }
+  .scenario { font-style: italic; margin: 6px 0 14px; }
+  .mark { font-family: Consolas, "Courier New", monospace; font-size: 10pt; }
+  strong { font-weight: 700; }
+</style>
+</head>
+<body>
+
+<h1>План проверки мокапов CRM «Чистая Гавань»</h1>
+
+<p class="meta">
+  Проверка глазами бизнес-пользователя (менеджер, диспетчер, руководитель).<br>
+  Основание: backlog разработки (Epic → Feature → User Story → Acceptance Criteria).<br>
+  Порядок: Сотрудники → Клиенты → Объекты → Лиды → Договора → Заказы.
+</p>
+
+<div class="note">
+  <strong>Как пользоваться.</strong> Открыть соответствующий мокап и по каждой User Story отметить:
+  <strong>да</strong> / <strong>нет</strong> / <strong>неясно</strong> / <strong>нет в мокапе</strong>.
+  Формат заметки: <span class="mark">US-0XX | экран | результат | комментарий одним предложением</span>
+</div>
+
+<h2>1. Сотрудники</h2>
+<p><strong>Мокап:</strong> employees.html<br>
+<strong>Бэклог:</strong> E08-F01 (US-048–050), частично E08-F02, E01-F02</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:18%">ID</th>
+      <th>Что проверить как бизнес-пользователь</th>
+      <th style="width:22%">Результат</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>US-048</td>
+      <td>Могу завести нового сотрудника с понятными полями?</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>US-049</td>
+      <td>Видно роль человека (менеджер, клинер, бригадир и т.д.)?</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>US-050</td>
+      <td>Понятно, кто активен, а кого уже нельзя ставить на работу?</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>US-051–053</td>
+      <td>Видно ли бригады / понятно ли, кого назначать на заказ вместе? (если есть в мокапе)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>US-004–005</td>
+      <td>Чувствуется ли различие ролей и доступа, или экран «для всех одинаковый»?</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+
+<p class="scenario"><strong>Сценарий дня:</strong> «Нужен состав на завтра — вижу, кого можно поставить.»</p>
+
+<h2>2. Клиенты</h2>
+<p><strong>Мокап:</strong> clients.html<br>
+<strong>Бэклог:</strong> E03-F01 (US-016–019), E13 (US-076)</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:18%">ID</th>
+      <th>Что проверить как бизнес-пользователь</th>
+      <th style="width:22%">Результат</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>US-016</td>
+      <td>Могу создать клиента с первого обращения?</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>US-017</td>
+      <td>Карточка отвечает на вопрос «кто этот клиент?» без звонка коллегам</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>US-018 / US-076</td>
+      <td>В карточке видна история: что было, кто трогал, чем закончилось</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>US-019</td>
+      <td>Есть ли намёк на защиту от дублей (поиск до создания, предупреждение)?</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>AC связей</td>
+      <td>Из клиента видно заявки / договора / заказы?</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+
+<p class="scenario"><strong>Сценарий дня:</strong> «Клиент перезвонил — за 30 секунд понял контекст.»</p>
+
+<h2>3. Объекты</h2>
+<p><strong>Мокап:</strong> objects.html (при необходимости — scan.html)<br>
+<strong>Бэклог:</strong> E06-F01 (US-036–037), E06-F02 (US-038–041)</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:18%">ID</th>
+      <th>Что проверить как бизнес-пользователь</th>
+      <th style="width:22%">Результат</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>US-036</td>
+      <td>Могу завести объект клиента (адрес, тип, площадь)?</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>US-037</td>
+      <td>У объекта есть уникальный ID / понятный идентификатор для поля?</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>AC</td>
+      <td>Один объект может иметь историю нескольких заказов?</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>US-038–041</td>
+      <td>QR: сотрудник сканирует → система узнаёт объект → пускает только при активном заказе и праве?</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+
+<p class="scenario"><strong>Сценарий дня:</strong> «Бригада едет на адрес — объект однозначен, история заказов на месте видна.»</p>
+
+<h2>4. Лиды (заявки)</h2>
+<p><strong>Мокап:</strong> leads.html<br>
+<strong>Бэклог:</strong> E03-F02 (US-020–024), связка с сайтом E02-F02</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:18%">ID</th>
+      <th>Что проверить как бизнес-пользователь</th>
+      <th style="width:22%">Результат</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>US-020</td>
+      <td>Вижу входящие заявки и не теряю новые</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>US-021</td>
+      <td>Открыл заявку — понятны клиент, услуга, источник, суть запроса</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>US-022</td>
+      <td>Могу назначить ответственного менеджера</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>US-023</td>
+      <td>Могу менять статус / стадию по понятной воронке</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>US-024</td>
+      <td>Есть явный путь «заявка → договор / сделка»</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>AC истории</td>
+      <td>Смена статуса и назначения остаются в истории</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>US-013 (связка)</td>
+      <td>Понятно, что заявка могла прийти с сайта</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+
+<p class="scenario"><strong>Сценарий дня:</strong> «5 заявок с утра — у каждой есть хозяин и следующий шаг.»</p>
+
+<h2>5. Договора (сделки)</h2>
+<p><strong>Мокап:</strong> deals.html<br>
+<strong>Бэклог:</strong> E04-F01 / F02 (US-025–030), E13 (US-077)</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:18%">ID</th>
+      <th>Что проверить как бизнес-пользователь</th>
+      <th style="width:22%">Результат</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>US-025</td>
+      <td>Договор рождается из заявки, связь не рвётся</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>US-026 / US-029–030</td>
+      <td>Воронка по стадиям читается; перевод стадии понятен</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>US-027</td>
+      <td>Виден ответственный</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>US-028</td>
+      <td>Рядом клиент, заявка, объекты — без «прыжков по таблицам»</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>US-077</td>
+      <td>История стадии и действий сохраняется</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>AC</td>
+      <td>Недопустимый скачок стадии, если есть, блокируется понятно</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+
+<p class="scenario"><strong>Сценарий дня:</strong> «Заявка квалифицирована → договор в воронке → видно, на ком мяч.»</p>
+
+<h2>6. Заказы</h2>
+<p><strong>Мокапы:</strong> orders.html, order-assign.html, order-work.html, order-quality.html<br>
+<strong>Бэклог:</strong> E05 (US-031–035), E07 (US-042–047), E08-F02 (US-053), E13 (US-078)</p>
+
+<h3>6.1. Создание и планирование (E05)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:18%">ID</th>
+      <th>Что проверить как бизнес-пользователь</th>
+      <th style="width:22%">Результат</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>US-031</td>
+      <td>Заказ из договора содержит: клиент, договор, объект, услуга, дата, ответственный, исполнитель/бригада, статус</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>US-032</td>
+      <td>Дату / слот можно назначить</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>US-033 / US-034 / US-053</td>
+      <td>Назначается исполнитель или бригада</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>US-035</td>
+      <td>Заказ виден в календаре</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>6.2. Выполнение (E07)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:18%">ID</th>
+      <th>Что проверить как бизнес-пользователь</th>
+      <th style="width:22%">Результат</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>US-042</td>
+      <td>Исполнитель может стартовать работу (после QR / допуска)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>US-043–045</td>
+      <td>Этапы видны, закрываются по порядку, результат фиксируется</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>US-046</td>
+      <td>Можно прикрепить фото / видео к этапу</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>US-047</td>
+      <td>Завершение только когда обязательное сделано; время и статус сохраняются</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>US-078</td>
+      <td>История заказа читаема руководителю</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+
+<p class="scenario"><strong>Сценарий дня:</strong> «Согласованный договор → заказ в календаре с людьми → выезд → этапы → фото → закрытие.»</p>
+
+<h2>7. Сквозной прогон (E16-F02)</h2>
+<p>Прогнать по мокапам цепочку бэклога:</p>
+<p><strong>Заявка → Клиент → Договор → Заказ → Исполнитель → QR → Выполнение → Результат → История</strong></p>
+
+<p>На каждом звене отметить:</p>
+<ol>
+  <li>Связь с предыдущим шагом видна?</li>
+  <li>Понятно, кто следующий ответственный?</li>
+  <li>История не обрывается?</li>
+</ol>
+
+<table>
+  <thead>
+    <tr>
+      <th>Звено цепочки</th>
+      <th>Связь видна</th>
+      <th>Кто следующий</th>
+      <th>История</th>
+      <th>Комментарий</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>Заявка</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>Клиент</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>Договор</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>Заказ</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>Исполнитель</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>QR</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>Выполнение</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>Результат</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>История</td><td></td><td></td><td></td><td></td></tr>
+  </tbody>
+</table>
+
+<h2>8. Что сознательно не требовать от этих 6 экранов</h2>
+<p>По бэклогу это другие эпики или Future для текущего просмотра:</p>
+<ul>
+  <li>сайт и калькулятор (E-02);</li>
+  <li>онлайн-оплата (E-10);</li>
+  <li>клиентский кабинет (E-11);</li>
+  <li>Telegram / SMS (E-09);</li>
+  <li>лояльность (E-14);</li>
+  <li>аналитика по филиалу / региону / городу (E-12) — только если явно есть в мокапе.</li>
+</ul>
+
+<h2>9. Пример записи</h2>
+<p class="mark">US-031 | deals → orders | нет | из договора создаётся заказ, но бригада не видна до отдельного экрана</p>
+
+</body>
+</html>
